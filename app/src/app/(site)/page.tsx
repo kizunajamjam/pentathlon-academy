@@ -10,6 +10,7 @@ import { SectionHeading } from "@/components/ui/section-heading";
 import { SITE } from "@/lib/constants/site";
 import { listUpcomingEvents } from "@/lib/db/events";
 import { listPublishedNews } from "@/lib/db/news";
+import { assetPath } from "@/lib/utils/asset";
 
 export default async function HomePage() {
   const [news, events] = await Promise.all([listPublishedNews(4), listUpcomingEvents(2)]);
@@ -41,7 +42,7 @@ export default async function HomePage() {
             {/* ロゴは白背景なので、紺地の上では白い面に載せて見せる */}
             <div className="rounded-card bg-white p-6 shadow-2xl sm:p-8">
               <Image
-                src="/logo.png"
+                src={assetPath("/logo.png")}
                 alt={SITE.nameEn}
                 width={340}
                 height={340}

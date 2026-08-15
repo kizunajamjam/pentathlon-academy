@@ -37,7 +37,7 @@ export function DisciplineExplorer() {
     <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
       <div className="relative mx-auto w-full max-w-xs sm:max-w-sm lg:max-w-md">
         <Image
-          src="/logo-mark.png"
+          src={assetPath("/logo-mark.png")}
           alt={SITE.nameEn}
           width={512}
           height={512}

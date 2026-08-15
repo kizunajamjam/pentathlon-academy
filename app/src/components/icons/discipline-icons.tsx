@@ -1,5 +1,6 @@
 import Image from "next/image";
 
+import { assetPath } from "@/lib/utils/asset";
 import type { DisciplineId } from "@/types";
 
 /*
@@ -23,7 +24,7 @@ export function DisciplineIcon({
 }) {
   return (
     <Image
-      src={`/icons/${id}.png`}
+      src={assetPath(`/icons/${id}.png`)}
       alt=""
       width={size}
       height={size}
