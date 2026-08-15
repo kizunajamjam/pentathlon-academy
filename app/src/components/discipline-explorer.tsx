@@ -8,6 +8,7 @@ import { ArrowRight } from "lucide-react";
 
 import { LOGO_WEDGES } from "@/lib/constants/logo-geometry";
 import { DISCIPLINES, SITE } from "@/lib/constants/site";
+import { assetPath } from "@/lib/utils/asset";
 import type { DisciplineId } from "@/types";
 
 /*
@@ -68,8 +69,9 @@ export function DisciplineExplorer() {
                 transition: "transform 250ms ease-out",
               }}
             >
+              {/* SVG の href には basePath が自動で付かないので自分で補う */}
               <image
-                href={`/icons/overlay-${activeWedge.id}.png`}
+                href={assetPath(`/icons/overlay-${activeWedge.id}.png`)}
                 x="0"
                 y="0"
                 width="100"

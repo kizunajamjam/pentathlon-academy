@@ -1,0 +1,67 @@
+# GitHub Pages への確認用プレビューを公開する。
+name: Deploy preview to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+
+      - run: npm ci
+        working-directory: app
+
+      # 静的書き出しでは動かせないものを、このビルドに限って外す。
+      # リポジトリ上のファイルは変更しない（CI のチェックアウト内でのみ操作）。
+      - name: 静的化できない部分を除く
+        working-directory: app
+        run: |
+          rm -rf src/app/admin      # 管理画面（動的レンダリング）
+          rm -f src/proxy.ts        # Supabase セッション更新
+          # お問い合わせフォームは Server Actions を使うため、代替表示に差し替える
+          rm -f src/app/\(site\)/contact/actions.ts
+          cp src/components/contact-form.static.tsx src/components/contact-form.tsx
+
+      - name: ビルド
+        working-directory: app
+        env:
+          STATIC_EXPORT: "1"
+          NEXT_PUBLIC_BASE_PATH: /pentathlon-academy
+          NEXT_PUBLIC_SITE_URL: https://kizunajamjam.github.io/pentathlon-academy
+        run: npm run build
+
+      # Jekyll に _next/ を無視されないようにする
+      - run: touch app/out/.nojekyll
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: app/out
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

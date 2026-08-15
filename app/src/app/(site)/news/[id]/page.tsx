@@ -4,10 +4,20 @@ import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 
 import { NEWS_CATEGORY_LABEL } from "@/lib/constants/site";
-import { getNews } from "@/lib/db/news";
+import { getNews, listPublishedNews } from "@/lib/db/news";
 import { formatDate } from "@/lib/utils/date";
 
 type Props = { params: Promise<{ id: string }> };
+
+/*
+ * 静的書き出し（GitHub Pages）では、生成する詳細ページの一覧が必要になる。
+ * 通常のビルドでも公開済みのお知らせが事前生成されるだけで、
+ * 新しく追加されたものはリクエスト時に生成されるため支障はない。
+ */
+export async function generateStaticParams() {
+  const news = await listPublishedNews();
+  return news.map((n) => ({ id: n.id }));
+}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
