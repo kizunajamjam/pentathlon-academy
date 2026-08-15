@@ -35,8 +35,9 @@ jobs:
       - name: 静的化できない部分を除く
         working-directory: app
         run: |
-          rm -rf src/app/admin      # 管理画面（動的レンダリング）
-          rm -f src/proxy.ts        # Supabase セッション更新
+          rm -rf src/app/admin        # 管理画面（動的レンダリング）
+          rm -rf src/components/admin # 管理画面専用のフォーム部品
+          rm -f src/proxy.ts          # Supabase セッション更新
           # お問い合わせフォームは Server Actions を使うため、代替表示に差し替える
           rm -f src/app/\(site\)/contact/actions.ts
           cp src/components/contact-form.static.tsx src/components/contact-form.tsx
@@ -47,6 +48,8 @@ jobs:
           STATIC_EXPORT: "1"
           NEXT_PUBLIC_BASE_PATH: /pentathlon-academy
           NEXT_PUBLIC_SITE_URL: https://kizunajamjam.github.io/pentathlon-academy
+          # 仮テキストのまま公開するため、検索エンジンには載せない
+          NEXT_PUBLIC_IS_PREVIEW: "1"
         run: npm run build
 
       # Jekyll に _next/ を無視されないようにする

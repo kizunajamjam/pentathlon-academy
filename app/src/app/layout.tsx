@@ -22,6 +22,10 @@ export const metadata: Metadata = {
     template: `%s | ${SITE.name}`,
   },
   description: SITE.description,
+  // 確認用プレビューは検索結果に出さない（robots.ts も同じ条件で切り替えている）
+  ...(process.env.NEXT_PUBLIC_IS_PREVIEW === "1"
+    ? { robots: { index: false, follow: false } }
+    : {}),
   openGraph: {
     type: "website",
     siteName: SITE.name,

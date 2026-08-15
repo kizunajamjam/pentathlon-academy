@@ -6,6 +6,9 @@ import { listPublishedNews } from "@/lib/db/news";
 // TODO: 本番ドメインが決まったら NEXT_PUBLIC_SITE_URL を設定する。
 const BASE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://example.com";
 
+// 静的書き出し（GitHub Pages）ではビルド時に固定する必要がある
+export const dynamic = "force-static";
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const news = await listPublishedNews();
 
