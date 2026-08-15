@@ -18,7 +18,13 @@ export function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-50 bg-navy-800 shadow-sm">
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 lg:h-20">
+      {/*
+        ヘッダーだけ各ページの本文セクションより広いコンテナを使う。
+        max-w-6xl（本文と同じ幅）だと、ロゴ＋7項目＋CTAボタンの合計幅が
+        コンテナ幅を超え、各リンクが個別に縮んで日本語が途中で折り返されていた。
+        ページ幅を広げても直らなかったのは、コンテナ自体に上限があったため。
+      */}
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 lg:h-20">
         <Link href="/" onClick={() => setOpen(false)}>
           <SiteLogo />
         </Link>
@@ -29,7 +35,7 @@ export function SiteHeader() {
             <Link
               key={item.href}
               href={item.href}
-              className={`rounded px-3 py-2 text-sm transition-colors ${
+              className={`whitespace-nowrap rounded px-2.5 py-2 text-sm transition-colors ${
                 isActive(item.href)
                   ? "text-gold-400"
                   : "text-navy-100 hover:bg-navy-700 hover:text-white"
@@ -40,7 +46,7 @@ export function SiteHeader() {
           ))}
           <Link
             href="/contact"
-            className="ml-3 rounded-full bg-gold-500 px-5 py-2.5 text-sm font-bold text-navy-900 transition-colors hover:bg-gold-400"
+            className="ml-3 whitespace-nowrap rounded-full bg-gold-500 px-5 py-2.5 text-sm font-bold text-navy-900 transition-colors hover:bg-gold-400"
           >
             体験のお申し込み
           </Link>
