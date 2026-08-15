@@ -27,7 +27,11 @@ jobs:
           cache: npm
           cache-dependency-path: app/package-lock.json
 
-      - run: npm ci
+      # npm ci ではなく npm install を使う。
+      # 画像生成に使う sharp はプラットフォームごとに別の依存を持ち、
+      # Windows で生成した lock ファイルには Linux 用のものが入らないため、
+      # npm ci の同期チェックに引っかかる。ここでは解決を実行時に任せる。
+      - run: npm install
         working-directory: app
 
       # 静的書き出しでは動かせないものを、このビルドに限って外す。
