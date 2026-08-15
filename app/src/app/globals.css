@@ -1,0 +1,125 @@
+@import "tailwindcss";
+
+/*
+ * ペンタスロンアカデミー デザイントークン
+ *
+ * 配色はロゴ(五角形の5分割)から直接採用している。
+ * 五種競技それぞれに1色が割り当てられており、
+ *   走 = ネイビー / フェンシング = ゴールド / 水泳 = ブルー /
+ *   射撃 = レッド / 障害物レース = グリーン
+ * ネイビー+ゴールドをブランドの基調、残り3色は競技セクション専用のアクセントとして使う。
+ *
+ * 正式なブランドガイドが出てきた場合は下のスケールの数値だけ差し替えれば全体に反映される。
+ * コンポーネント側で 16進数を直書きしないこと。
+ */
+
+@theme {
+  /* ── ネイビー(主色) ─────────────────────────────────────────────── */
+  --color-navy-50: #f4f6fa;
+  --color-navy-100: #e4e8f1;
+  --color-navy-200: #c5cddf;
+  --color-navy-300: #9aa7c3;
+  --color-navy-400: #6577a0;
+  --color-navy-500: #3f5280;
+  --color-navy-600: #2a3a63;
+  --color-navy-700: #1f2c4d;
+  --color-navy-800: #17233f; /* ロゴのネイビー */
+  --color-navy-900: #101830;
+  --color-navy-950: #0a1022;
+
+  /* ── ゴールド(強調色) ───────────────────────────────────────────── */
+  --color-gold-50: #fbf7ef;
+  --color-gold-100: #f5ebd6;
+  --color-gold-200: #ebd5ab;
+  --color-gold-300: #dfbb79;
+  --color-gold-400: #d3a855;
+  --color-gold-500: #c79a3e; /* ロゴのゴールド */
+  --color-gold-600: #a87f30;
+  --color-gold-700: #856228;
+  --color-gold-800: #634923;
+  --color-gold-900: #4a371d;
+
+  /* ── 競技別アクセント ───────────────────────────────────────────── */
+  --color-swim-50: #eef4fb;
+  --color-swim-500: #1e5ba8; /* 水泳 */
+  --color-swim-700: #16457e;
+  --color-shoot-50: #fbeef0;
+  --color-shoot-500: #9c2333; /* 射撃 */
+  --color-shoot-700: #761a26;
+  --color-obstacle-50: #eaf4ef;
+  --color-obstacle-500: #12543a; /* 障害物レース */
+  --color-obstacle-700: #0d3f2c;
+
+  /* ── ステータス表示 ─────────────────────────────────────────────── */
+  /* 「公開中」「対応済み」などに使う。障害物レースと同じ緑だが、
+     意味が別物なので競技用トークンとは分けて持つ。 */
+  --color-success-50: #eaf4ef;
+  --color-success-500: #12543a;
+
+  /* ── セマンティック ─────────────────────────────────────────────── */
+  --color-background: #ffffff;
+  --color-surface: #f7f8fb;
+  --color-foreground: #1a1d23;
+  --color-muted: #5b6478;
+  --color-border: #e2e6ee;
+
+  /* ── タイポグラフィ ─────────────────────────────────────────────── */
+  --font-display: "Zen Kaku Gothic New", "Hiragino Sans", "Yu Gothic UI", Meiryo, sans-serif;
+  --font-sans: "Noto Sans JP", "Hiragino Sans", "Yu Gothic UI", Meiryo, sans-serif;
+
+  /* ── 角丸 ───────────────────────────────────────────────────────── */
+  --radius-card: 0.75rem;
+}
+
+@layer base {
+  body {
+    background: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    font-feature-settings: "palt"; /* 日本語の詰め組み */
+    /* メールアドレスやURLなど、切れ目のない長い文字列がはみ出すのを防ぐ */
+    overflow-wrap: break-word;
+  }
+
+  /*
+   * 日本語の折り返し位置。
+   *
+   * 既定では「射撃・ラ / ンニング」のようにカタカナ語の途中で改行されてしまう。
+   * word-break: auto-phrase は文節単位で折り返すため、単語が分断されない。
+   * 未対応ブラウザ(Firefox 等)では従来どおりの折り返しになるだけで、崩れはしない。
+   */
+  h1,
+  h2,
+  h3,
+  h4,
+  p,
+  li,
+  dd,
+  dt {
+    word-break: auto-phrase;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    letter-spacing: 0.01em;
+  }
+
+  /* 見出しの英字ラベル(ABOUT / NEWS 等)はロゴの "ACADEMY" に合わせて字間を広く取る */
+  .eyebrow {
+    font-family: var(--font-display);
+    font-weight: 500;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+  }
+}
+
+@layer utilities {
+  /* ロゴの五角形モチーフ。装飾ブロックの切り抜きに使う */
+  .clip-pentagon {
+    clip-path: polygon(50% 0%, 100% 38%, 81% 100%, 19% 100%, 0% 38%);
+  }
+}
