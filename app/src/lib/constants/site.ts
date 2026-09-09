@@ -2,19 +2,73 @@ import type { DisciplineId, EventCategory, NewsCategory } from "@/types";
 
 // ⚠️ 仮テキスト: 正式な文言・数値が決まり次第このファイルを差し替える。
 // 表示側のコンポーネントには文言を直書きせず、必ずここを参照させること。
-export const SITE = {
+//
+// tel / address が null なのは未確認だからではなく「出さない」という判断。
+// 住所は持たない運用で、電話も現状は公開していない（問い合わせはフォーム・
+// メール・Instagram の DM で受ける）。表示側は null を見て項目ごと省くので、
+// 載せることになったら文字列を入れるだけでよい。
+export const SITE: {
+  name: string;
+  nameEn: string;
+  tagline: string;
+  description: string;
+  email: string;
+  tel: string | null;
+  address: string | null;
+  instagram: string;
+  instagramHandle: string;
+} = {
   name: "ペンタスロンアカデミー",
   nameEn: "PENTATHLON ACADEMY",
   tagline: "近代五種に、本気で取り組める場所。",
   description:
     "フェンシング・水泳・障害物レース・射撃・ランニング。5種目を一貫して鍛え、世界を目指す選手を育てるアカデミーです。",
-  // TODO: 正式な連絡先に差し替える
-  email: "info@example.com",
-  tel: "000-0000-0000",
-  address: "〒000-0000 ○○県○○市○○ 0-0-0",
+  email: "pentathlonacademy.jp@gmail.com",
+  tel: null,
+  address: null,
   instagram: "https://www.instagram.com/pentathlonacademy.jp/",
   instagramHandle: "@pentathlonacademy.jp",
-} as const;
+};
+
+/*
+ * 指導者。
+ *
+ * 資格は「誰がどれを持っているか」が未確認のため、個人には割り当てず
+ * QUALIFICATIONS にアカデミー全体の保有資格としてまとめている。
+ * 割り当てが分かったら COACHES 側に移すこと。
+ */
+export const COACHES: { name: string; discipline: string | null }[] = [
+  { name: "竹上譲一", discipline: null },
+  { name: "小路瑛", discipline: null },
+];
+
+// 指導者が保有する専門資格。競技・スポーツ科学・コンディショニング領域。
+export const QUALIFICATIONS = [
+  "日本スポーツ協会公認 陸上競技コーチ1",
+  "日本スポーツ協会公認 水泳上級教師",
+  "日本スポーツ協会公認 競泳コーチ3",
+  "日本スポーツ協会公認 フェンシングコーチ3",
+] as const;
+
+/*
+ * 連携先。
+ *
+ * ⚠️ url が null のあいだはリンクにせず名前だけ出す。
+ * オーナーからは「ホームページアドレスとともに」と依頼を受けているが、
+ * アドレス自体は未受領。届いたら url を入れるとリンクになる。
+ */
+export const PARTNERS: { name: string; summary: string; url: string | null }[] = [
+  {
+    name: "ITAMI MED-FIT",
+    summary: "コンディショニング・身体づくりの面で連携しています。",
+    url: null,
+  },
+  {
+    name: "無畏フェンシングクラブ",
+    summary: "フェンシングの練習環境と指導の面で連携しています。",
+    url: null,
+  },
+];
 
 /*
  * 強化選手チャレンジ基準（水泳）。

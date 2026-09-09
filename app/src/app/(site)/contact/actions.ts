@@ -52,10 +52,12 @@ export async function submitInquiry(
   }
 
   // Supabase 未接続のうちは保存できないため、正直に電話・メールへ誘導する。
+  // 電話番号は現状非公開のため、tel の有無で案内文を出し分ける。
   if (!isSupabaseConfigured) {
+    const contacts = [SITE.tel, SITE.email].filter(Boolean).join(" または ");
     return {
       status: "error",
-      message: `現在フォームからの送信を準備中です。お手数ですが ${SITE.tel} または ${SITE.email} までご連絡ください。`,
+      message: `現在フォームからの送信を準備中です。お手数ですが ${contacts} までご連絡ください。`,
     };
   }
 

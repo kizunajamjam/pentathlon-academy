@@ -28,3 +28,6 @@ _inspect-*.png
 _diff-*.png
 _wedge-*.png
 _edge-*.png
+
+# TypeScript インクリメンタルビルドのキャッシュ
+*.tsbuildinfo

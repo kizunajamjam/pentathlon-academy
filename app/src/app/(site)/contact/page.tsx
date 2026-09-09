@@ -33,17 +33,21 @@ export default function ContactPage() {
           <aside className="lg:pt-4">
             <div className="rounded-card border border-border bg-surface p-7">
               <p className="eyebrow text-[10px] text-gold-600">DIRECT</p>
-              <h2 className="mt-3 text-lg text-navy-800">お電話・メールでも</h2>
+              <h2 className="mt-3 text-lg text-navy-800">
+                {SITE.tel ? "お電話・メールでも" : "メールでも"}
+              </h2>
               <ul className="mt-6 space-y-5 text-sm">
-                <li className="flex items-start gap-3">
-                  <Phone size={17} className="mt-0.5 shrink-0 text-gold-600" />
-                  <span>
-                    <span className="block text-xs text-muted">電話</span>
-                    <span className="mt-0.5 block font-display text-base text-navy-800">
-                      {SITE.tel}
+                {SITE.tel && (
+                  <li className="flex items-start gap-3">
+                    <Phone size={17} className="mt-0.5 shrink-0 text-gold-600" />
+                    <span>
+                      <span className="block text-xs text-muted">電話</span>
+                      <span className="mt-0.5 block font-display text-base text-navy-800">
+                        {SITE.tel}
+                      </span>
                     </span>
-                  </span>
-                </li>
+                  </li>
+                )}
                 <li className="flex items-start gap-3">
                   <Mail size={17} className="mt-0.5 shrink-0 text-gold-600" />
                   <span>
@@ -51,15 +55,17 @@ export default function ContactPage() {
                     <span className="mt-0.5 block break-all text-navy-800">{SITE.email}</span>
                   </span>
                 </li>
-                <li className="flex items-start gap-3">
-                  <MapPin size={17} className="mt-0.5 shrink-0 text-gold-600" />
-                  <span>
-                    <span className="block text-xs text-muted">所在地</span>
-                    <span className="mt-0.5 block leading-relaxed text-navy-800">
-                      {SITE.address}
+                {SITE.address && (
+                  <li className="flex items-start gap-3">
+                    <MapPin size={17} className="mt-0.5 shrink-0 text-gold-600" />
+                    <span>
+                      <span className="block text-xs text-muted">所在地</span>
+                      <span className="mt-0.5 block leading-relaxed text-navy-800">
+                        {SITE.address}
+                      </span>
                     </span>
-                  </span>
-                </li>
+                  </li>
+                )}
               </ul>
             </div>
 
