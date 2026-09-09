@@ -19,6 +19,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "monthly" as const,
       priority: item.href === "/" ? 1 : 0.8,
     })),
+    // 規約はヘッダーのナビには載せていない（footer からのみ）ので個別に足す
+    {
+      url: `${BASE}/terms`,
+      lastModified: new Date(),
+      changeFrequency: "yearly" as const,
+      priority: 0.3,
+    },
     ...news.map((n) => ({
       url: `${BASE}/news/${n.id}`,
       lastModified: new Date(n.publishedAt),

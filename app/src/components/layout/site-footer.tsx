@@ -15,14 +15,18 @@ export function SiteFooter() {
               {SITE.description}
             </p>
             <ul className="mt-6 space-y-2.5 text-sm">
-              <li className="flex items-start gap-2.5">
-                <MapPin size={16} className="mt-0.5 shrink-0 text-gold-500" />
-                <span>{SITE.address}</span>
-              </li>
-              <li className="flex items-start gap-2.5">
-                <Phone size={16} className="mt-0.5 shrink-0 text-gold-500" />
-                <span>{SITE.tel}</span>
-              </li>
+              {SITE.address && (
+                <li className="flex items-start gap-2.5">
+                  <MapPin size={16} className="mt-0.5 shrink-0 text-gold-500" />
+                  <span>{SITE.address}</span>
+                </li>
+              )}
+              {SITE.tel && (
+                <li className="flex items-start gap-2.5">
+                  <Phone size={16} className="mt-0.5 shrink-0 text-gold-500" />
+                  <span>{SITE.tel}</span>
+                </li>
+              )}
               <li className="flex items-start gap-2.5">
                 <Mail size={16} className="mt-0.5 shrink-0 text-gold-500" />
                 <span>{SITE.email}</span>
@@ -55,10 +59,13 @@ export function SiteFooter() {
           </nav>
         </div>
 
-        <div className="mt-12 border-t border-navy-700 pt-6 text-xs text-navy-400">
+        <div className="mt-12 flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-navy-700 pt-6 text-xs text-navy-400">
           <p>
             © {new Date().getFullYear()} {SITE.name}
           </p>
+          <Link href="/terms" className="transition-colors hover:text-gold-400">
+            クラブ規約
+          </Link>
         </div>
       </div>
     </footer>

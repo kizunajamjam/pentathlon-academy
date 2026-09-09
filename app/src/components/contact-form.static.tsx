@@ -23,7 +23,7 @@ export function ContactForm() {
         お名前・メールアドレス・お問い合わせ種別・内容を入力するフォームが表示されます。
       </p>
       <ul className="mt-5 space-y-2 text-sm text-navy-800">
-        <li>電話: {SITE.tel}</li>
+        {SITE.tel && <li>電話: {SITE.tel}</li>}
         <li>メール: {SITE.email}</li>
         <li>
           Instagram:{" "}
