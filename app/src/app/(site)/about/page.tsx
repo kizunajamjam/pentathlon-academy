@@ -131,9 +131,17 @@ export default function AboutPage() {
               <div key={coach.name} className="rounded-card border border-border bg-white p-6">
                 <PhotoSlot label="指導者の写真" ratio="aspect-square" className="!bg-navy-50" />
                 <p className="mt-5 font-display text-base font-bold text-navy-800">{coach.name}</p>
-                <p className="mt-1.5 text-xs text-muted">
-                  {coach.discipline ?? "担当種目・経歴は準備中です"}
-                </p>
+                {coach.role.length > 0 ? (
+                  <ul className="mt-1.5 space-y-0.5">
+                    {coach.role.map((r) => (
+                      <li key={r} className="text-xs leading-relaxed text-muted">
+                        {r}
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="mt-1.5 text-xs text-muted">担当種目・経歴は準備中です</p>
+                )}
               </div>
             ))}
           </div>

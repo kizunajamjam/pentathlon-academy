@@ -33,13 +33,22 @@ export const SITE: {
 /*
  * 指導者。
  *
+ * role は経歴・実績を短い行に分けたもの（例: 「元 ○○部 コーチ」「○○選手権 優勝」）。
+ * 担当種目はまだ届いていないので持たせていない。分かったら role とは別に追加すること。
+ *
+ * ⚠️ 「京都大学バスケットボール部」は原文 "Kyoto University Basketball Club" の訳。
+ * 大学の公式な部・サークル名としてこの表記でよいか要確認（docs/HEARING.md 参照）。
+ *
  * 資格は「誰がどれを持っているか」が未確認のため、個人には割り当てず
  * QUALIFICATIONS にアカデミー全体の保有資格としてまとめている。
- * 割り当てが分かったら COACHES 側に移すこと。
+ * 割り当てが分かったら role 側に移すこと。
  */
-export const COACHES: { name: string; discipline: string | null }[] = [
-  { name: "竹上譲一", discipline: null },
-  { name: "小路瑛", discipline: null },
+export const COACHES: { name: string; role: string[] }[] = [
+  { name: "竹上譲一", role: ["元 京都大学バスケットボール部 コーチ"] },
+  {
+    name: "小路瑛",
+    role: ["全日本近代五種選手権大会 出場", "全日本近代3種選手権 優勝"],
+  },
 ];
 
 // 指導者が保有する専門資格。競技・スポーツ科学・コンディショニング領域。
