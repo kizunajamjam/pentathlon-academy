@@ -100,6 +100,8 @@ CONTACT_NOTIFY_FROM=no-reply@（認証済みドメイン）
 
 ## 差し替えが必要な箇所（仮のまま入っているもの）
 
+オーナーに確認して埋める項目は [HEARING.md](HEARING.md) にまとめてある。
+
 | 対象 | 場所 |
 | --- | --- |
 | 連絡先・住所・電話・メール | `src/lib/constants/site.ts` の `SITE` |

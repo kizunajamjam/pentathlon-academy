@@ -55,3 +55,5 @@ node scripts/check-wedges.mjs   # 生成結果の目視確認
 
 現在は文言・写真・連絡先の一部が仮のものです。差し替えが必要な箇所は
 [docs/SETUP.md](docs/SETUP.md) の一覧にまとめています。
+
+公開までにオーナーへ確認が必要な項目は [docs/HEARING.md](docs/HEARING.md) にまとめています。
