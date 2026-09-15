@@ -116,9 +116,9 @@ export const PARTNERS: { name: string; summary: string; url: string | null }[] =
  * アカデミーが提示している記録。あくまで目安であって入会条件ではない。
  */
 export const SWIM_LEVELS = [
-  { label: "ゴールド", sub: "トップレベル" },
-  { label: "シルバー", sub: "ハイレベル" },
-  { label: "ブロンズ", sub: "チャレンジレベル" },
+  { label: "S", sub: "トップレベル" },
+  { label: "A", sub: "ハイレベル" },
+  { label: "B", sub: "チャレンジレベル" },
 ] as const;
 
 export const SWIM_STANDARDS: {

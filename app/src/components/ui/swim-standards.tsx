@@ -17,7 +17,7 @@ export function SwimStandards() {
           <h3 className="font-display text-base font-bold text-navy-800">{group.gender}</h3>
 
           <div className="mt-3 overflow-x-auto">
-            {/* 見出しが「ゴール/ド」のように途中で折り返さないよう nowrap を効かせる */}
+            {/* 種目名や補足ラベル（トップレベル等）が途中で折り返さないよう nowrap を効かせる */}
             <table className="w-full min-w-[27rem] border-collapse whitespace-nowrap text-sm">
               <thead>
                 <tr className="border-b border-border">
