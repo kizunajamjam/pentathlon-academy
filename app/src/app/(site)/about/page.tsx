@@ -1,13 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import {
-  Award,
-  Compass,
-  ExternalLink,
-  HeartHandshake,
-  Microscope,
-  Sparkles,
-} from "lucide-react";
+import { Compass, ExternalLink, HeartHandshake, Microscope, Sparkles } from "lucide-react";
 
 import { ButtonLink } from "@/components/ui/button-link";
 import { PageHero } from "@/components/ui/page-hero";
@@ -15,7 +8,7 @@ import { PendingSlot } from "@/components/ui/pending-slot";
 import { PhotoSlot } from "@/components/ui/photo-slot";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { SwimStandards } from "@/components/ui/swim-standards";
-import { COACHES, PARTNERS, QUALIFICATIONS, SITE } from "@/lib/constants/site";
+import { COACHES, PARTNERS, SITE } from "@/lib/constants/site";
 
 export const metadata: Metadata = {
   title: "アカデミーについて",
@@ -113,12 +106,12 @@ export default function AboutPage() {
       {/* ── 指導者 ─────────────────────────────────────────────────── */}
       <section className="bg-white py-16 sm:py-24">
         <div className="mx-auto max-w-6xl px-4">
-          <SectionHeading
-            eyebrow="COACHING TEAM"
-            title="指導者"
-            description="※ 経歴と写真は準備中です。揃い次第こちらに掲載します。"
-          />
+          <SectionHeading eyebrow="COACHING TEAM" title="指導者" description="顔写真は掲載していません。" />
           {/*
+            写真を持たないので、カードは肩書きバッジ＋氏名＋経歴の箇条書きだけ。
+            資格・実績はコーチによって行数が大きく違う（3〜10行）ため、
+            グリッドで同じ行の高さが揃っても不自然にならないテキスト主体の構成にしている。
+
             列数は人数に合わせる。3列に2人だと右が空くため。
             Tailwind は文字列結合したクラス名を purge するので、完全な形で持つ。
           */}
@@ -129,50 +122,21 @@ export default function AboutPage() {
           >
             {COACHES.map((coach) => (
               <div key={coach.name} className="rounded-card border border-border bg-white p-6">
-                <PhotoSlot label="指導者の写真" ratio="aspect-square" className="!bg-navy-50" />
-                <p className="mt-5 font-display text-base font-bold text-navy-800">{coach.name}</p>
-                {coach.role.length > 0 ? (
-                  <ul className="mt-1.5 space-y-0.5">
-                    {coach.role.map((r) => (
-                      <li key={r} className="text-xs leading-relaxed text-muted">
-                        {r}
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className="mt-1.5 text-xs text-muted">担当種目・経歴は準備中です</p>
-                )}
+                <span className="inline-flex rounded-full bg-navy-50 px-3 py-1 text-xs font-bold text-navy-800">
+                  {coach.title}
+                </span>
+                <p className="mt-4 font-display text-lg font-bold text-navy-800">{coach.name}</p>
+                <ul className="mt-3 space-y-1.5">
+                  {coach.bio.map((line) => (
+                    <li key={line} className="flex items-start gap-2 text-sm leading-relaxed text-muted">
+                      <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-gold-500" />
+                      {line}
+                    </li>
+                  ))}
+                </ul>
               </div>
             ))}
           </div>
-        </div>
-      </section>
-
-      {/* ── 保有資格 ───────────────────────────────────────────────── */}
-      <section className="bg-surface py-16 sm:py-24">
-        <div className="mx-auto max-w-4xl px-4">
-          {/*
-            ⚠️ いただいた原文は「各競技・スポーツ科学・コンディショニング領域の
-            専門資格を保有しています」だったが、受け取った資格4件はいずれも
-            競技の指導資格。スポーツ科学・コンディショニングの資格が届いたら
-            原文の言い回しに戻す。
-          */}
-          <SectionHeading
-            eyebrow="QUALIFICATIONS"
-            title="保有資格"
-            description="当アカデミーの指導者は、指導する各競技において公認の専門資格を保有しています。"
-          />
-          <ul className="mt-10 grid gap-3 sm:grid-cols-2">
-            {QUALIFICATIONS.map((q) => (
-              <li
-                key={q}
-                className="flex items-start gap-3 rounded-card border border-border bg-white px-5 py-4"
-              >
-                <Award size={18} className="mt-0.5 shrink-0 text-gold-600" />
-                <span className="text-sm leading-relaxed text-navy-800">{q}</span>
-              </li>
-            ))}
-          </ul>
         </div>
       </section>
 
