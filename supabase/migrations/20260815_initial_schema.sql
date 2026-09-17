@@ -86,7 +86,7 @@ create table public.schedule_slots (
   -- クラス名も同様に任意。種目に当てはまらない活動名（コオーディネーション 等）にも使う。
   class_name text,
   discipline text
-    -- 馬術は2028年ロス五輪から廃止され、障害物レース(obstacle)に置き換わった
+    -- 馬術は2028年ロス五輪から廃止され、オブスタクル(obstacle)に置き換わった
     check (discipline in ('fencing', 'swimming', 'obstacle', 'shooting', 'running')),
   location text,
   note text,

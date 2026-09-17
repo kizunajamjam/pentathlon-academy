@@ -39,7 +39,7 @@ const P = [
 const WEDGES = [
   { from: 0, to: 1, fill: "var(--color-gold-500)" }, // フェンシング
   { from: 1, to: 2, fill: "var(--color-shoot-500)" }, // 射撃
-  { from: 2, to: 3, fill: "var(--color-obstacle-500)" }, // 障害物レース
+  { from: 2, to: 3, fill: "var(--color-obstacle-500)" }, // オブスタクル
   { from: 3, to: 4, fill: "var(--color-swim-500)" }, // 水泳
   { from: 4, to: 0, fill: "var(--color-navy-800)" }, // ランニング
 ];
