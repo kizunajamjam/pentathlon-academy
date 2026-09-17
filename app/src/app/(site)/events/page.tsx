@@ -45,7 +45,7 @@ export default async function EventsPage() {
             <h3 className="text-lg text-navy-800">体験・見学は随時受け付けています</h3>
             <p className="mt-3 text-sm leading-relaxed text-navy-700">
               日程を決めて開催する形ではなく、ご希望の日に合わせてご案内しています。
-              練習スケジュールをご覧のうえ、ご都合のよい曜日・クラスをお知らせください。空き状況をお伝えします。
+              練習スケジュールをご覧のうえ、ご都合のよい曜日をお知らせください。空き状況をお伝えします。
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
               <ButtonLink href="/contact">体験・見学を申し込む</ButtonLink>
