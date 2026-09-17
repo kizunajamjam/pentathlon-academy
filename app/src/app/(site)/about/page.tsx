@@ -166,7 +166,7 @@ export default function AboutPage() {
             <SwimStandards />
           </div>
           <p className="mt-10 rounded-card border border-border bg-white px-5 py-4 text-sm leading-relaxed text-navy-700 sm:px-6">
-            水泳で積み上げてきた力は、近代五種でそのまま武器になります。基準に近い記録をお持ちの方はもちろん、これから伸ばしていきたい方もご相談ください。
+            水泳で積み上げてきた力は、近代五種でそのまま武器になります。水泳が強い選手は既に日本選手権や国際大会を舞台に戦う事前準備ができています。
           </p>
         </div>
       </section>

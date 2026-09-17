@@ -36,9 +36,13 @@ export type DayOfWeek = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 export type ScheduleSlot = {
   id: string;
   dayOfWeek: DayOfWeek;
-  startTime: string; // "17:30"
-  endTime: string; // "19:00"
-  className: string; // 例: 初級クラス、選手クラス
+  // 練習は基本的に選手と相談のうえで場所・時間を決めるため、
+  // 固定の時刻を持たない枠がある（null は「時間は個別に相談」を意味する）。
+  startTime: string | null; // "17:30"
+  endTime: string | null; // "19:00"
+  // 例: 初級クラス、選手クラス。種目チップだけでは表せない活動名
+  // （コオーディネーション、レーザーラン 等）を出すためにも使う。
+  className: string | null;
   discipline: DisciplineId | null;
   location: string | null;
   note: string | null;

@@ -44,7 +44,7 @@ export default async function AdminSchedulePage() {
                       {DAY_LABEL[s.dayOfWeek]}
                     </span>
                     <span className="shrink-0 font-display text-sm text-navy-800 sm:w-32">
-                      {s.startTime} 〜 {s.endTime}
+                      {s.startTime && s.endTime ? `${s.startTime} 〜 ${s.endTime}` : "個別に相談"}
                     </span>
                     <span className="flex-1 text-sm text-navy-800">
                       {s.className}

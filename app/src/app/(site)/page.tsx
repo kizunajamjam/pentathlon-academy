@@ -25,7 +25,7 @@ export default async function HomePage() {
             <h1 className="mt-5 text-3xl leading-tight text-white sm:text-4xl lg:text-5xl">
               近代五種に、
               <br />
-              本気で取り組める場所。
+              本気で取り組めるクラブ。
             </h1>
             <p className="mt-6 max-w-md text-sm leading-relaxed text-navy-200 sm:text-base">
               {SITE.description}
@@ -135,8 +135,8 @@ export default async function HomePage() {
         <div className="relative mx-auto max-w-3xl px-4 text-center">
           <SectionHeading
             eyebrow="CONTACT"
-            title="まずは、練習を見にきてください。"
-            description="体験・見学は随時受け付けています。水泳や陸上など、これまで続けてきた競技があれば、それがそのまま武器になります。近代五種がはじめての方もご相談ください。"
+            title="まずは練習を見に来てください。"
+            description="体験・見学は随時受け付けています。水泳や陸上など、これまで続けてきた競技があれば、それがそのまま武器になります。近代五種が初めての方もご相談ください。"
             tone="light"
             align="center"
           />

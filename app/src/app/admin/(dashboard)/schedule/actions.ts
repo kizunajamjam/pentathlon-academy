@@ -19,9 +19,10 @@ export async function saveSlot(
   if (!staff) return { message: "権限がありません。再度ログインしてください。" };
 
   const dayOfWeek = Number(formData.get("dayOfWeek"));
-  const startTime = String(formData.get("startTime") ?? "");
-  const endTime = String(formData.get("endTime") ?? "");
-  const className = String(formData.get("className") ?? "").trim();
+  // 時刻・クラス名は「個別に相談」の枠もあるため任意項目。空欄は null にする。
+  const startTime = String(formData.get("startTime") ?? "").trim() || null;
+  const endTime = String(formData.get("endTime") ?? "").trim() || null;
+  const className = String(formData.get("className") ?? "").trim() || null;
   const rawDiscipline = String(formData.get("discipline") ?? "");
   const location = String(formData.get("location") ?? "").trim() || null;
   const note = String(formData.get("note") ?? "").trim() || null;
@@ -31,9 +32,13 @@ export async function saveSlot(
   if (!Number.isInteger(dayOfWeek) || dayOfWeek < 0 || dayOfWeek > 6) {
     return { message: "曜日を選択してください。" };
   }
-  if (!className) return { message: "クラス名を入力してください。" };
-  if (!startTime || !endTime) return { message: "開始・終了時刻を入力してください。" };
-  if (endTime <= startTime) return { message: "終了時刻は開始時刻より後にしてください。" };
+  // 時刻は両方入れるか、両方空（個別相談）のどちらか。片方だけは不整合になる。
+  if ((startTime === null) !== (endTime === null)) {
+    return { message: "開始・終了時刻は両方入力するか、両方空にしてください。" };
+  }
+  if (startTime && endTime && endTime <= startTime) {
+    return { message: "終了時刻は開始時刻より後にしてください。" };
+  }
 
   const discipline = DISCIPLINES.includes(rawDiscipline as DisciplineId)
     ? (rawDiscipline as DisciplineId)

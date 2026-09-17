@@ -43,12 +43,16 @@ export function SlotForm({ slot }: { slot?: ScheduleSlot }) {
       </AdminField>
 
       <div className="grid gap-6 sm:grid-cols-2">
-        <AdminField label="開始時刻" htmlFor="startTime">
+        <AdminField
+          label="開始時刻"
+          htmlFor="startTime"
+          hint="時間を決めず個別に相談する枠は、両方空欄のままにしてください。"
+        >
           <input
             id="startTime"
             name="startTime"
             type="time"
-            defaultValue={slot?.startTime ?? "17:30"}
+            defaultValue={slot?.startTime ?? ""}
             className={adminInput}
           />
         </AdminField>
@@ -58,18 +62,22 @@ export function SlotForm({ slot }: { slot?: ScheduleSlot }) {
             id="endTime"
             name="endTime"
             type="time"
-            defaultValue={slot?.endTime ?? "19:00"}
+            defaultValue={slot?.endTime ?? ""}
             className={adminInput}
           />
         </AdminField>
       </div>
 
-      <AdminField label="クラス名" htmlFor="className" hint="例: 初級クラス / 選手クラス / 一般クラス">
+      <AdminField
+        label="クラス名"
+        htmlFor="className"
+        hint="例: 初級クラス / 選手クラス / 一般クラス。種目に当てはまらない活動名（コオーディネーション、レーザーラン 等）にも使えます。空欄でも構いません。"
+      >
         <input
           id="className"
           name="className"
           type="text"
-          defaultValue={slot?.className}
+          defaultValue={slot?.className ?? ""}
           maxLength={100}
           className={adminInput}
         />

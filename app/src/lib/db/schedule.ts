@@ -8,9 +8,9 @@ import type { DayOfWeek, DisciplineId, ScheduleSlot } from "@/types";
 type ScheduleRow = {
   id: string;
   day_of_week: DayOfWeek;
-  start_time: string;
-  end_time: string;
-  class_name: string;
+  start_time: string | null;
+  end_time: string | null;
+  class_name: string | null;
   discipline: DisciplineId | null;
   location: string | null;
   note: string | null;
@@ -19,8 +19,9 @@ type ScheduleRow = {
 };
 
 // Postgres の time 型は "17:30:00" で返るため表示用に秒を落とす。
-function toHm(t: string): string {
-  return t.slice(0, 5);
+// 時間を個別に相談する枠は null のまま通す。
+function toHm(t: string | null): string | null {
+  return t ? t.slice(0, 5) : null;
 }
 
 function mapSlot(row: ScheduleRow): ScheduleSlot {
@@ -78,9 +79,9 @@ export function groupByDay(slots: ScheduleSlot[]): Map<DayOfWeek, ScheduleSlot[]
 
 export type ScheduleSlotInput = {
   dayOfWeek: DayOfWeek;
-  startTime: string;
-  endTime: string;
-  className: string;
+  startTime: string | null;
+  endTime: string | null;
+  className: string | null;
   discipline: DisciplineId | null;
   location: string | null;
   note: string | null;
