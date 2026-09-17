@@ -13,7 +13,7 @@ import { COACHES, PARTNERS, SITE } from "@/lib/constants/site";
 export const metadata: Metadata = {
   title: "アカデミーについて",
   description:
-    "ペンタスロンアカデミーの理念、指導者と保有資格、育成の考え方、連携先、今後の研究についてご紹介します。",
+    "ペンタスロンアカデミーの理念と指導方針、指導者の紹介、強化選手標準記録、連携先、今後の研究についてご紹介します。",
 };
 
 // ⚠️ 仮テキスト。正式な理念・実績が決まり次第この配列を差し替える。

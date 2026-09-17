@@ -1,5 +1,5 @@
 // 五種競技の識別子。ロゴの五角形の各面と 1:1 で対応する。
-// 2028年ロサンゼルス五輪から馬術は廃止され、障害物レース(obstacle)に置き換わった。
+// 2028年ロサンゼルス五輪から馬術は廃止され、オブスタクル(obstacle)に置き換わった。
 export type DisciplineId = "fencing" | "swimming" | "obstacle" | "shooting" | "running";
 
 export type NewsCategory = "notice" | "report" | "media" | "recruit";
