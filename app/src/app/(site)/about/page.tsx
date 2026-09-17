@@ -106,7 +106,7 @@ export default function AboutPage() {
       {/* ── 指導者 ─────────────────────────────────────────────────── */}
       <section className="bg-white py-16 sm:py-24">
         <div className="mx-auto max-w-6xl px-4">
-          <SectionHeading eyebrow="COACHING TEAM" title="指導者" description="顔写真は掲載していません。" />
+          <SectionHeading eyebrow="COACHING TEAM" title="指導者" />
           {/*
             写真を持たないので、カードは肩書きバッジ＋氏名＋経歴の箇条書きだけ。
             資格・実績はコーチによって行数が大きく違う（3〜10行）ため、
