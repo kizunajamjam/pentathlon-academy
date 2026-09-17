@@ -79,9 +79,12 @@ create table public.schedule_slots (
   id uuid primary key default gen_random_uuid(),
   -- 0=日曜 ... 6=土曜（JavaScript の Date.getDay() に合わせている）
   day_of_week smallint not null check (day_of_week between 0 and 6),
-  start_time time not null,
-  end_time time not null,
-  class_name text not null,
+  -- 練習は基本的に選手と相談のうえで時間を決めるため、固定時刻を持たない枠がある。
+  -- start_time / end_time は両方 null（個別に相談）か、両方入っているかのどちらか。
+  start_time time,
+  end_time time,
+  -- クラス名も同様に任意。種目に当てはまらない活動名（コオーディネーション 等）にも使う。
+  class_name text,
   discipline text
     -- 馬術は2028年ロス五輪から廃止され、障害物レース(obstacle)に置き換わった
     check (discipline in ('fencing', 'swimming', 'obstacle', 'shooting', 'running')),
@@ -92,7 +95,8 @@ create table public.schedule_slots (
   is_active boolean not null default true,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
-  check (end_time > start_time)
+  check ((start_time is null) = (end_time is null)),
+  check (start_time is null or end_time > start_time)
 );
 
 create index schedule_slots_day_idx on public.schedule_slots (day_of_week, sort_order);

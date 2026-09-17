@@ -29,7 +29,7 @@ export default async function SchedulePage() {
           <SectionHeading
             eyebrow="WEEKLY"
             title="週間スケジュール"
-            description="通常週のグループ練習の予定です。大会・合宿などにより変更になる場合があります。変更が生じた際はお知らせページでご案内します。"
+            description="基本的に選手と相談して練習場所を決めていますので、以下は参考としてご覧ください。大会・合宿などにより変更になる場合もあります。"
           />
 
           {/* 週間表だけだとグループ練習しかないように見えるため、ここで補う */}
@@ -70,40 +70,43 @@ export default async function SchedulePage() {
                       return (
                         <li
                           key={slot.id}
-                          className="grid gap-2 px-5 py-4 sm:grid-cols-[9rem_1fr] sm:items-center sm:gap-5"
+                          className="flex flex-wrap items-center gap-x-4 gap-y-2 px-5 py-4"
                         >
-                          <time className="font-display text-sm font-bold text-navy-800">
-                            {slot.startTime} 〜 {slot.endTime}
-                          </time>
+                          {/* 時刻は「個別に相談」の枠では null。あるときだけ出す。 */}
+                          {slot.startTime && slot.endTime && (
+                            <time className="font-display text-sm font-bold text-navy-800">
+                              {slot.startTime} 〜 {slot.endTime}
+                            </time>
+                          )}
 
-                          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+                          {slot.className && (
                             <span className="rounded-full bg-navy-50 px-3 py-1 text-xs text-navy-700">
                               {slot.className}
                             </span>
+                          )}
 
-                            {discipline && (
-                              // この行では 16px 程度しか取れず、切り出しアイコンだと
-                              // シルエットが潰れるので色の丸で示す。
-                              <span className={`flex items-center gap-2 text-sm ${discipline.text}`}>
-                                <span className={`h-2.5 w-2.5 rounded-full ${discipline.chip}`} />
-                                {discipline.name}
-                              </span>
-                            )}
+                          {discipline && (
+                            // この行では 16px 程度しか取れず、切り出しアイコンだと
+                            // シルエットが潰れるので色の丸で示す。
+                            <span className={`flex items-center gap-2 text-sm ${discipline.text}`}>
+                              <span className={`h-2.5 w-2.5 rounded-full ${discipline.chip}`} />
+                              {discipline.name}
+                            </span>
+                          )}
 
-                            {slot.location && (
-                              <span className="flex items-center gap-1.5 text-sm text-muted">
-                                <MapPin size={14} className="shrink-0 text-gold-600" />
-                                {slot.location}
-                              </span>
-                            )}
+                          {slot.location && (
+                            <span className="flex items-center gap-1.5 text-sm text-muted">
+                              <MapPin size={14} className="shrink-0 text-gold-600" />
+                              {slot.location}
+                            </span>
+                          )}
 
-                            {slot.note && (
-                              <span className="flex items-center gap-1.5 text-xs text-muted">
-                                <Info size={13} className="shrink-0" />
-                                {slot.note}
-                              </span>
-                            )}
-                          </div>
+                          {slot.note && (
+                            <span className="flex items-center gap-1.5 text-xs text-muted">
+                              <Info size={13} className="shrink-0" />
+                              {slot.note}
+                            </span>
+                          )}
                         </li>
                       );
                     })}
@@ -120,7 +123,7 @@ export default async function SchedulePage() {
           </div>
 
           <p className="mt-8 rounded-card border border-gold-200 bg-gold-50 px-5 py-4 text-sm leading-relaxed text-navy-700">
-            ※ 天候・施設の都合により中止や場所の変更が生じる場合があります。当日の実施可否は各クラスのご連絡をご確認ください。
+            ※ 天候・施設の都合により中止や場所の変更が生じる場合があります。当日の実施可否は各活動の連絡をご確認ください。
           </p>
         </div>
       </section>
