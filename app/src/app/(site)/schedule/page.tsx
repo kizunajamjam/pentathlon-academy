@@ -133,7 +133,7 @@ export default async function SchedulePage() {
           <SectionHeading
             eyebrow="TRIAL"
             title="体験は、随時受け付けています。"
-            description="ご希望の曜日・クラスと、個別・グループのご希望をお知らせください。空き状況をご案内します。"
+            description="ご希望の曜日と、個別・グループのご希望をお知らせください。空き状況をご案内します。"
             align="center"
           />
           <div className="mt-9 flex justify-center">

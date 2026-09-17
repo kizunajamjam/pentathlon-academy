@@ -61,7 +61,7 @@ export default function DisciplinesPage() {
                       href="/about#standards"
                       className="font-bold text-navy-800 underline decoration-gold-400 underline-offset-4 transition-colors hover:text-gold-600"
                     >
-                      水泳経験者向けのチャレンジ基準を見る
+                      水泳経験者向けの標準記録を見る
                     </Link>
                   </p>
                 )}
