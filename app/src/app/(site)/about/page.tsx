@@ -123,14 +123,28 @@ export default function AboutPage() {
             }`}
           >
             {COACHES.map((coach) => (
-              <div key={coach.name} className="rounded-card border border-border bg-white p-6">
+              <div
+                key={coach.name}
+                className="min-w-0 rounded-card border border-border bg-white p-6"
+              >
                 <span className="inline-flex rounded-full bg-navy-50 px-3 py-1 text-xs font-bold text-navy-800">
                   {coach.title}
                 </span>
                 <p className="mt-4 font-display text-lg font-bold text-navy-800">{coach.name}</p>
                 <ul className="mt-3 space-y-1.5">
+                  {/*
+                    経歴には「大阪体育大学体育学部スポーツ教育学科卒業」のように
+                    文節の切れ目を持たない長い行がある。word-break: auto-phrase は
+                    文節で折れない行をそのまま1行として扱うため、幅の狭い端末では
+                    カードごと画面からはみ出す。overflow-wrap: anywhere は
+                    「他に折り返しようがないときだけ」効くので、余裕があるときの
+                    折り返し位置は変えずに、はみ出しだけを防げる。
+                  */}
                   {coach.bio.map((line) => (
-                    <li key={line} className="flex items-start gap-2 text-sm leading-relaxed text-muted">
+                    <li
+                      key={line}
+                      className="flex items-start gap-2 text-sm leading-relaxed text-muted [overflow-wrap:anywhere]"
+                    >
                       <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-gold-500" />
                       {line}
                     </li>
@@ -230,9 +244,6 @@ export default function AboutPage() {
             <div>
               <p className="text-sm leading-relaxed text-navy-700 sm:text-base">
                 指導と並行して、近代五種の育成に関する研究に取り組んでいきます。修士・博士課程での研究、学会での発表、論文を通じて得たものを、日々の練習の組み立てに戻していくことを考えています。
-              </p>
-              <p className="mt-4 text-sm leading-relaxed text-muted">
-                具体的なテーマと発表の予定は、決まり次第こちらでお知らせします。
               </p>
             </div>
           </div>

@@ -226,7 +226,11 @@ for (const comp of wedgeComponents) {
 }
 const center = [cxAll / nAll, cyAll / nAll];
 
-// ロゴ実物の配置（中心から見た角度。画像座標なので Y は下向き）
+// ロゴ実物の配置（中心から見た角度。画像座標なので Y は下向き）。
+//
+// ここだけは5種目の並び順ではなく角度順で持つ。下の割り当ては
+// 「近い角度から順に取る」貪欲法で、並べ替えるとどの面がどの id を
+// 先に取るかが変わり、割り当て自体がずれうるため。表示には出ない表。
 const DIRECTIONS = [
   { id: "running", deg: -125 }, // 左上
   { id: "fencing", deg: -55 }, // 右上

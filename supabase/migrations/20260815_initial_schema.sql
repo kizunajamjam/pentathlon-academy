@@ -87,7 +87,7 @@ create table public.schedule_slots (
   class_name text,
   discipline text
     -- 馬術は2028年ロス五輪から廃止され、オブスタクル(obstacle)に置き換わった
-    check (discipline in ('fencing', 'swimming', 'obstacle', 'shooting', 'running')),
+    check (discipline in ('fencing', 'obstacle', 'swimming', 'shooting', 'running')),
   location text,
   note text,
   -- 同じ曜日に複数枠があるときの並び順

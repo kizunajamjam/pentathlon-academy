@@ -2,7 +2,7 @@
 // 透明の穴だと白背景では正しく見えるが、色の上に置くと透けてしまう。
 import sharp from "sharp";
 
-for (const id of ["fencing", "swimming", "obstacle", "shooting", "running"]) {
+for (const id of ["fencing", "obstacle", "swimming", "shooting", "running"]) {
   const { data, info } = await sharp(`public/icons/${id}.png`)
     .ensureAlpha()
     .raw()

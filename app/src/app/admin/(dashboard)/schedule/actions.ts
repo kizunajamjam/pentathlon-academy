@@ -9,7 +9,7 @@ import type { DayOfWeek, DisciplineId } from "@/types";
 
 export type SlotFormState = { message?: string };
 
-const DISCIPLINES: DisciplineId[] = ["fencing", "swimming", "obstacle", "shooting", "running"];
+const DISCIPLINES: DisciplineId[] = ["fencing", "obstacle", "swimming", "shooting", "running"];
 
 export async function saveSlot(
   _prev: SlotFormState,

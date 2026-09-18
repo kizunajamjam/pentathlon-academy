@@ -22,10 +22,15 @@ export default async function HomePage() {
         <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 py-16 sm:py-24 lg:grid-cols-2 lg:gap-16">
           <div>
             <p className="eyebrow text-xs text-gold-400">MODERN PENTATHLON</p>
+            {/*
+              iOS Safari は word-break: auto-phrase に未対応で、折り返しが
+              「…クラ / ブ。」のように語の途中に入る。文節ごとに
+              inline-block で包むと、どのブラウザでもこの単位でしか折れない。
+              9文字ずつに割れるので、どの画面幅でも2行で釣り合う。
+            */}
             <h1 className="mt-5 text-3xl leading-tight text-white sm:text-4xl lg:text-5xl">
-              近代五種に、
-              <br />
-              本気で取り組めるクラブ。
+              <span className="inline-block">近代五種に、本気で</span>
+              <span className="inline-block">取り組めるクラブ。</span>
             </h1>
             <p className="mt-6 max-w-md text-sm leading-relaxed text-navy-200 sm:text-base">
               {SITE.description}
@@ -80,7 +85,7 @@ export default async function HomePage() {
               description="近代五種は5つの種目それぞれに場所と道具を必要とするため、まとめて取り組める環境はなかなかありません。ペンタスロンアカデミーは、その環境をつくるために立ち上げました。"
             />
             <p className="mt-5 max-w-2xl text-sm leading-relaxed text-muted sm:text-base">
-              走る・泳ぐ・撃つ・突く・登る。5種目を一貫して積み上げ、日本代表、そしてオリンピックの舞台で戦える選手を育てることを目標にしています。練習は個別・グループのどちらにも対応します。
+              突く・登る・泳ぐ・撃つ・走る。5種目を一貫して積み上げ、日本代表、そしてオリンピックの舞台で戦える選手を育てることを目標にしています。練習は個別・グループのどちらにも対応します。
             </p>
             <div className="mt-8">
               <ButtonLink href="/about" variant="outline">
@@ -135,7 +140,7 @@ export default async function HomePage() {
         <div className="relative mx-auto max-w-3xl px-4 text-center">
           <SectionHeading
             eyebrow="CONTACT"
-            title="まずは練習を見に来てください。"
+            title="まずは練習を見に来て下さい。"
             description="体験・見学は随時受け付けています。水泳や陸上など、これまで続けてきた競技があれば、それがそのまま武器になります。近代五種が初めての方もご相談ください。"
             tone="light"
             align="center"
