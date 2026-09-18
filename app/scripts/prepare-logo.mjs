@@ -512,6 +512,9 @@ for (const comp of components) {
 // ── 書き出し ─────────────────────────────────────────────────────────
 await mkdir(OUT_ICONS, { recursive: true });
 
+// 書き出しはサイト共通の並び順に揃える。DIRECTIONS が角度順なので
+// 生成の過程では面がこの順に出てこない。
+const DISCIPLINE_ORDER = ["fencing", "obstacle", "swimming", "shooting", "running"];
 const geometryRows = [];
 
 for (const a of assigned) {
@@ -575,9 +578,10 @@ for (const a of assigned) {
   const gx = ((sumX / count) / side) * 100;
   const gy = ((sumY / count) / side) * 100;
 
-  geometryRows.push(
-    `  { id: "${a.id}", points: "${points}", centroid: { x: ${gx.toFixed(2)}, y: ${gy.toFixed(2)} } },`,
-  );
+  geometryRows.push({
+    id: a.id,
+    row: `  { id: "${a.id}", points: "${points}", centroid: { x: ${gx.toFixed(2)}, y: ${gy.toFixed(2)} } },`,
+  });
 
   console.log(`✓ ${a.id}.png / overlay-${a.id}.png (頂点${hull.length}点, 重心 ${gx.toFixed(1)},${gy.toFixed(1)})`);
 }
@@ -595,7 +599,7 @@ export const LOGO_WEDGES: {
   points: string;
   centroid: { x: number; y: number };
 }[] = [
-${geometryRows.join("\n")}
+${DISCIPLINE_ORDER.map((id) => geometryRows.find((r) => r.id === id).row).join("\n")}
 ];
 `,
   "utf8",
