@@ -17,8 +17,13 @@ export function SectionHeading({
       <p className={`eyebrow text-xs ${tone === "light" ? "text-gold-400" : "text-gold-600"}`}>
         {eyebrow}
       </p>
+      {/*
+        見出しは15文字前後のものが多く、24px 固定だと幅の狭いスマホで
+        最後の1〜2文字だけが次の行に落ちる。clamp で画面幅に追従させると
+        最長15文字の見出しでも360px級で1行に収まり、400px 以上では従来どおり 24px になる。
+      */}
       <h2
-        className={`mt-3 text-2xl sm:text-3xl ${
+        className={`mt-3 text-[clamp(1.125rem,5.6vw,1.5rem)] sm:text-3xl ${
           tone === "light" ? "text-white" : "text-navy-800"
         }`}
       >

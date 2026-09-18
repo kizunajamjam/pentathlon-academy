@@ -36,12 +36,14 @@ const P = [
   [4.35, 35.17],
 ];
 
+// from / to は上の P の添字。5種目の並び順で持つため頂点は連番にならないが、
+// 面はいずれも重ならないので描画順は見た目に影響しない。
 const WEDGES = [
-  { from: 0, to: 1, fill: "var(--color-gold-500)" }, // フェンシング
-  { from: 1, to: 2, fill: "var(--color-shoot-500)" }, // 射撃
-  { from: 2, to: 3, fill: "var(--color-obstacle-500)" }, // オブスタクル
-  { from: 3, to: 4, fill: "var(--color-swim-500)" }, // 水泳
-  { from: 4, to: 0, fill: "var(--color-navy-800)" }, // ランニング
+  { from: 0, to: 1, fill: "var(--color-gold-500)" }, // フェンシング（右上）
+  { from: 2, to: 3, fill: "var(--color-obstacle-500)" }, // オブスタクル（下）
+  { from: 3, to: 4, fill: "var(--color-swim-500)" }, // 水泳（左）
+  { from: 1, to: 2, fill: "var(--color-shoot-500)" }, // 射撃（右）
+  { from: 4, to: 0, fill: "var(--color-navy-800)" }, // ランニング（左上）
 ];
 
 // 背景に薄く敷く装飾用。写真のように白背景を持たないので低不透明度でも成立する。
