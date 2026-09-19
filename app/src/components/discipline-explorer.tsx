@@ -49,7 +49,12 @@ const RAYS = Array.from({ length: 12 }, (_, i) => {
   };
 });
 
-const clamp01 = (v: number) => (v < 0 ? 0 : v > 1 ? 1 : v);
+/*
+ * ロゴのどれだけが画面に入ったら動き出すか。
+ * 半分より少し多めにしているのは、下端に覗いた時点ではなく、
+ * ロゴがはっきり見える位置まで送ってから動かしたいため。
+ */
+const TRIGGER_RATIO = 0.6;
 
 export function DisciplineExplorer() {
   const router = useRouter();
@@ -105,56 +110,71 @@ export function DisciplineExplorer() {
       }
     };
 
-    /*
-     * どこまで組み上がっているか（0〜1）。
-     *
-     * 上端ではなく中心で測る。上端を基準にすると、ロゴが画面の下に
-     * 少し覗いただけで「開始済み」になってしまい、ページを開いた時点で
-     * 途中から始まってしまうため。
-     */
-    const progressNow = () => {
+    /** いま画面に見えている割合（0〜1）。 */
+    const visibleRatio = () => {
       const rect = stage.getBoundingClientRect();
       const vh = window.innerHeight;
-      const center = rect.top + rect.height / 2;
-      const start = vh * 1.05; // 中心がここより下なら、まだ始まっていない
-      const end = vh * 0.55; // ここまで上がったら組み上がり
-      return clamp01((start - center) / (start - end));
+      const shown = Math.min(vh, rect.bottom) - Math.max(0, rect.top);
+      return rect.height > 0 ? Math.max(0, Math.min(1, shown / rect.height)) : 0;
     };
 
     // 動きを減らす設定の人には、完成した姿のまま出す。
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-    // 読み込んだ時点で既に始まっている位置なら、組み上げ直さない。
-    // 完成形からいきなり途中へ飛ぶと、ちらついて見えるため。
-    if (progressNow() > 0.02) return;
+    // 読み込んだ時点でロゴを見ている位置にいるなら、組み上げ直さない。
+    // 完成形からいきなり最初へ戻ると、ちらついて見えるため。
+    if (visibleRatio() > TRIGGER_RATIO) return;
 
     setAssembled(false);
     apply(assemblyFrame(0));
 
-    let queued = false;
-    let done = false;
+    /*
+     * スクロール位置に直結させていたが、勢いよく指を動かすと
+     * 5.6秒ぶんの動きが一瞬で終わってしまい、速すぎた。
+     * ロゴが画面に入ったのを合図にして、あとは決まった速さで動かす。
+     */
+    let raf = 0;
+    let startedAt = 0;
 
-    const update = () => {
-      queued = false;
-      const progress = progressNow();
-      apply(assemblyFrame(progress * ASSEMBLY_TOTAL));
-      if (progress >= 1) {
-        done = true;
+    const step = (now: number) => {
+      if (!startedAt) startedAt = now;
+      const t = (now - startedAt) / 1000;
+      apply(assemblyFrame(Math.min(t, ASSEMBLY_TOTAL)));
+      if (t < ASSEMBLY_TOTAL) {
+        raf = requestAnimationFrame(step);
+      } else {
         setAssembled(true);
       }
     };
 
-    const onScroll = () => {
-      if (done || queued) return;
-      queued = true;
-      requestAnimationFrame(update);
+    const snapToEnd = () => {
+      cancelAnimationFrame(raf);
+      apply(ASSEMBLED);
+      setAssembled(true);
     };
 
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll);
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        // 動き出す前に通り過ぎてしまったら、完成した姿にして終わりにする。
+        // 空っぽのロゴが置き去りになるのを避ける。
+        if (!entry.isIntersecting) {
+          if (entry.boundingClientRect.bottom < 0) {
+            observer.disconnect();
+            snapToEnd();
+          }
+          return;
+        }
+        if (entry.intersectionRatio < TRIGGER_RATIO) return;
+        observer.disconnect();
+        raf = requestAnimationFrame(step);
+      },
+      { threshold: [0, TRIGGER_RATIO] },
+    );
+    observer.observe(stage);
+
     return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
+      observer.disconnect();
+      cancelAnimationFrame(raf);
     };
   }, []);
 
