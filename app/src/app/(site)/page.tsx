@@ -1,5 +1,3 @@
-import Image from "next/image";
-
 import { DisciplineExplorer } from "@/components/discipline-explorer";
 import { PentagonMotif } from "@/components/layout/site-logo";
 import { ButtonLink } from "@/components/ui/button-link";
@@ -10,7 +8,6 @@ import { SectionHeading } from "@/components/ui/section-heading";
 import { SITE } from "@/lib/constants/site";
 import { listUpcomingEvents } from "@/lib/db/events";
 import { listPublishedNews } from "@/lib/db/news";
-import { assetPath } from "@/lib/utils/asset";
 
 export default async function HomePage() {
   const [news, events] = await Promise.all([listPublishedNews(4), listUpcomingEvents(2)]);
@@ -18,9 +15,14 @@ export default async function HomePage() {
   return (
     <>
       {/* ── ヒーロー ───────────────────────────────────────────────── */}
+      {/*
+        ロゴはヘッダーに常時出ているうえ、すぐ下の DISCIPLINES で
+        五角形そのものを大きく使うため、ヒーローには置かない。
+        見出しだけの1段組みにしている。
+      */}
       <section className="relative overflow-hidden bg-navy-800">
-        <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 py-16 sm:py-24 lg:grid-cols-2 lg:gap-16">
-          <div>
+        <div className="mx-auto max-w-6xl px-4 py-20 sm:py-28">
+          <div className="max-w-2xl">
             <p className="eyebrow text-xs text-gold-400">MODERN PENTATHLON</p>
             {/*
               iOS Safari は word-break: auto-phrase に未対応で、折り返しが
@@ -40,20 +42,6 @@ export default async function HomePage() {
               <ButtonLink href="/about" variant="ghost">
                 アカデミーについて
               </ButtonLink>
-            </div>
-          </div>
-
-          <div className="flex justify-center lg:justify-end">
-            {/* ロゴは白背景なので、紺地の上では白い面に載せて見せる */}
-            <div className="rounded-card bg-white p-6 shadow-2xl sm:p-8">
-              <Image
-                src={assetPath("/logo.png")}
-                alt={SITE.nameEn}
-                width={340}
-                height={340}
-                priority
-                className="h-56 w-56 object-contain sm:h-72 sm:w-72"
-              />
             </div>
           </div>
         </div>
