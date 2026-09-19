@@ -13,6 +13,11 @@
  * ロゴを差し替えたときだけ再実行する（生成物はコミットする）。
  * 差し替え後は node scripts/check-wedges.mjs で目視確認すること。
  *
+ * ⚠️ 同じロゴで再実行しても、破片の吸収判定（下の「破片を吸収／除外」）が
+ *    毎回同じ結果になるとは限らない。実際 obstacle は再実行で 3% ほどの
+ *    画素が変わった。ロゴを差し替えていないのに走らせると、公開済みの
+ *    切り出しが理由もなく置き換わるので、必要がなければ実行しないこと。
+ *
  * ── 面の範囲の求め方 ────────────────────────────────────────────────
  * 手で調整した定数は使わず、画像から実際の塗り範囲を求める。
  *
@@ -516,6 +521,7 @@ await mkdir(OUT_ICONS, { recursive: true });
 // 生成の過程では面がこの順に出てこない。
 const DISCIPLINE_ORDER = ["fencing", "obstacle", "swimming", "shooting", "running"];
 const geometryRows = [];
+let starCenter = null; // 中央の星の重心（下の中央素材の切り出しで求める）
 
 for (const a of assigned) {
   const hull = convexHull(a.comp.pixels);
@@ -586,6 +592,139 @@ for (const a of assigned) {
   console.log(`✓ ${a.id}.png / overlay-${a.id}.png (頂点${hull.length}点, 重心 ${gx.toFixed(1)},${gy.toFixed(1)})`);
 }
 
+
+// ── 五角形マークのみ ─────────────────────────────────────────────────
+await sharp(SRC)
+  .extract({
+    left: sqLeft,
+    top: sqTop,
+    width: Math.min(side, W - sqLeft),
+    height: Math.min(side, H - sqTop),
+  })
+  .resize(512, 512, { fit: "contain", background: { r: 255, g: 255, b: 255, alpha: 1 } })
+  .png()
+  .toFile("public/logo-mark.png");
+console.log("✓ logo-mark.png (512x512)");
+
+/*
+ * ── 中央の「P」と星 ─────────────────────────────────────────────────
+ *
+ * ロゴが1枚ずつ組み上がる演出のために、中央の2つも独立した素材にしておく。
+ * 5つの面と同じ 512x512 の座標系に載せてあるので、7枚をそのまま重ねると
+ * logo-mark.png に戻る。
+ *
+ * 切り分けは色ではなく連結した塊で行う。星は金色の面と黒に近い面が
+ * 交互に並ぶので、色で分けると暗い面が「P」側に落ちてしまう。
+ * 「P」と星は画像のうえで離れているため、塊で見れば確実に分かれる。
+ */
+{
+  const mark = await sharp("public/logo-mark.png")
+    .ensureAlpha()
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+  const MW = mark.info.width;
+  const MH = mark.info.height;
+
+  // 5つの面が覆う範囲。フチのアンチエイリアスを飲み込むため少し太らせる。
+  const covered = new Uint8Array(MW * MH);
+  for (const { id } of DIRECTIONS) {
+    const o = await sharp(`${OUT_ICONS}/overlay-${id}.png`).raw().toBuffer({ resolveWithObject: true });
+    for (let i = 0; i < MW * MH; i++) if (o.data[i * 4 + 3] > 8) covered[i] = 1;
+  }
+  const GROW = 4;
+  const grown = new Uint8Array(MW * MH);
+  for (let y = 0; y < MH; y++) {
+    for (let x = 0; x < MW; x++) {
+      if (!covered[y * MW + x]) continue;
+      for (let dy = -GROW; dy <= GROW; dy++) {
+        for (let dx = -GROW; dx <= GROW; dx++) {
+          const ny = y + dy;
+          const nx = x + dx;
+          if (ny < 0 || nx < 0 || ny >= MH || nx >= MW) continue;
+          if (dx * dx + dy * dy <= GROW * GROW) grown[ny * MW + nx] = 1;
+        }
+      }
+    }
+  }
+
+  // 残った非白画素。白からの距離をそのまま不透明度にして輪郭をなめらかに保つ。
+  const alpha = new Uint8Array(MW * MH);
+  for (let i = 0; i < MW * MH; i++) {
+    if (grown[i]) continue;
+    const j = i * 4;
+    const luma = (mark.data[j] + mark.data[j + 1] + mark.data[j + 2]) / 3;
+    if (luma > 246) continue;
+    alpha[i] = Math.round(Math.min(1, (246 - luma) / 26) * 255);
+  }
+
+  // 8近傍で塊に分け、金色を最も多く含む塊を星とする。
+  const label = new Int32Array(MW * MH).fill(-1);
+  const blobs = [];
+  for (let start = 0; start < MW * MH; start++) {
+    if (!alpha[start] || label[start] >= 0) continue;
+    const id = blobs.length;
+    label[start] = id;
+    const stack = [start];
+    let size = 0;
+    let gold = 0;
+    while (stack.length) {
+      const q = stack.pop();
+      size++;
+      const qx = q % MW;
+      const qy = (q / MW) | 0;
+      const j = q * 4;
+      if (mark.data[j] > mark.data[j + 2] + 18) gold++;
+      for (let dy = -1; dy <= 1; dy++) {
+        for (let dx = -1; dx <= 1; dx++) {
+          const nx = qx + dx;
+          const ny = qy + dy;
+          if (nx < 0 || ny < 0 || nx >= MW || ny >= MH) continue;
+          const r = ny * MW + nx;
+          if (alpha[r] && label[r] < 0) {
+            label[r] = id;
+            stack.push(r);
+          }
+        }
+      }
+    }
+    blobs.push({ id, size, gold });
+  }
+  const star = blobs.reduce((a, b) => (b.gold > a.gold ? b : a));
+  // 数画素だけの取りこぼしは捨てる（面のフチの残りなので絵ではない）
+  const pIds = new Set(blobs.filter((b) => b.id !== star.id && b.size >= 12).map((b) => b.id));
+
+  const pBuf = Buffer.alloc(MW * MH * 4, 0);
+  const starBuf = Buffer.alloc(MW * MH * 4, 0);
+  for (let i = 0; i < MW * MH; i++) {
+    if (!alpha[i]) continue;
+    const dst = label[i] === star.id ? starBuf : pIds.has(label[i]) ? pBuf : null;
+    if (!dst) continue;
+    const j = i * 4;
+    dst[j] = mark.data[j];
+    dst[j + 1] = mark.data[j + 1];
+    dst[j + 2] = mark.data[j + 2];
+    dst[j + 3] = alpha[i];
+  }
+  const raw = { width: MW, height: MH, channels: 4 };
+  await sharp(pBuf, { raw }).png().toFile(`${OUT_ICONS}/center-p.png`);
+  await sharp(starBuf, { raw }).png().toFile(`${OUT_ICONS}/center-star.png`);
+  console.log(`✓ center-p.png / center-star.png (P ${blobs.find((b) => pIds.has(b.id)).size}px, 星 ${star.size}px)`);
+
+  // 星の重心。きらめきの光をここから出すので、面の重心と同じ形で書き出す。
+  let sx = 0;
+  let sy = 0;
+  let sw = 0;
+  for (let i = 0; i < MW * MH; i++) {
+    const a = starBuf[i * 4 + 3];
+    if (a <= 24) continue;
+    sx += (i % MW) * a;
+    sy += ((i / MW) | 0) * a;
+    sw += a;
+  }
+  starCenter = { x: (sx / sw / MW) * 100, y: (sy / sw / MH) * 100 };
+}
+
+// 星の重心まで出そろってから書き出す。
 await writeFile(
   "src/lib/constants/logo-geometry.ts",
   `// scripts/prepare-logo.mjs が生成。直接編集しないこと。
@@ -601,23 +740,13 @@ export const LOGO_WEDGES: {
 }[] = [
 ${DISCIPLINE_ORDER.map((id) => geometryRows.find((r) => r.id === id).row).join("\n")}
 ];
+
+// 中央の星の重心。組み上がる演出で、きらめきの光をここから出す。
+export const LOGO_STAR = { x: ${starCenter.x.toFixed(2)}, y: ${starCenter.y.toFixed(2)} };
 `,
   "utf8",
 );
 console.log("✓ src/lib/constants/logo-geometry.ts");
-
-// ── 五角形マークのみ ─────────────────────────────────────────────────
-await sharp(SRC)
-  .extract({
-    left: sqLeft,
-    top: sqTop,
-    width: Math.min(side, W - sqLeft),
-    height: Math.min(side, H - sqTop),
-  })
-  .resize(512, 512, { fit: "contain", background: { r: 255, g: 255, b: 255, alpha: 1 } })
-  .png()
-  .toFile("public/logo-mark.png");
-console.log("✓ logo-mark.png (512x512)");
 
 // ファビコン。src/app/icon.png に置くと Next.js が自動で <link rel="icon"> を出す。
 await sharp("public/logo-mark.png").resize(512, 512).png().toFile("src/app/icon.png");
