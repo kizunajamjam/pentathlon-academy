@@ -521,6 +521,7 @@ await mkdir(OUT_ICONS, { recursive: true });
 // 生成の過程では面がこの順に出てこない。
 const DISCIPLINE_ORDER = ["fencing", "obstacle", "swimming", "shooting", "running"];
 const geometryRows = [];
+let starCenter = null; // 中央の星の重心（下の中央素材の切り出しで求める）
 
 for (const a of assigned) {
   const hull = convexHull(a.comp.pixels);
@@ -591,25 +592,6 @@ for (const a of assigned) {
   console.log(`✓ ${a.id}.png / overlay-${a.id}.png (頂点${hull.length}点, 重心 ${gx.toFixed(1)},${gy.toFixed(1)})`);
 }
 
-await writeFile(
-  "src/lib/constants/logo-geometry.ts",
-  `// scripts/prepare-logo.mjs が生成。直接編集しないこと。
-// logo-mark.png 上での各面の情報（viewBox="0 0 100 100" 基準）。
-//   points   … 塗られている領域の輪郭（凸包）。ホバーの当たり判定に使う
-//   centroid … 塗られている領域の重心。拡大の基点に使う
-import type { DisciplineId } from "@/types";
-
-export const LOGO_WEDGES: {
-  id: DisciplineId;
-  points: string;
-  centroid: { x: number; y: number };
-}[] = [
-${DISCIPLINE_ORDER.map((id) => geometryRows.find((r) => r.id === id).row).join("\n")}
-];
-`,
-  "utf8",
-);
-console.log("✓ src/lib/constants/logo-geometry.ts");
 
 // ── 五角形マークのみ ─────────────────────────────────────────────────
 await sharp(SRC)
@@ -727,7 +709,44 @@ console.log("✓ logo-mark.png (512x512)");
   await sharp(pBuf, { raw }).png().toFile(`${OUT_ICONS}/center-p.png`);
   await sharp(starBuf, { raw }).png().toFile(`${OUT_ICONS}/center-star.png`);
   console.log(`✓ center-p.png / center-star.png (P ${blobs.find((b) => pIds.has(b.id)).size}px, 星 ${star.size}px)`);
+
+  // 星の重心。きらめきの光をここから出すので、面の重心と同じ形で書き出す。
+  let sx = 0;
+  let sy = 0;
+  let sw = 0;
+  for (let i = 0; i < MW * MH; i++) {
+    const a = starBuf[i * 4 + 3];
+    if (a <= 24) continue;
+    sx += (i % MW) * a;
+    sy += ((i / MW) | 0) * a;
+    sw += a;
+  }
+  starCenter = { x: (sx / sw / MW) * 100, y: (sy / sw / MH) * 100 };
 }
+
+// 星の重心まで出そろってから書き出す。
+await writeFile(
+  "src/lib/constants/logo-geometry.ts",
+  `// scripts/prepare-logo.mjs が生成。直接編集しないこと。
+// logo-mark.png 上での各面の情報（viewBox="0 0 100 100" 基準）。
+//   points   … 塗られている領域の輪郭（凸包）。ホバーの当たり判定に使う
+//   centroid … 塗られている領域の重心。拡大の基点に使う
+import type { DisciplineId } from "@/types";
+
+export const LOGO_WEDGES: {
+  id: DisciplineId;
+  points: string;
+  centroid: { x: number; y: number };
+}[] = [
+${DISCIPLINE_ORDER.map((id) => geometryRows.find((r) => r.id === id).row).join("\n")}
+];
+
+// 中央の星の重心。組み上がる演出で、きらめきの光をここから出す。
+export const LOGO_STAR = { x: ${starCenter.x.toFixed(2)}, y: ${starCenter.y.toFixed(2)} };
+`,
+  "utf8",
+);
+console.log("✓ src/lib/constants/logo-geometry.ts");
 
 // ファビコン。src/app/icon.png に置くと Next.js が自動で <link rel="icon"> を出す。
 await sharp("public/logo-mark.png").resize(512, 512).png().toFile("src/app/icon.png");

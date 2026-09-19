@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -8,6 +8,13 @@ import { ArrowRight } from "lucide-react";
 
 import { LOGO_WEDGES } from "@/lib/constants/logo-geometry";
 import { DISCIPLINES, SITE } from "@/lib/constants/site";
+import {
+  ASSEMBLED,
+  ASSEMBLY_TOTAL,
+  LOGO_STAR,
+  assemblyFrame,
+  type AssemblyFrame,
+} from "@/lib/logo-assembly";
 import { assetPath } from "@/lib/utils/asset";
 import type { DisciplineId } from "@/types";
 
@@ -19,30 +26,217 @@ import type { DisciplineId } from "@/types";
  * 各面にホバー（スマホはタップ）すると他の面が白く沈んで
  * その競技だけが浮かび上がるようにしている。
  *
- * ホバー領域の座標は scripts/prepare-logo.mjs が logo-geometry.ts に
+ * ロゴは1枚絵ではなく、面5枚＋星＋P の7枚を重ねて組み立てている。
+ * スクロールしてこのセクションに入ってくるあいだに、その7枚が順に
+ * 寄ってきて組み上がる（動きの計算は lib/logo-assembly.ts）。
+ * 素材の切り出しとホバー領域の座標は scripts/prepare-logo.mjs が
  * 書き出すので、ロゴを差し替えても手で直す必要はない。
  *
  * SVG はマウス操作の補助なので aria-hidden にし、
  * キーボードとスクリーンリーダー向けには下のボタン列で同じ操作を提供する。
  */
+
+// きらめきの放射線。長い線と短い線を交互に12本。
+const RAYS = Array.from({ length: 12 }, (_, i) => {
+  const angle = (i * Math.PI) / 6;
+  const long = i % 3 === 0;
+  return {
+    x1: LOGO_STAR.x + Math.cos(angle) * 1.2,
+    y1: LOGO_STAR.y + Math.sin(angle) * 1.2,
+    x2: LOGO_STAR.x + Math.cos(angle) * (long ? 17 : 7.5),
+    y2: LOGO_STAR.y + Math.sin(angle) * (long ? 17 : 7.5),
+    width: long ? 0.75 : 0.35,
+  };
+});
+
+const clamp01 = (v: number) => (v < 0 ? 0 : v > 1 ? 1 : v);
+
 export function DisciplineExplorer() {
   const router = useRouter();
   const [active, setActive] = useState<DisciplineId | null>(null);
+  // 組み上がる前はホバーを受けない。飛んでいる最中の面を掴めても意味がないため。
+  const [assembled, setAssembled] = useState(true);
 
   const current = DISCIPLINES.find((d) => d.id === active) ?? null;
   const currentIndex = DISCIPLINES.findIndex((d) => d.id === active);
   const activeWedge = LOGO_WEDGES.find((w) => w.id === active) ?? null;
 
+  const stageRef = useRef<HTMLDivElement>(null);
+  const pieceRefs = useRef<Partial<Record<DisciplineId, HTMLImageElement | null>>>({});
+  const starRef = useRef<HTMLImageElement>(null);
+  const markRef = useRef<HTMLImageElement>(null);
+  const haloRef = useRef<SVGCircleElement>(null);
+  const raysRef = useRef<SVGGElement>(null);
+
+  useEffect(() => {
+    const stage = stageRef.current;
+    if (!stage) return;
+
+    const apply = (f: AssemblyFrame) => {
+      for (const wedge of LOGO_WEDGES) {
+        const el = pieceRefs.current[wedge.id];
+        if (!el) continue;
+        const s = f.pieces[wedge.id];
+        el.style.opacity = String(s.opacity);
+        el.style.transform = `translate(${s.dx}%, ${s.dy}%) scale(${s.scale})`;
+      }
+      if (starRef.current) {
+        starRef.current.style.opacity = String(f.star.opacity);
+        starRef.current.style.transformOrigin = `${LOGO_STAR.x}% ${LOGO_STAR.y}%`;
+        starRef.current.style.transform = `scale(${f.star.scale}) rotate(${f.star.rotate}deg)`;
+        starRef.current.style.filter = `brightness(${f.star.brightness})`;
+      }
+      if (markRef.current) {
+        markRef.current.style.opacity = String(f.p.opacity);
+        markRef.current.style.transformOrigin = "50% 55%";
+        markRef.current.style.transform = `translateY(${f.p.translateY}%) scale(${f.p.scale})`;
+      }
+      if (haloRef.current) {
+        haloRef.current.setAttribute("opacity", Math.min(1, f.sparkle.strength * 0.7).toFixed(3));
+        haloRef.current.setAttribute("r", f.sparkle.haloRadius.toFixed(2));
+      }
+      if (raysRef.current) {
+        raysRef.current.setAttribute("opacity", Math.min(1, f.sparkle.strength * 0.95).toFixed(3));
+        raysRef.current.setAttribute(
+          "transform",
+          `translate(${LOGO_STAR.x} ${LOGO_STAR.y}) rotate(${f.sparkle.raysRotate}) ` +
+            `scale(${f.sparkle.raysScale}) translate(${-LOGO_STAR.x} ${-LOGO_STAR.y})`,
+        );
+      }
+    };
+
+    /*
+     * どこまで組み上がっているか（0〜1）。
+     *
+     * 上端ではなく中心で測る。上端を基準にすると、ロゴが画面の下に
+     * 少し覗いただけで「開始済み」になってしまい、ページを開いた時点で
+     * 途中から始まってしまうため。
+     */
+    const progressNow = () => {
+      const rect = stage.getBoundingClientRect();
+      const vh = window.innerHeight;
+      const center = rect.top + rect.height / 2;
+      const start = vh * 1.05; // 中心がここより下なら、まだ始まっていない
+      const end = vh * 0.55; // ここまで上がったら組み上がり
+      return clamp01((start - center) / (start - end));
+    };
+
+    // 動きを減らす設定の人には、完成した姿のまま出す。
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    // 読み込んだ時点で既に始まっている位置なら、組み上げ直さない。
+    // 完成形からいきなり途中へ飛ぶと、ちらついて見えるため。
+    if (progressNow() > 0.02) return;
+
+    setAssembled(false);
+    apply(assemblyFrame(0));
+
+    let queued = false;
+    let done = false;
+
+    const update = () => {
+      queued = false;
+      const progress = progressNow();
+      apply(assemblyFrame(progress * ASSEMBLY_TOTAL));
+      if (progress >= 1) {
+        done = true;
+        setAssembled(true);
+      }
+    };
+
+    const onScroll = () => {
+      if (done || queued) return;
+      queued = true;
+      requestAnimationFrame(update);
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
+  }, []);
+
   return (
     <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
-      <div className="relative mx-auto w-full max-w-xs sm:max-w-sm lg:max-w-md">
+      <div
+        ref={stageRef}
+        className="relative mx-auto aspect-square w-full max-w-xs sm:max-w-sm lg:max-w-md"
+      >
+        {/*
+          ロゴ本体。7枚を重ねて1枚のロゴになる。
+          style に初期値を置いているのは、JavaScript が動く前や
+          動きを減らす設定のときに、完成した姿で出したいため。
+        */}
+        {LOGO_WEDGES.map((wedge) => (
+          <Image
+            key={wedge.id}
+            ref={(el) => {
+              pieceRefs.current[wedge.id] = el;
+            }}
+            src={assetPath(`/icons/overlay-${wedge.id}.png`)}
+            alt=""
+            width={512}
+            height={512}
+            priority
+            className="absolute inset-0 h-full w-full"
+            style={{ opacity: ASSEMBLED.pieces[wedge.id].opacity }}
+          />
+        ))}
         <Image
-          src={assetPath("/logo-mark.png")}
+          ref={starRef}
+          src={assetPath("/icons/center-star.png")}
+          alt=""
+          width={512}
+          height={512}
+          className="absolute inset-0 h-full w-full"
+          style={{ opacity: ASSEMBLED.star.opacity }}
+        />
+        <Image
+          ref={markRef}
+          src={assetPath("/icons/center-p.png")}
           alt={SITE.nameEn}
           width={512}
           height={512}
-          className="w-full"
+          className="absolute inset-0 h-full w-full"
+          style={{ opacity: ASSEMBLED.p.opacity }}
         />
+
+        {/* 星のきらめき。組み上がったあとは透明のまま残る。 */}
+        <svg
+          viewBox="0 0 100 100"
+          className="pointer-events-none absolute inset-0 h-full w-full overflow-visible"
+          aria-hidden="true"
+        >
+          <defs>
+            <radialGradient id="logo-halo">
+              <stop offset="0%" stopColor="#fff7e0" stopOpacity="1" />
+              <stop offset="45%" stopColor="#f0d89a" stopOpacity="0.55" />
+              <stop offset="100%" stopColor="#e8c97a" stopOpacity="0" />
+            </radialGradient>
+          </defs>
+          <circle
+            ref={haloRef}
+            cx={LOGO_STAR.x}
+            cy={LOGO_STAR.y}
+            r={3}
+            fill="url(#logo-halo)"
+            opacity={0}
+          />
+          <g ref={raysRef} stroke="#fdf3d4" strokeLinecap="round" opacity={0}>
+            {RAYS.map((ray, i) => (
+              <line
+                key={i}
+                x1={ray.x1}
+                y1={ray.y1}
+                x2={ray.x2}
+                y2={ray.y2}
+                strokeWidth={ray.width}
+              />
+            ))}
+          </g>
+        </svg>
 
         {/*
           ホバーした面だけをその場で少し大きく見せる。
@@ -84,7 +278,7 @@ export function DisciplineExplorer() {
         {/* 当たり判定。上の層はクリックを透過させ、ここだけで受ける。 */}
         <svg
           viewBox="0 0 100 100"
-          className="absolute inset-0 h-full w-full"
+          className={`absolute inset-0 h-full w-full ${assembled ? "" : "pointer-events-none"}`}
           aria-hidden="true"
           onMouseLeave={() => setActive(null)}
         >
