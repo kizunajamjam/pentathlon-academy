@@ -50,11 +50,13 @@ const RAYS = Array.from({ length: 12 }, (_, i) => {
 });
 
 /*
- * ロゴのどれだけが画面に入ったら動き出すか。
- * 半分より少し多めにしているのは、下端に覗いた時点ではなく、
- * ロゴがはっきり見える位置まで送ってから動かしたいため。
+ * 動き出す位置。ロゴの中心が、画面の高さのこの割合まで上がってきたら始める。
+ *
+ * 「どれだけ見えたか」で測っていたときは、下端に覗いた程度で動き出して
+ * しまった。中心の位置で測ると、ロゴが画面の中ほどまで来てから動き出す。
+ * 小さくするほど引きつけてから動く。
  */
-const TRIGGER_RATIO = 0.6;
+const TRIGGER_LINE = 0.6;
 
 export function DisciplineExplorer() {
   const router = useRouter();
@@ -110,20 +112,21 @@ export function DisciplineExplorer() {
       }
     };
 
-    /** いま画面に見えている割合（0〜1）。 */
-    const visibleRatio = () => {
+    /** ロゴの中心が、動き出す位置まで上がってきたか。 */
+    const reachedTriggerLine = () => {
       const rect = stage.getBoundingClientRect();
-      const vh = window.innerHeight;
-      const shown = Math.min(vh, rect.bottom) - Math.max(0, rect.top);
-      return rect.height > 0 ? Math.max(0, Math.min(1, shown / rect.height)) : 0;
+      return rect.top + rect.height / 2 <= window.innerHeight * TRIGGER_LINE;
     };
+
+    /** 動き出す前に、上へ通り過ぎてしまったか。 */
+    const scrolledPast = () => stage.getBoundingClientRect().bottom < 0;
 
     // 動きを減らす設定の人には、完成した姿のまま出す。
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-    // 読み込んだ時点でロゴを見ている位置にいるなら、組み上げ直さない。
+    // 読み込んだ時点で既に動き出す位置にいるなら、組み上げ直さない。
     // 完成形からいきなり最初へ戻ると、ちらついて見えるため。
-    if (visibleRatio() > TRIGGER_RATIO) return;
+    if (reachedTriggerLine()) return;
 
     setAssembled(false);
     apply(assemblyFrame(0));
@@ -153,27 +156,37 @@ export function DisciplineExplorer() {
       setAssembled(true);
     };
 
-    const observer = new IntersectionObserver(
-      ([entry]) => {
+    let queued = false;
+
+    const detach = () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
+
+    const check = () => {
+      queued = false;
+      if (reachedTriggerLine()) {
+        detach();
+        raf = requestAnimationFrame(step);
+      } else if (scrolledPast()) {
         // 動き出す前に通り過ぎてしまったら、完成した姿にして終わりにする。
         // 空っぽのロゴが置き去りになるのを避ける。
-        if (!entry.isIntersecting) {
-          if (entry.boundingClientRect.bottom < 0) {
-            observer.disconnect();
-            snapToEnd();
-          }
-          return;
-        }
-        if (entry.intersectionRatio < TRIGGER_RATIO) return;
-        observer.disconnect();
-        raf = requestAnimationFrame(step);
-      },
-      { threshold: [0, TRIGGER_RATIO] },
-    );
-    observer.observe(stage);
+        detach();
+        snapToEnd();
+      }
+    };
+
+    function onScroll() {
+      if (queued) return;
+      queued = true;
+      requestAnimationFrame(check);
+    }
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
 
     return () => {
-      observer.disconnect();
+      detach();
       cancelAnimationFrame(raf);
     };
   }, []);
