@@ -66,6 +66,33 @@ const SCROLL_SPAN_VH = 120;
  */
 const LEAD_IN = 0.35;
 
+/*
+ * 一度組み上がりを見たかどうかの覚え書き。
+ *
+ * 見るのは最初の1回でよい、というオーナーの指示による。同じ訪問のあいだは
+ * 組み上げ直さず、区間も畳んで、完成した姿をそのまま出す。
+ * sessionStorage なのでタブを閉じれば忘れる。localStorage にすると
+ * 端末を変えるまで二度と見られなくなるため、そこまでは覚えさせない。
+ */
+const SEEN_KEY = "pa-logo-assembled";
+
+const hasSeen = () => {
+  try {
+    return sessionStorage.getItem(SEEN_KEY) === "1";
+  } catch {
+    // プライベートブラウズなどで読めないことがある。その場合は毎回見せる。
+    return false;
+  }
+};
+
+const rememberSeen = () => {
+  try {
+    sessionStorage.setItem(SEEN_KEY, "1");
+  } catch {
+    // 覚えられなくても動きに支障はない
+  }
+};
+
 export function DisciplineExplorer() {
   const router = useRouter();
   const [active, setActive] = useState<DisciplineId | null>(null);
@@ -143,8 +170,16 @@ export function DisciplineExplorer() {
       return span > 0 ? Math.max(0, Math.min(1, (lead - rect.top) / span)) : 1;
     };
 
-    // 動きを減らす設定の人には、完成した姿のまま出す。
+    // 動きを減らす設定の人には、完成した姿のまま出す（区間は CSS 側で畳まれる）。
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    // この訪問で既に見ていれば、もう繰り返さない。区間ごと畳んで、
+    // 長いスクロールを求めないようにする。畳むのは読み込み直後なので、
+    // ページの高さが変わっても見た目は飛ばない。
+    if (hasSeen()) {
+      track.dataset.skip = "";
+      return;
+    }
 
     // 読み込んだ時点で既に区間へ入っているなら、組み上げ直さない。
     // 完成形からいきなり途中へ飛ぶと、ちらついて見えるため。
@@ -166,22 +201,30 @@ export function DisciplineExplorer() {
         wasAssembled = done;
         setAssembled(done);
       }
+      if (done) {
+        // 一度組み上がったら、そこで見るのをやめる。
+        // 戻ってもばらけないし、二度目は最初から完成した姿になる。
+        rememberSeen();
+        detach();
+      }
     };
 
-    const onScroll = () => {
+    function onScroll() {
       if (queued) return;
       queued = true;
       requestAnimationFrame(update);
-    };
+    }
+
+    function detach() {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    }
 
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", onScroll);
     update();
 
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
-    };
+    return detach;
   }, []);
 
   return (
@@ -196,14 +239,14 @@ export function DisciplineExplorer() {
     */
     <div
       ref={trackRef}
-      className="relative h-[calc(100svh+var(--logo-span))] motion-reduce:h-auto"
+      className="group relative h-[calc(100svh+var(--logo-span))] data-[skip]:h-auto motion-reduce:h-auto"
       style={{ "--logo-span": `${SCROLL_SPAN_VH}vh` } as CSSProperties}
     >
       {/*
         ヘッダーは画面の上に貼りついたままなので、その下に留める。
         top-0 にすると、画面の低い端末でロゴの上部がヘッダーに隠れる。
       */}
-      <div className="sticky top-16 flex h-[calc(100svh-4rem)] items-center motion-reduce:static motion-reduce:h-auto lg:top-20 lg:h-[calc(100svh-5rem)]">
+      <div className="sticky top-16 flex h-[calc(100svh-4rem)] items-center group-data-[skip]:static group-data-[skip]:h-auto motion-reduce:static motion-reduce:h-auto lg:top-20 lg:h-[calc(100svh-5rem)]">
         <div className="grid w-full items-center gap-8 lg:grid-cols-2 lg:gap-16">
           <div className="relative mx-auto aspect-square w-full max-w-[min(20rem,36svh)] sm:max-w-sm lg:max-w-md">
             {/*
