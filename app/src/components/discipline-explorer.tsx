@@ -155,18 +155,28 @@ export function DisciplineExplorer() {
       }
     };
 
+    // 実際に貼りつく箱。ピンが外れる位置をここから測る。
+    const pane = track.firstElementChild as HTMLElement | null;
+
     /*
      * 区間のどこまで進んだか（0〜1）。
      *
      * 区間の上端が画面の上端に届くとロゴは留まりはじめ、そこから
      * 区間を抜けるまでのスクロール量が、そのまま組み上がり具合になる。
      * 留まっているあいだは画面から出ていかないので、通り過ぎようがない。
+     *
+     * 終わりは「ピンが外れる瞬間」に合わせる。画面の高さで代用すると、
+     * スマホのツールバーの開閉で 100svh と innerHeight がずれ、組み上がった
+     * あとも少しのあいだ貼りついたままになる（＝スクロールが引っかかる）。
      */
     const progressNow = () => {
       const rect = track.getBoundingClientRect();
-      const vh = window.innerHeight;
-      const lead = vh * LEAD_IN;
-      const span = track.offsetHeight - vh + lead;
+      const lead = window.innerHeight * LEAD_IN;
+      // ピンが外れるのは、区間の下端が「貼りつく位置＋箱の高さ」に追いついたとき
+      const release = pane
+        ? (parseFloat(getComputedStyle(pane).top) || 0) + pane.offsetHeight
+        : window.innerHeight;
+      const span = track.offsetHeight - release + lead;
       return span > 0 ? Math.max(0, Math.min(1, (lead - rect.top) / span)) : 1;
     };
 

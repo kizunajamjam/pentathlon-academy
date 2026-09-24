@@ -13,9 +13,6 @@ import type { DisciplineId } from "@/types";
  * 画面上を飛び回る動きになるため、ここでは見た目の流れを優先している。
  */
 
-/** 最初の面が動き出してから P が出そろうまで（秒）。 */
-export const ASSEMBLY_TOTAL = 5.6;
-
 /** 各面が入りはじめる時刻（秒）。 */
 const ENTER: Record<DisciplineId, number> = {
   running: 0,
@@ -34,6 +31,20 @@ const TWINKLE_SPAN = 1.5;
 
 const P_AT = 3.7;
 const P_DURATION = 1;
+
+/*
+ * 最初の面が動き出してから、最後の素材が収まりきるまで（秒）。
+ *
+ * 固定値にしていたときは、実際に動きが終わる時刻より 0.9 秒ぶん長かった。
+ * スクロールに割り当てると、その分だけ「完成したロゴが貼りついたまま
+ * 何も起きない」区間になり、スクロールが引っかかって感じられた。
+ * 進行表から求めれば、ずれようがない。
+ */
+export const ASSEMBLY_TOTAL = Math.max(
+  ...Object.values(ENTER).map((t) => t + ENTER_DURATION),
+  STAR_AT + Math.max(STAR_DURATION, TWINKLE_SPAN),
+  P_AT + P_DURATION,
+);
 
 /** 面が待機する位置。重心から外へどれだけ離すか（中心からの距離に対する割合）。 */
 const OFFSET = 0.34;
