@@ -59,7 +59,7 @@ export function SiteFooter() {
           </nav>
         </div>
 
-        <div className="mt-12 flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-navy-700 pt-6 text-xs text-navy-400">
+        <div className="mt-12 flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-navy-700 pt-6 text-xs text-navy-300">
           <p>
             © {new Date().getFullYear()} {SITE.name}
           </p>

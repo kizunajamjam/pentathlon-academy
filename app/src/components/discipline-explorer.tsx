@@ -404,7 +404,7 @@ export function DisciplineExplorer() {
             <div className="lg:min-h-[15rem]">
               {current ? (
                 <>
-                  <p className="eyebrow text-xs text-gold-600">
+                  <p className="eyebrow text-xs text-gold-700">
                     {String(currentIndex + 1).padStart(2, "0")} /{" "}
                     {current.nameEn}
                   </p>
@@ -429,7 +429,7 @@ export function DisciplineExplorer() {
                     近代五種は、性質のまったく違う5つの競技を1人の選手がすべて行い、
                     総合力で順位を決める競技です。ロゴの5つの面が、その5種目にあたります。
                   </p>
-                  <p className="mt-4 hidden text-xs text-navy-400 lg:block">
+                  <p className="mt-4 hidden text-xs text-muted lg:block">
                     ロゴの各面にカーソルを合わせると、競技の説明が表示されます。
                   </p>
                 </>

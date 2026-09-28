@@ -51,7 +51,7 @@ export default async function HomePage() {
       <section className="bg-white py-16 sm:py-24">
         <div className="mx-auto max-w-6xl px-4">
           <div className="text-center">
-            <p className="eyebrow text-xs text-gold-600">DISCIPLINES</p>
+            <p className="eyebrow text-xs text-gold-700">DISCIPLINES</p>
             <h2 className="mt-3 text-2xl text-navy-800 sm:text-3xl">近代五種という競技</h2>
             <span className="mx-auto mt-4 block h-0.5 w-12 bg-gold-500" />
           </div>

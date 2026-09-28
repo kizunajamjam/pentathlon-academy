@@ -14,7 +14,7 @@ export function SectionHeading({
 }) {
   return (
     <div className={align === "center" ? "text-center" : ""}>
-      <p className={`eyebrow text-xs ${tone === "light" ? "text-gold-400" : "text-gold-600"}`}>
+      <p className={`eyebrow text-xs ${tone === "light" ? "text-gold-400" : "text-gold-700"}`}>
         {eyebrow}
       </p>
       {/*
