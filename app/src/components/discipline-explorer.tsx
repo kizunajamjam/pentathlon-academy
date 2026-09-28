@@ -225,7 +225,49 @@ export function DisciplineExplorer() {
         // 戻ってもばらけないし、二度目は最初から完成した姿になる。
         rememberSeen();
         detach();
+        watchToCollapse();
       }
+    };
+
+    /*
+     * 組み上がったあと、区間を畳んで貼りつきをやめる。
+     *
+     * 畳まないままだと、戻ってもう一度通るときに、完成したロゴのまま
+     * 画面1.2個ぶん貼りつき続け、スクロールがそこで停滞する。
+     *
+     * 畳むのは区間が画面から完全に外れてから。見えていないあいだに
+     * 変えるので、ロゴが飛んだり縮んだりして見えることがない。
+     * 区間が画面より上にあるときは、畳んだ分だけページが詰まって
+     * 見ている位置がずれるので、同じだけスクロールを戻して打ち消す。
+     */
+    const watchToCollapse = () => {
+      let pending = false;
+
+      const tryCollapse = () => {
+        pending = false;
+        const rect = track.getBoundingClientRect();
+        const above = rect.bottom <= 0;
+        const below = rect.top >= window.innerHeight;
+        if (!above && !below) return;
+
+        const before = track.offsetHeight;
+        track.dataset.skip = "";
+        const shrank = before - track.offsetHeight;
+        if (above && shrank > 0) window.scrollTo(0, window.scrollY - shrank);
+
+        window.removeEventListener("scroll", onIdle);
+        window.removeEventListener("resize", onIdle);
+      };
+
+      const onIdle = () => {
+        if (pending) return;
+        pending = true;
+        requestAnimationFrame(tryCollapse);
+      };
+
+      window.addEventListener("scroll", onIdle, { passive: true });
+      window.addEventListener("resize", onIdle);
+      tryCollapse();
     };
 
     function onScroll() {
