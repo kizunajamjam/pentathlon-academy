@@ -45,7 +45,7 @@ export default function TermsPage() {
                           className="grid gap-2 text-sm leading-relaxed text-navy-700 sm:grid-cols-[1.5rem_1fr] sm:gap-3"
                         >
                           {paragraphCount > 1 && (
-                            <span className="font-display text-sm font-bold text-gold-600">
+                            <span className="font-display text-sm font-bold text-gold-700">
                               {++paragraphNo}
                             </span>
                           )}

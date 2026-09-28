@@ -207,7 +207,10 @@ export const DISCIPLINES: {
       "距離感をつくる練習",
       "1分間の総当たり形式の実戦",
     ],
-    text: "text-gold-600",
+    // 文字色だけ一段濃くしている。gold-600 は白地で 3.66:1 しかなく、
+    // 競技の説明文やスケジュールの種目名が読みにくかった（要 4.5:1）。
+    // 丸や面に使う gold-500 は図形なので、そのままでよい。
+    text: "text-gold-700",
     bg: "bg-gold-50",
     border: "border-gold-200",
     chip: "bg-gold-500",

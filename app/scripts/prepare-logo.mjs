@@ -748,9 +748,23 @@ export const LOGO_STAR = { x: ${starCenter.x.toFixed(2)}, y: ${starCenter.y.toFi
 );
 console.log("✓ src/lib/constants/logo-geometry.ts");
 
-// ファビコン。src/app/icon.png に置くと Next.js が自動で <link rel="icon"> を出す。
-await sharp("public/logo-mark.png").resize(512, 512).png().toFile("src/app/icon.png");
-console.log("✓ src/app/icon.png (512x512)");
+/*
+ * ファビコン。src/app/icon.png に置くと Next.js が自動で <link rel="icon"> を出す。
+ *
+ * 512px のままだと 272KB あり、全ページで毎回読み込まれていた。タブに出るのは
+ * せいぜい 32px なので 96px で足りる（パレット化して 6KB）。
+ * ホーム画面に追加したときの大きいアイコンは apple-icon.png が受け持つ。
+ * こちらは iOS が必要になったときだけ取りにくるので、毎回の負担にならない。
+ */
+const icon = (size, file) =>
+  sharp("public/logo-mark.png")
+    .resize(size, size)
+    .png({ compressionLevel: 9, palette: true })
+    .toFile(file);
+
+await icon(96, "src/app/icon.png");
+await icon(180, "src/app/apple-icon.png");
+console.log("✓ src/app/icon.png (96x96) / apple-icon.png (180x180)");
 
 // ── OGP画像 ─────────────────────────────────────────────────────────
 await sharp(SRC)

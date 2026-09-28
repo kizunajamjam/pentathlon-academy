@@ -21,7 +21,7 @@ export function PhotoSlot({
 }) {
   return (
     <div
-      className={`flex flex-col items-center justify-center gap-2 rounded-card border-2 border-dashed border-navy-200 bg-navy-50 text-navy-400 ${ratio} ${className}`}
+      className={`flex flex-col items-center justify-center gap-2 rounded-card border-2 border-dashed border-navy-200 bg-navy-50 text-muted ${ratio} ${className}`}
     >
       <ImageIcon size={28} strokeWidth={1.5} />
       <span className="px-4 text-center text-xs leading-relaxed">{label}</span>

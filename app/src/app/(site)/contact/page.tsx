@@ -32,7 +32,7 @@ export default function ContactPage() {
 
           <aside className="lg:pt-4">
             <div className="rounded-card border border-border bg-surface p-7">
-              <p className="eyebrow text-[10px] text-gold-600">DIRECT</p>
+              <p className="eyebrow text-[10px] text-gold-700">DIRECT</p>
               <h2 className="mt-3 text-lg text-navy-800">
                 {SITE.tel ? "お電話・メールでも" : "メールでも"}
               </h2>

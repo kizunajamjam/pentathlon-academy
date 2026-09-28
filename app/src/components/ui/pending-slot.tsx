@@ -13,8 +13,8 @@ import { Hourglass } from "lucide-react";
 export function PendingSlot({ label }: { label: string }) {
   return (
     <div className="flex flex-col items-center gap-2.5 rounded-card border-2 border-dashed border-navy-200 bg-navy-50 px-6 py-12 text-center">
-      <Hourglass size={24} strokeWidth={1.5} className="text-navy-400" />
-      <p className="max-w-md text-sm leading-relaxed text-navy-400">{label}</p>
+      <Hourglass size={24} strokeWidth={1.5} className="text-muted" />
+      <p className="max-w-md text-sm leading-relaxed text-muted">{label}</p>
     </div>
   );
 }
