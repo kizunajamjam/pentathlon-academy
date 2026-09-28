@@ -13,10 +13,18 @@ type Props = { params: Promise<{ id: string }> };
  * 静的書き出し（GitHub Pages）では、生成する詳細ページの一覧が必要になる。
  * 通常のビルドでも公開済みのお知らせが事前生成されるだけで、
  * 新しく追加されたものはリクエスト時に生成されるため支障はない。
+ *
+ * お知らせが1件も無いときでも、空の配列は返せない。Next.js は
+ * generateStaticParams が最低1件返すことを求めており、空だと
+ * 静的書き出しがビルドごと失敗する（empty-generate-static-params）。
+ * どこからもリンクしない id をひとつ返して逃がす。開いても 404 に
+ * なるだけで、一覧にも sitemap にも出ない。
  */
+const NO_NEWS_ID = "none";
+
 export async function generateStaticParams() {
   const news = await listPublishedNews();
-  return news.map((n) => ({ id: n.id }));
+  return news.length > 0 ? news.map((n) => ({ id: n.id })) : [{ id: NO_NEWS_ID }];
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
