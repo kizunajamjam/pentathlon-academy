@@ -200,10 +200,19 @@ export function DisciplineExplorer() {
 
     let queued = false;
     let wasAssembled = false;
+    /*
+     * ここまで進んだ、という印。進み具合はここから戻さない。
+     *
+     * スクロール位置をそのまま使うと、組み上がりきる前に上へ戻したときに
+     * 巻き戻り、入ったはずの面がまた小さくなって外へ散っていく。
+     * 組み上がるのは最初の1回でよいので、前へ進むだけにする。
+     */
+    let peak = 0;
 
     const update = () => {
       queued = false;
-      const progress = progressNow();
+      const progress = Math.max(peak, progressNow());
+      peak = progress;
       apply(assemblyFrame(progress * ASSEMBLY_TOTAL));
       // 組み上がってはじめて、面にふれられるようにする
       const done = progress >= 1;
