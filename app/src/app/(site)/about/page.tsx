@@ -20,8 +20,8 @@ export const metadata: Metadata = {
 // ⚠️ 仮テキスト。正式な理念・実績が決まり次第この配列を差し替える。
 //
 // 「競技よりも先に、人間力向上を」を先頭に置くのはオーナー指定。
-// EQ測定の具体的な方法（使う検査・頻度）は未受領なので、本文は
-// 「取り入れている」ことだけに留めている。
+// EQ測定は具体的な検査名・頻度を決めていないため（オーナー確認済み）、
+// 本文は「取り入れている」ことだけに留めている。
 const POLICIES = [
   {
     icon: HeartHandshake,
@@ -179,7 +179,7 @@ export default function AboutPage() {
       {/*
         種目ごとに小見出しとアンカー（#standards-<種目id>）を持たせ、
         競技紹介ページの「〇〇経験者向けの強化選手標準記録を見る」から直接飛べるようにする。
-        数値が未受領の種目は STANDARDS が null で、準備中の枠を出す。
+        記録の数値を設けていない種目は STANDARDS が null で、個別に相談する旨の文章を出す。
       */}
       <section id="standards" className="scroll-mt-20 bg-surface py-16 sm:py-24">
         <div className="mx-auto max-w-6xl px-4">
@@ -201,7 +201,10 @@ export default function AboutPage() {
                     {standard ? (
                       <Standards standard={standard} />
                     ) : (
-                      <PendingSlot label={`${d.name}の標準記録は準備中です。`} />
+                      <p className="rounded-card border border-border bg-white px-5 py-4 text-sm leading-relaxed text-navy-700 sm:px-6">
+                        {d.name}
+                        の経験がある方は、これまでの競技歴や大会成績をもとに、個別にご相談させていただきます。
+                      </p>
                     )}
                   </div>
                 </div>
