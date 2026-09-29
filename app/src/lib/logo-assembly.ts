@@ -118,3 +118,9 @@ export function assemblyFrame(t: number): AssemblyFrame {
 export const ASSEMBLED = assemblyFrame(ASSEMBLY_TOTAL);
 
 export { LOGO_STAR };
+
+/**
+ * 組み上がりをこの訪問で見終えたことを覚えておく sessionStorage のキー。
+ * discipline-explorer.tsx と、layout.tsx の先読みスクリプトの両方が使う。
+ */
+export const LOGO_SEEN_KEY = "pa-logo-assembled";

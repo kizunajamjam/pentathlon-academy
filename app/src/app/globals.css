@@ -123,3 +123,16 @@
     clip-path: polygon(50% 0%, 100% 38%, 81% 100%, 19% 100%, 0% 38%);
   }
 }
+
+/*
+ * トップページのロゴの区間を、最初の描画から畳んだ姿にする。
+ * 印は layout.tsx の先読みスクリプトと discipline-explorer.tsx が付ける。
+ * レイヤーの外に置いているので、sticky や高さのユーティリティより優先される。
+ */
+html[data-logo-seen] [data-logo-track] {
+  height: auto;
+}
+html[data-logo-seen] [data-logo-pane] {
+  position: static;
+  height: auto;
+}
