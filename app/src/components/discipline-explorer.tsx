@@ -11,6 +11,7 @@ import { DISCIPLINES, SITE } from "@/lib/constants/site";
 import {
   ASSEMBLED,
   ASSEMBLY_TOTAL,
+  LOGO_SEEN_KEY,
   LOGO_STAR,
   assemblyFrame,
   type AssemblyFrame,
@@ -74,7 +75,15 @@ const LEAD_IN = 0.35;
  * sessionStorage なのでタブを閉じれば忘れる。localStorage にすると
  * 端末を変えるまで二度と見られなくなるため、そこまでは覚えさせない。
  */
-const SEEN_KEY = "pa-logo-assembled";
+// 印の名前は layout.tsx の先読みスクリプトと共有するため lib 側に置いている
+const SEEN_KEY = LOGO_SEEN_KEY;
+
+/*
+ * スクロールがこの時間（ミリ秒）途切れたら、止まったとみなす。
+ * iPhone の慣性スクロール中もスクロールイベントは出続けるので、
+ * これで慣性が収まるまで待てる。
+ */
+const IDLE_MS = 200;
 
 const hasSeen = () => {
   try {
@@ -92,6 +101,20 @@ const rememberSeen = () => {
     // 覚えられなくても動きに支障はない
   }
 };
+
+/*
+ * 畳んだ状態を <html> にも印として残す。
+ *
+ * 同じ訪問のなかで別のページへ行って「戻る」と、このコンポーネントは
+ * 作り直される。印が無いと、いったん長い区間のまま描かれてブラウザが
+ * スクロール位置を戻し、そのあとで畳まれるので、戻った先が画面1つ以上
+ * ずれていた。印があれば globals.css が最初の描画から畳んだ姿にする。
+ * 再読み込みのときは layout.tsx の先読みスクリプトが同じ印を付ける。
+ */
+const markCollapsed = () => {
+  document.documentElement.dataset.logoSeen = "";
+};
+
 
 export function DisciplineExplorer() {
   const router = useRouter();
@@ -188,12 +211,58 @@ export function DisciplineExplorer() {
     // ページの高さが変わっても見た目は飛ばない。
     if (hasSeen()) {
       track.dataset.skip = "";
+      markCollapsed();
       return;
     }
 
-    // 読み込んだ時点で既に区間へ入っているなら、組み上げ直さない。
-    // 完成形からいきなり途中へ飛ぶと、ちらついて見えるため。
-    if (progressNow() > 0.02) return;
+    /*
+     * 区間を畳んで、貼りつきをやめる。
+     *
+     * 区間が画面より上にあるときは、畳んだ分だけページが詰まって
+     * 見ている位置がずれるので、同じだけスクロールを戻して打ち消す。
+     * 画面にかかっているときは、見えているロゴの位置を保つ。
+     */
+    const collapse = () => {
+      if (track.hasAttribute("data-skip")) return;
+      const content = pane?.firstElementChild as HTMLElement | null | undefined;
+      // 保ちたい位置の目印。区間より下の内容を見ているならその先頭、
+      // ロゴが見えているならロゴ。どちらを使うかは畳む前に決めておく
+      // （畳んだあとに判定し直すと、目印が入れ替わって大きくずれる）。
+      const above = track.getBoundingClientRect().bottom <= 0;
+      const anchorY = () =>
+        above
+          ? track.getBoundingClientRect().bottom
+          : (content?.getBoundingClientRect().top ?? 0);
+      const before = anchorY();
+
+      /*
+       * Chrome などはページが縮むと自分でも位置を補正する（スクロール
+       * アンカリング）。こちらの補正と重なると二重にずれるので、畳むあいだ
+       * だけ止め、ずれた量を実測して1回で戻す。
+       */
+      const root = document.documentElement;
+      root.style.overflowAnchor = "none";
+      track.dataset.skip = "";
+      // ロゴの箱は貼りついていたときの高さのまま残す。箱が縮むと、その下の
+      // 内容が画面上で詰まって見えるため。globals.css がこの印を見る。
+      track.dataset.keep = "";
+      markCollapsed();
+      const after = anchorY();
+      const shift = after - before;
+      if (Math.abs(shift) >= 1) window.scrollTo(0, window.scrollY + shift);
+      requestAnimationFrame(() => {
+        root.style.overflowAnchor = "";
+      });
+    };
+
+    // 読み込んだ時点で既に区間へ入っているなら（途中で再読み込みした等）、
+    // 組み上げ直さずにその場で畳む。完成形からいきなり途中へ飛ぶと
+    // ちらついて見えるうえ、畳まないと完成したロゴのまま長く貼りつくため。
+    if (progressNow() > 0.02) {
+      rememberSeen();
+      collapse();
+      return;
+    }
 
     setAssembled(false);
     apply(assemblyFrame(0));
@@ -230,44 +299,44 @@ export function DisciplineExplorer() {
     };
 
     /*
-     * 組み上がったあと、区間を畳んで貼りつきをやめる。
+     * 組み上がったあと、区間を畳む。
      *
-     * 畳まないままだと、戻ってもう一度通るときに、完成したロゴのまま
+     * 畳まないままだと、下から上へ戻るときに、完成したロゴのまま
      * 画面1.2個ぶん貼りつき続け、スクロールがそこで停滞する。
      *
-     * 畳むのは区間が画面から完全に外れてから。見えていないあいだに
-     * 変えるので、ロゴが飛んだり縮んだりして見えることがない。
-     * 区間が画面より上にあるときは、畳んだ分だけページが詰まって
-     * 見ている位置がずれるので、同じだけスクロールを戻して打ち消す。
+     * 畳むのは (1) スクロールが止まったとき、または (2) 上へ向きを変えた
+     * とき。スクロールの最中（特に iPhone の慣性スクロール中）に位置を
+     * 書き換えると慣性がそこで止まるので、下へ流れているあいだは待つ。
+     * 上へ向きを変えた時点では指が画面にふれていて慣性は無いので、
+     * すぐ畳んでよい。畳んでもロゴの箱の高さは変えないので（collapse の
+     * data-keep）、ロゴが見えていても画面上は何も動かない。
      */
     const watchToCollapse = () => {
-      let pending = false;
+      let timer = 0;
+      let lastY = window.scrollY;
 
-      const tryCollapse = () => {
-        pending = false;
-        const rect = track.getBoundingClientRect();
-        const above = rect.bottom <= 0;
-        const below = rect.top >= window.innerHeight;
-        if (!above && !below) return;
-
-        const before = track.offsetHeight;
-        track.dataset.skip = "";
-        const shrank = before - track.offsetHeight;
-        if (above && shrank > 0) window.scrollTo(0, window.scrollY - shrank);
-
-        window.removeEventListener("scroll", onIdle);
-        window.removeEventListener("resize", onIdle);
+      const finish = () => {
+        window.clearTimeout(timer);
+        window.removeEventListener("scroll", onMove);
+        window.removeEventListener("resize", onMove);
+        collapse();
       };
 
-      const onIdle = () => {
-        if (pending) return;
-        pending = true;
-        requestAnimationFrame(tryCollapse);
+      const onMove = () => {
+        const y = window.scrollY;
+        if (y < lastY - 1) {
+          finish();
+          return;
+        }
+        lastY = y;
+        // スクロールが IDLE_MS のあいだ途切れたら「止まった」とみなす
+        window.clearTimeout(timer);
+        timer = window.setTimeout(finish, IDLE_MS);
       };
 
-      window.addEventListener("scroll", onIdle, { passive: true });
-      window.addEventListener("resize", onIdle);
-      tryCollapse();
+      window.addEventListener("scroll", onMove, { passive: true });
+      window.addEventListener("resize", onMove);
+      onMove();
     };
 
     function onScroll() {
@@ -300,6 +369,7 @@ export function DisciplineExplorer() {
     */
     <div
       ref={trackRef}
+      data-logo-track=""
       className="group relative h-[calc(100svh+var(--logo-span))] data-[skip]:h-auto motion-reduce:h-auto"
       style={{ "--logo-span": `${SCROLL_SPAN_VH}vh` } as CSSProperties}
     >
@@ -307,7 +377,9 @@ export function DisciplineExplorer() {
         ヘッダーは画面の上に貼りついたままなので、その下に留める。
         top-0 にすると、画面の低い端末でロゴの上部がヘッダーに隠れる。
       */}
-      <div className="sticky top-16 flex h-[calc(100svh-4rem)] items-center group-data-[skip]:static group-data-[skip]:h-auto motion-reduce:static motion-reduce:h-auto lg:top-20 lg:h-[calc(100svh-5rem)]">
+      <div
+        data-logo-pane=""
+        className="sticky top-16 flex h-[calc(100svh-4rem)] items-center group-data-[skip]:static motion-reduce:static motion-reduce:h-auto lg:top-20 lg:h-[calc(100svh-5rem)]">
         <div className="grid w-full items-center gap-8 lg:grid-cols-2 lg:gap-16">
           <div className="relative mx-auto aspect-square w-full max-w-[min(20rem,36svh)] sm:max-w-sm lg:max-w-md">
             {/*

@@ -10,7 +10,7 @@ import { SectionHeading } from "@/components/ui/section-heading";
 import { DISCIPLINES } from "@/lib/constants/site";
 
 export const metadata: Metadata = {
-  title: "近代五種競技 / トレーニング内容",
+  title: "近代五種 トレーニング内容",
   description:
     "フェンシング・オブスタクル・水泳・射撃・ランニングの5種目と、アカデミーでの各種目のトレーニング内容をご紹介します。",
 };
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
 export default function DisciplinesPage() {
   return (
     <>
-      <PageHero title="近代五種競技 / トレーニング内容" titleEn="DISCIPLINES" />
+      <PageHero title="近代五種 トレーニング内容" titleEn="DISCIPLINES" />
 
       <section className="bg-white py-16 sm:py-20">
         <div className="mx-auto max-w-3xl px-4">
@@ -55,16 +55,14 @@ export default function DisciplinesPage() {
                 <p className={`mt-6 font-display text-lg ${d.text}`}>{d.summary}</p>
                 <p className="mt-4 text-sm leading-relaxed text-muted sm:text-base">{d.detail}</p>
 
-                {d.id === "swimming" && (
-                  <p className="mt-4 text-sm">
-                    <Link
-                      href="/about#standards"
-                      className="font-bold text-navy-800 underline decoration-gold-400 underline-offset-4 transition-colors hover:text-gold-600"
-                    >
-                      水泳経験者向けの標準記録を見る
-                    </Link>
-                  </p>
-                )}
+                <p className="mt-4 text-sm">
+                  <Link
+                    href={`/about#standards-${d.id}`}
+                    className="font-bold text-navy-800 underline decoration-gold-400 underline-offset-4 transition-colors hover:text-gold-600"
+                  >
+                    {d.name}経験者向けの強化選手標準記録を見る
+                  </Link>
+                </p>
 
                 <div className="mt-7">
                   <p className="eyebrow text-[10px] text-navy-800">TRAINING</p>
@@ -93,7 +91,7 @@ export default function DisciplinesPage() {
           <SectionHeading
             eyebrow="CONTACT"
             title="5種目を、順に積み上げていく。"
-            description="5種目すべての経験がなくても構いません。いまある強みを軸に、足りない種目を重ねていきます。まずは実際の練習を見てみてください。"
+            description="5種目すべての経験がなくても構いません。いまある強みを軸に、足りない種目を重ねていきます。"
             tone="light"
             align="center"
           />

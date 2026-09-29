@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Info, MapPin } from "lucide-react";
+import { Info, MapPin, Star } from "lucide-react";
 
 import { ButtonLink } from "@/components/ui/button-link";
 import { PageHero } from "@/components/ui/page-hero";
@@ -124,6 +124,12 @@ export default async function SchedulePage() {
 
           <p className="mt-8 rounded-card border border-gold-200 bg-gold-50 px-5 py-4 text-sm leading-relaxed text-navy-700">
             ※ 天候・施設の都合により中止や場所の変更が生じる場合があります。当日の実施可否は各活動の連絡をご確認ください。
+          </p>
+
+          {/* 下の方に置くようオーナー指定。記号の ☆ はいただいた原稿どおり。 */}
+          <p className="mt-4 flex items-start gap-2 px-1 text-sm leading-relaxed text-navy-700">
+            <Star size={16} className="mt-0.5 shrink-0 fill-gold-500 text-gold-500" aria-hidden />
+            各自練習のメニューも相談の上、作成させていただきます。
           </p>
         </div>
       </section>

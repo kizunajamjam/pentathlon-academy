@@ -26,14 +26,27 @@ export default async function HomePage() {
             <p className="eyebrow text-xs text-gold-400">MODERN PENTATHLON</p>
             {/*
               iOS Safari は word-break: auto-phrase に未対応で、折り返しが
-              「…クラ / ブ。」のように語の途中に入る。文節ごとに
-              inline-block で包むと、どのブラウザでもこの単位でしか折れない。
-              9文字ずつに割れるので、どの画面幅でも2行で釣り合う。
+              語の途中に入る。文節ごとに inline-block で包むと、どのブラウザでも
+              この単位でしか折れない。「近代五種を通じて、」で必ず改行し、
+              狭い画面では残りが「人生を切り拓く / 総合力を育む」で折れる。
             */}
             <h1 className="mt-5 text-3xl leading-tight text-white sm:text-4xl lg:text-5xl">
-              <span className="inline-block">近代五種に、本気で</span>
-              <span className="inline-block">取り組めるクラブ。</span>
+              <span className="inline-block">近代五種を通じて、</span>
+              <br />
+              <span className="inline-block">人生を切り拓く</span>
+              <span className="inline-block">総合力を育む</span>
             </h1>
+            {/* 総合力の中身。キャッチコピーとセットで出すようオーナー指定。 */}
+            <ul className="mt-7 flex flex-wrap gap-2.5">
+              {["挑戦する力", "考える力", "やり抜く力"].map((power) => (
+                <li
+                  key={power}
+                  className="whitespace-nowrap rounded-full border border-gold-400/60 px-4 py-1.5 font-display text-sm font-bold text-gold-400"
+                >
+                  {power}
+                </li>
+              ))}
+            </ul>
             <p className="mt-6 max-w-md text-sm leading-relaxed text-navy-200 sm:text-base">
               {SITE.description}
             </p>
@@ -73,7 +86,7 @@ export default async function HomePage() {
               description="近代五種は5つの種目それぞれに場所と道具を必要とするため、まとめて取り組める環境はなかなかありません。ペンタスロンアカデミーは、その環境をつくるために立ち上げました。"
             />
             <p className="mt-5 max-w-2xl text-sm leading-relaxed text-muted sm:text-base">
-              突く・登る・泳ぐ・撃つ・走る。5種目を一貫して積み上げ、日本代表、そしてオリンピックの舞台で戦える選手を育てることを目標にしています。練習は個別・グループのどちらにも対応します。
+              突く・登る・泳ぐ・撃つ・走る。性質のまったく違う5種目に取り組むことで、挑戦する力・考える力・やり抜く力を育てていきます。練習は個別・グループのどちらにも対応します。
             </p>
             <div className="mt-8">
               <ButtonLink href="/about" variant="outline">

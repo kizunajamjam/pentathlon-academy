@@ -20,9 +20,9 @@ export const SITE: {
 } = {
   name: "ペンタスロンアカデミー",
   nameEn: "PENTATHLON ACADEMY",
-  tagline: "近代五種に、本気で取り組めるクラブ。",
+  tagline: "近代五種を通じて、人生を切り拓く総合力を育む",
   description:
-    "フェンシング・オブスタクル・水泳・射撃・ランニング。5種目を一貫して鍛え、世界を目指す選手を育てるアカデミーです。",
+    "フェンシング・オブスタクル・水泳・射撃・ランニング。性質のまったく違う5種目に、一人ひとりのペースで取り組むアカデミーです。",
   email: "pentathlonacademy.jp@gmail.com",
   tel: null,
   address: null,
@@ -45,7 +45,7 @@ export const COACHES: { name: string; title: string; bio: string[] }[] = [
     name: "竹上譲一",
     title: "S&Cコーチ",
     bio: [
-      "京都大学大学院理学研究科修士課程卒業",
+      "京都大学大学院理学研究科修士課程修了",
       "元 京都大学バスケットボール部 コーチ",
       "2026 HYROX OSAKA SINGLE OPEN 1:20:26",
       "2027 HYROX OSAKA SINGLE PRO",
@@ -71,7 +71,14 @@ export const COACHES: { name: string; title: string; bio: string[] }[] = [
   {
     name: "宮下裕策",
     title: "メディカルアドバイザー",
-    bio: ["京都大学医学部医学科卒業", "京都大学医学部附属病院勤務", "800m 1分57秒08"],
+    bio: [
+      "京都大学医学部医学科卒業",
+      "京都大学医学部附属病院勤務",
+      "脳神経外科専攻（令和9年度付）",
+      "800m 1分57秒08",
+      "西日本医科学生総合体育大会 800m優勝",
+      "近江八幡駅伝競走大会優勝（区間賞）",
+    ],
   },
   {
     name: "山本隆世",
@@ -85,7 +92,7 @@ export const COACHES: { name: string; title: string; bio: string[] }[] = [
   {
     name: "福島聡太",
     title: "オブスタクル・スプリントコーチ",
-    bio: ["筑波大学医学群医学類5回生", "100m 10秒50"],
+    bio: ["筑波大学医学群医学類", "東日本医科学生総合体育大会 100m優勝", "100m 10秒50"],
   },
 ];
 
@@ -110,62 +117,79 @@ export const PARTNERS: { name: string; summary: string; url: string | null }[] =
 ];
 
 /*
- * 強化選手標準記録（水泳）。
+ * 強化選手標準記録。
  *
- * 近代五種は水泳が土台になるため、水泳経験者に向けた目安として
+ * これまで何かの競技に取り組んできた方に向けて、種目ごとに
  * アカデミーが提示している記録。あくまで目安であって入会条件ではない。
+ * 競技紹介ページの各種目から「〇〇経験者向けの強化選手標準記録を見る」で
+ * アカデミーについてページの #standards-<種目id> に飛ぶ。
  *
- * 200m / 400m 個人メドレーは、水泳選手の地力を測るための種目。
+ * 記録の数値を設けているのは水泳だけ。ほかの4種目は具体的な記録が無いと
+ * オーナーに確認済みで null にしてあり、表示側は「競技歴・大会成績をもとに
+ * 個別に相談」という文章を出す。いずれ数値を決めたら水泳と同じ形で埋めるだけでよい。
+ *
+ * プラス評価は男女共通で1つにまとめ、表の下に出す（オーナー指定）。
+ *
+ * 水泳の 200m / 400m 個人メドレーは、水泳選手の地力を測るための種目。
  * 近代五種の水泳そのもの（100m自由形）とは別物なので、ここに 200m が
  * あっても競技の説明と矛盾しない。このまま残すことをオーナーに確認済み。
  */
-export const SWIM_LEVELS = [
+export const STANDARD_LEVELS = [
   { label: "S", sub: "トップレベル" },
   { label: "A", sub: "ハイレベル" },
   { label: "B", sub: "チャレンジレベル" },
 ] as const;
 
-export const SWIM_STANDARDS: {
-  gender: "男子" | "女子";
-  events: { name: string; times: [string, string, string] }[];
+export type Standard = {
+  groups: {
+    gender: "男子" | "女子";
+    events: { name: string; times: [string, string, string] }[];
+  }[];
   plus: string[];
-}[] = [
-  {
-    gender: "男子",
-    events: [
-      { name: "50m 自由形", times: ["24.80", "25.50", "26.30"] },
-      { name: "100m 自由形", times: ["53.50", "55.00", "56.50"] },
-      { name: "200m 個人メドレー", times: ["2:10.00", "2:18.00", "2:25.00"] },
-      { name: "400m 個人メドレー", times: ["4:45.00", "4:58.00", "5:15.00"] },
+};
+
+export const STANDARDS: Record<DisciplineId, Standard | null> = {
+  fencing: null,
+  obstacle: null,
+  swimming: {
+    groups: [
+      {
+        gender: "男子",
+        events: [
+          { name: "50m 自由形", times: ["24.80", "25.50", "26.30"] },
+          { name: "100m 自由形", times: ["53.50", "55.00", "56.50"] },
+          { name: "200m 個人メドレー", times: ["2:10.00", "2:18.00", "2:25.00"] },
+          { name: "400m 個人メドレー", times: ["4:45.00", "4:58.00", "5:15.00"] },
+        ],
+      },
+      {
+        gender: "女子",
+        events: [
+          { name: "50m 自由形", times: ["27.80", "28.60", "29.50"] },
+          { name: "100m 自由形", times: ["59.50", "1:01.50", "1:03.50"] },
+          { name: "200m 個人メドレー", times: ["2:24.00", "2:32.00", "2:40.00"] },
+          { name: "400m 個人メドレー", times: ["5:05.00", "5:20.00", "5:40.00"] },
+        ],
+      },
     ],
+    // 以前は男女別に持っていたものを1つにまとめた。
+    // 「ランニングが得意（男子）／好き（女子）」は1項目に寄せている。
     plus: [
-      "ランニングが得意",
-      "リレーでアンカーの経験がある",
+      "ランニングが得意・好き",
       "身体操作能力が高い（跳ぶ・登る・バランス）",
       "新しい競技への興味がある",
-    ],
-  },
-  {
-    gender: "女子",
-    events: [
-      { name: "50m 自由形", times: ["27.80", "28.60", "29.50"] },
-      { name: "100m 自由形", times: ["59.50", "1:01.50", "1:03.50"] },
-      { name: "200m 個人メドレー", times: ["2:24.00", "2:32.00", "2:40.00"] },
-      { name: "400m 個人メドレー", times: ["5:05.00", "5:20.00", "5:40.00"] },
-    ],
-    plus: [
-      "ランニングが好き",
-      "身体操作能力が高い（跳ぶ・登る・バランス）",
       "継続して練習できる",
       "チャレンジ精神がある",
     ],
   },
-];
+  shooting: null,
+  running: null,
+};
 
 export const NAV_ITEMS = [
   { href: "/", label: "トップ", labelEn: "HOME" },
   { href: "/about", label: "アカデミーについて", labelEn: "ABOUT" },
-  { href: "/disciplines", label: "近代五種競技", labelEn: "DISCIPLINES" },
+  { href: "/disciplines", label: "近代五種 トレーニング内容", labelEn: "DISCIPLINES" },
   { href: "/schedule", label: "練習スケジュール", labelEn: "SCHEDULE" },
   { href: "/events", label: "大会・イベント", labelEn: "EVENTS" },
   { href: "/news", label: "お知らせ", labelEn: "NEWS" },
@@ -249,7 +273,7 @@ export const DISCIPLINES: {
     summary: "呼吸を整え、心拍を制御する集中力の種目。",
     detail:
       "レーザーピストルを使い、決められた的を狙います。走った直後の高い心拍のなかで正確に撃つ必要があるため、身体をどう落ち着かせるかが鍵になります。",
-    training: ["据銃姿勢と呼吸の合わせ方", "静止状態での的当て", "走行後の実戦形式"],
+    training: ["据銃姿勢と呼吸の合わせ方", "静止状態での練習", "走行後の実践練習"],
     text: "text-shoot-500",
     bg: "bg-shoot-50",
     border: "border-shoot-500/20",

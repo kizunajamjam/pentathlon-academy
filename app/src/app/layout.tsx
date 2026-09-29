@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import { SITE } from "@/lib/constants/site";
+import { LOGO_SEEN_KEY } from "@/lib/logo-assembly";
 import "./globals.css";
 
 /*
@@ -48,8 +49,21 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ja">
+    // data-logo-seen は下の先読みスクリプトが描画前に付けるので、
+    // サーバーの HTML と食い違っても警告しないようにしている。
+    <html lang="ja" suppressHydrationWarning>
       <head>
+        {/*
+          トップページのロゴが組み上がる区間を、この訪問で既に見ていれば
+          最初の描画から畳んでおく（globals.css の data-logo-seen）。
+          JavaScript の読み込みを待ってから畳むと、再読み込みや「戻る」で
+          ブラウザが戻したスクロール位置が、そのぶんずれてしまう。
+        */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{if(sessionStorage.getItem(${JSON.stringify(LOGO_SEEN_KEY)})==="1")document.documentElement.dataset.logoSeen=""}catch(e){}`,
+          }}
+        />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link

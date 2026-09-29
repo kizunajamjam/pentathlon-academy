@@ -2,13 +2,14 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Compass, ExternalLink, HeartHandshake, Microscope, Sparkles } from "lucide-react";
 
+import { DisciplineIcon } from "@/components/icons/discipline-icons";
 import { ButtonLink } from "@/components/ui/button-link";
 import { PageHero } from "@/components/ui/page-hero";
 import { PendingSlot } from "@/components/ui/pending-slot";
 import { PhotoSlot } from "@/components/ui/photo-slot";
 import { SectionHeading } from "@/components/ui/section-heading";
-import { SwimStandards } from "@/components/ui/swim-standards";
-import { COACHES, PARTNERS, SITE } from "@/lib/constants/site";
+import { Standards } from "@/components/ui/standards";
+import { COACHES, DISCIPLINES, PARTNERS, SITE, STANDARDS } from "@/lib/constants/site";
 
 export const metadata: Metadata = {
   title: "アカデミーについて",
@@ -17,7 +18,16 @@ export const metadata: Metadata = {
 };
 
 // ⚠️ 仮テキスト。正式な理念・実績が決まり次第この配列を差し替える。
+//
+// 「競技よりも先に、人間力向上を」を先頭に置くのはオーナー指定。
+// EQ測定は具体的な検査名・頻度を決めていないため（オーナー確認済み）、
+// 本文は「取り入れている」ことだけに留めている。
 const POLICIES = [
+  {
+    icon: HeartHandshake,
+    title: "競技よりも先に、人間力向上を",
+    body: "剣やレーザーピストルの扱い、譲り合って使う施設、対戦相手への礼。近代五種は道具と人に囲まれて成り立つ競技です。アカデミーではEQ（心の知能指数）の測定を取り入れ、自分の感情や人との関わり方を客観的に見つめながら、競技を通じて人としての力を高めていきます。",
+  },
   {
     icon: Compass,
     title: "5種目の総合力で見る",
@@ -27,11 +37,6 @@ const POLICIES = [
     icon: Sparkles,
     title: "これまでの競技を、武器に変える",
     body: "水泳や陸上など積み上げてきたものは、近代五種でそのまま強みになります。土台のある種目を軸に、足りない種目を後から重ねて仕上げていきます。",
-  },
-  {
-    icon: HeartHandshake,
-    title: "競技よりも先に、姿勢を",
-    body: "剣やレーザーピストルの扱い、譲り合って使う施設、対戦相手への礼。近代五種は道具と人に囲まれて成り立つ競技です。上を目指すほど、その土台がものを言います。",
   },
 ];
 
@@ -63,7 +68,7 @@ export default function AboutPage() {
             <SectionHeading
               eyebrow="PHILOSOPHY"
               title="練習できる場所が、なかった。"
-              description="ペンタスロンアカデミーは、近代五種に本気で取り組める環境がないという課題から立ち上げたクラブです。"
+              description="ペンタスロンアカデミーは、近代五種に取り組める環境がないという課題から立ち上げたクラブです。"
             />
             {/*
               ⚠️ 仮テキスト: いただいた構成案では「5つの競技を通じた総合的な○○」と
@@ -74,7 +79,7 @@ export default function AboutPage() {
               掲げているのは、5つの競技を通じた総合的な育成です。近代五種は5つの種目それぞれに場所と道具を必要とする競技です。そのため「やってみたい」と思っても、5種目をまとめて鍛えられる場所がなかなか見つかりません。志があっても環境がないために届かない——その状況を変えることが、このアカデミーの出発点です。
             </p>
             <p className="mt-4 max-w-2xl text-sm leading-relaxed text-muted sm:text-base">
-              目標は、日本代表として、そしてオリンピックの舞台で戦える選手を育てること。そのために必要な練習量と環境を整え、5種目すべてを勝てる水準まで引き上げていきます。
+              5種目に取り組むなかで身につく、挑戦する力・考える力・やり抜く力。近代五種を通じて、人生を切り拓く総合力を育むことを目指しています。
             </p>
           </div>
           <PhotoSlot label="アカデミー全体の集合写真などが入ります" />
@@ -171,18 +176,43 @@ export default function AboutPage() {
       </section>
 
       {/* ── 強化選手標準記録 ───────────────────────────────────────── */}
+      {/*
+        種目ごとに小見出しとアンカー（#standards-<種目id>）を持たせ、
+        競技紹介ページの「〇〇経験者向けの強化選手標準記録を見る」から直接飛べるようにする。
+        記録の数値を設けていない種目は STANDARDS が null で、個別に相談する旨の文章を出す。
+      */}
       <section id="standards" className="scroll-mt-20 bg-surface py-16 sm:py-24">
         <div className="mx-auto max-w-6xl px-4">
           <SectionHeading
             eyebrow="STANDARDS"
             title="強化選手標準記録"
-            description="近代五種は水泳が土台になります。これまで泳いできた方に向けて、ひとつの目安として記録を示しています。入会の条件ではありませんので、届いていなくても構いません。"
+            description="これまで取り組んできた競技がある方に向けて、種目ごとにひとつの目安として記録を示しています。入会の条件ではありませんので、届いていなくても構いません。"
           />
-          <div className="mt-10">
-            <SwimStandards />
+          <div className="mt-12 space-y-14">
+            {DISCIPLINES.map((d) => {
+              const standard = STANDARDS[d.id];
+              return (
+                <div key={d.id} id={`standards-${d.id}`} className="scroll-mt-24">
+                  <div className="flex items-center gap-3 border-b border-border pb-3">
+                    <DisciplineIcon id={d.id} className="h-10 w-10 shrink-0 object-contain" />
+                    <h3 className="text-lg text-navy-800">{d.name}経験者向け</h3>
+                  </div>
+                  <div className="mt-6">
+                    {standard ? (
+                      <Standards standard={standard} />
+                    ) : (
+                      <p className="rounded-card border border-border bg-white px-5 py-4 text-sm leading-relaxed text-navy-700 sm:px-6">
+                        {d.name}
+                        の経験がある方は、これまでの競技歴や大会成績をもとに、個別にご相談させていただきます。
+                      </p>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
           </div>
-          <p className="mt-10 rounded-card border border-border bg-white px-5 py-4 text-sm leading-relaxed text-navy-700 sm:px-6">
-            水泳で積み上げてきた力は、近代五種でそのまま武器になります。水泳が強い選手は既に日本選手権や国際大会を舞台に戦う事前準備ができています。
+          <p className="mt-12 rounded-card border border-border bg-white px-5 py-4 text-sm leading-relaxed text-navy-700 sm:px-6">
+            これまでの競技で積み上げてきた力は、近代五種でそのまま武器になります。
           </p>
         </div>
       </section>
