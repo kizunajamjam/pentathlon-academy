@@ -226,12 +226,13 @@ export function DisciplineExplorer() {
       if (track.hasAttribute("data-skip")) return;
       const content = pane?.firstElementChild as HTMLElement | null | undefined;
       // 保ちたい位置の目印。区間より下の内容を見ているならその先頭、
-      // ロゴが見えているならロゴ。
+      // ロゴが見えているならロゴ。どちらを使うかは畳む前に決めておく
+      // （畳んだあとに判定し直すと、目印が入れ替わって大きくずれる）。
+      const above = track.getBoundingClientRect().bottom <= 0;
       const anchorY = () =>
-        track.getBoundingClientRect().bottom <= 0
+        above
           ? track.getBoundingClientRect().bottom
           : (content?.getBoundingClientRect().top ?? 0);
-      const above = track.getBoundingClientRect().bottom <= 0;
       const before = anchorY();
 
       /*
@@ -242,8 +243,11 @@ export function DisciplineExplorer() {
       const root = document.documentElement;
       root.style.overflowAnchor = "none";
       track.dataset.skip = "";
+      // ロゴの箱は貼りついていたときの高さのまま残す。箱が縮むと、その下の
+      // 内容が画面上で詰まって見えるため。globals.css がこの印を見る。
+      track.dataset.keep = "";
       markCollapsed();
-      const after = above ? track.getBoundingClientRect().bottom : anchorY();
+      const after = anchorY();
       const shift = after - before;
       if (Math.abs(shift) >= 1) window.scrollTo(0, window.scrollY + shift);
       requestAnimationFrame(() => {
@@ -297,31 +301,37 @@ export function DisciplineExplorer() {
     /*
      * 組み上がったあと、区間を畳む。
      *
-     * 畳まないままだと、戻ってもう一度通るときに、完成したロゴのまま
+     * 畳まないままだと、下から上へ戻るときに、完成したロゴのまま
      * 画面1.2個ぶん貼りつき続け、スクロールがそこで停滞する。
      *
-     * 畳むのは (1) スクロールが止まっていて、(2) 区間が画面から完全に
-     * 外れているときだけ。以前はスクロールの最中に畳んで位置を戻して
-     * いたが、iPhone では指を離したあとの慣性スクロールの途中で位置を
-     * 書き換えると、慣性がそこでぷつりと止まる。これが「スクロールが
-     * 引っかかる」原因だった。止まってから、見えていないところで畳めば、
-     * 慣性も見た目も損なわない。
+     * 畳むのは (1) スクロールが止まったとき、または (2) 上へ向きを変えた
+     * とき。スクロールの最中（特に iPhone の慣性スクロール中）に位置を
+     * 書き換えると慣性がそこで止まるので、下へ流れているあいだは待つ。
+     * 上へ向きを変えた時点では指が画面にふれていて慣性は無いので、
+     * すぐ畳んでよい。畳んでもロゴの箱の高さは変えないので（collapse の
+     * data-keep）、ロゴが見えていても画面上は何も動かない。
      */
     const watchToCollapse = () => {
       let timer = 0;
+      let lastY = window.scrollY;
 
-      const tryCollapse = () => {
-        const rect = track.getBoundingClientRect();
-        if (rect.bottom > 0 && rect.top < window.innerHeight) return;
-        collapse();
+      const finish = () => {
+        window.clearTimeout(timer);
         window.removeEventListener("scroll", onMove);
         window.removeEventListener("resize", onMove);
+        collapse();
       };
 
-      // スクロールが IDLE_MS のあいだ途切れたら「止まった」とみなす
       const onMove = () => {
+        const y = window.scrollY;
+        if (y < lastY - 1) {
+          finish();
+          return;
+        }
+        lastY = y;
+        // スクロールが IDLE_MS のあいだ途切れたら「止まった」とみなす
         window.clearTimeout(timer);
-        timer = window.setTimeout(tryCollapse, IDLE_MS);
+        timer = window.setTimeout(finish, IDLE_MS);
       };
 
       window.addEventListener("scroll", onMove, { passive: true });
@@ -369,7 +379,7 @@ export function DisciplineExplorer() {
       */}
       <div
         data-logo-pane=""
-        className="sticky top-16 flex h-[calc(100svh-4rem)] items-center group-data-[skip]:static group-data-[skip]:h-auto motion-reduce:static motion-reduce:h-auto lg:top-20 lg:h-[calc(100svh-5rem)]">
+        className="sticky top-16 flex h-[calc(100svh-4rem)] items-center group-data-[skip]:static motion-reduce:static motion-reduce:h-auto lg:top-20 lg:h-[calc(100svh-5rem)]">
         <div className="grid w-full items-center gap-8 lg:grid-cols-2 lg:gap-16">
           <div className="relative mx-auto aspect-square w-full max-w-[min(20rem,36svh)] sm:max-w-sm lg:max-w-md">
             {/*

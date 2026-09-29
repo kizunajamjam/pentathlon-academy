@@ -134,5 +134,11 @@ html[data-logo-seen] [data-logo-track] {
 }
 html[data-logo-seen] [data-logo-pane] {
   position: static;
+}
+/*
+ * 最初から畳んで出すときだけ、ロゴの箱を中身の高さまで詰める。
+ * その場で畳んだとき（data-keep）は、見た目が動かないよう高さを残す。
+ */
+html[data-logo-seen] [data-logo-track]:not([data-keep]) [data-logo-pane] {
   height: auto;
 }
