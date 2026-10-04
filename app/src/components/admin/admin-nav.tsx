@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { CalendarDays, GraduationCap, Home, Inbox, Medal, Megaphone, Trophy } from "lucide-react";
+import { BarChart3, CalendarDays, GraduationCap, Home, Inbox, Medal, Megaphone, Trophy } from "lucide-react";
 
 const ITEMS = [
   { href: "/admin", label: "ダッシュボード", icon: Home },
@@ -12,6 +12,7 @@ const ITEMS = [
   { href: "/admin/coaches", label: "指導者", icon: GraduationCap },
   { href: "/admin/athletes", label: "強化選手", icon: Medal },
   { href: "/admin/inquiries", label: "お問い合わせ", icon: Inbox },
+  { href: "/admin/analytics", label: "分析", icon: BarChart3 },
 ];
 
 export function AdminNav() {

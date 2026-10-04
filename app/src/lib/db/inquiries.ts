@@ -1,6 +1,7 @@
 import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/service";
 import { unwrap } from "./unwrap";
 import type { Inquiry } from "@/types";
 
@@ -13,6 +14,9 @@ type InquiryRow = {
   message: string;
   is_handled: boolean;
   created_at: string;
+  source: string | null;
+  landing_path: string | null;
+  handled_at: string | null;
 };
 
 function mapInquiry(row: InquiryRow): Inquiry {
@@ -25,6 +29,9 @@ function mapInquiry(row: InquiryRow): Inquiry {
     message: row.message,
     isHandled: row.is_handled,
     createdAt: row.created_at,
+    source: row.source,
+    landingPath: row.landing_path,
+    handledAt: row.handled_at,
   };
 }
 
@@ -34,17 +41,23 @@ export type InquiryInput = {
   phone: string | null;
   category: string;
   message: string;
+  source: string | null;
+  landingPath: string | null;
 };
 
 // 投稿は匿名(anon)から行われる。RLS で insert のみ許可している。
 export async function createInquiry(input: InquiryInput) {
-  const supabase = await createClient();
+  // service_role キーがあればそれで保存する（匿名の insert 権限を閉じられる）。
+  // 無ければ従来どおり匿名のまま保存する。
+  const supabase = createServiceClient() ?? (await createClient());
   const { error } = await supabase.from("inquiries").insert({
     name: input.name,
     email: input.email,
     phone: input.phone,
     category: input.category,
     message: input.message,
+    source: input.source,
+    landing_path: input.landingPath,
   });
 
   // insert 後に select すると SELECT ポリシーも評価されて anon では弾かれるため、

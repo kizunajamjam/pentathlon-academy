@@ -61,6 +61,12 @@ export type Inquiry = {
   message: string;
   isHandled: boolean;
   createdAt: string;
+  // 流入元（utm_source かリファラーのホスト名）。直接訪問は null
+  source: string | null;
+  // 最初に開いたページ
+  landingPath: string | null;
+  // 対応済みにした日時
+  handledAt: string | null;
 };
 
 export type Coach = {

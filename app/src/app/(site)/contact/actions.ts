@@ -61,12 +61,21 @@ export async function submitInquiry(
     };
   }
 
+  if (!(await verifyTurnstile(str(formData, "cf-turnstile-response")))) {
+    return {
+      status: "error",
+      message: "送信の確認に失敗しました。ページを読み込み直して、もう一度お試しください。",
+    };
+  }
+
   const { error } = await createInquiry({
     name,
     email,
     phone: phone.slice(0, MAX.phone) || null,
     category,
     message,
+    source: str(formData, "source").slice(0, 100) || null,
+    landingPath: str(formData, "landingPath").slice(0, 200) || null,
   });
 
   if (error) {
@@ -82,6 +91,28 @@ export async function submitInquiry(
   await notifyByEmail({ name, email, phone, category, message });
 
   return { status: "success" };
+}
+
+/*
+ * Cloudflare Turnstile の検証。TURNSTILE_SECRET_KEY が未設定なら検証しない（常に通す）。
+ * 検証サービスに繋がらないときは、正規の問い合わせを落とさないよう通す。
+ */
+async function verifyTurnstile(token: string): Promise<boolean> {
+  const secret = process.env.TURNSTILE_SECRET_KEY;
+  if (!secret) return true;
+  if (!token) return false;
+
+  try {
+    const res = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+      method: "POST",
+      body: new URLSearchParams({ secret, response: token }),
+    });
+    const json = (await res.json()) as { success?: boolean };
+    return json.success === true;
+  } catch (e) {
+    console.error("[contact] Turnstile の検証に失敗", e);
+    return true;
+  }
 }
 
 /*

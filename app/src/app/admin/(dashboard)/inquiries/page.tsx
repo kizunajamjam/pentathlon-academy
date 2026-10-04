@@ -38,9 +38,13 @@ export default async function AdminInquiriesPage() {
               <span className="font-display text-xs text-muted">
                 {formatDateDot(q.createdAt)} {formatTime(q.createdAt)}
               </span>
+              {q.source && (
+                <span className="text-xs text-muted">流入元: {q.source}</span>
+              )}
               {q.isHandled ? (
                 <span className="rounded-full bg-success-50 px-2.5 py-0.5 text-xs text-success-500">
                   対応済み
+                  {q.handledAt && ` ${formatDateDot(q.handledAt)}`}
                 </span>
               ) : (
                 <span className="rounded-full bg-gold-100 px-2.5 py-0.5 text-xs text-gold-700">

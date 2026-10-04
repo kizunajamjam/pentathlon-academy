@@ -29,6 +29,9 @@ jobs:
       - run: npm run lint
         working-directory: app
 
+      - run: npm test
+        working-directory: app
+
       - name: ビルド（管理画面を含む）
         working-directory: app
         env:

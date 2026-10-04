@@ -1,10 +1,12 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
 import { CheckCircle2, AlertCircle } from "lucide-react";
 
 import { submitInquiry, type ContactState } from "@/app/(site)/contact/actions";
 import { INQUIRY_CATEGORIES } from "@/lib/constants/site";
+import { readAttribution, trackEvent } from "@/lib/attribution";
+import { TurnstileWidget } from "@/components/turnstile-widget";
 
 const INITIAL: ContactState = { status: "idle" };
 
@@ -40,6 +42,10 @@ function Label({
 export function ContactForm() {
   const [state, formAction, pending] = useActionState(submitInquiry, INITIAL);
 
+  useEffect(() => {
+    if (state.status === "success") trackEvent("inquiry_submit");
+  }, [state.status]);
+
   if (state.status === "success") {
     return (
       <div className="rounded-card border border-success-500/30 bg-success-50 px-6 py-12 text-center">
@@ -55,7 +61,16 @@ export function ContactForm() {
   }
 
   return (
-    <form action={formAction} className="space-y-6">
+    <form
+      action={(formData) => {
+        // 流入元はブラウザにしか無いので、送信の直前に読んで添える
+        const { source, landingPath } = readAttribution();
+        formData.set("source", source);
+        formData.set("landingPath", landingPath);
+        formAction(formData);
+      }}
+      className="space-y-6"
+    >
       {state.status === "error" && state.message && (
         <p className="flex items-start gap-2.5 rounded-md border border-shoot-500/30 bg-shoot-50 px-4 py-3.5 text-sm leading-relaxed text-shoot-700">
           <AlertCircle size={18} className="mt-0.5 shrink-0" />
@@ -128,6 +143,8 @@ export function ContactForm() {
         />
         <FieldError message={state.fieldErrors?.message} />
       </div>
+
+      <TurnstileWidget resetKey={state} />
 
       {/* ハニーポット: 人間には見えない。bot が埋めると送信を破棄する。 */}
       <div aria-hidden="true" className="absolute left-[-9999px] h-0 w-0 overflow-hidden">
