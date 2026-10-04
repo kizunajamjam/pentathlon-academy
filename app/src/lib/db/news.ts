@@ -1,6 +1,7 @@
 import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
+import { unwrap } from "./unwrap";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { SEED_NEWS } from "./seed";
 import type { News, NewsCategory } from "@/types";
@@ -41,7 +42,7 @@ export async function listPublishedNews(limit?: number): Promise<News[]> {
 
   if (limit) query = query.limit(limit);
 
-  const { data } = await query;
+  const data = unwrap("news", await query);
   return (data ?? []).map(mapNews);
 }
 
@@ -51,7 +52,7 @@ export async function getNews(id: string): Promise<News | null> {
   }
 
   const supabase = await createClient();
-  const { data } = await supabase.from("news").select("*").eq("id", id).maybeSingle();
+  const data = unwrap("news", await supabase.from("news").select("*").eq("id", id).maybeSingle());
   return data ? mapNews(data) : null;
 }
 
@@ -60,10 +61,10 @@ export async function listAllNews(): Promise<News[]> {
   if (!isSupabaseConfigured) return SEED_NEWS;
 
   const supabase = await createClient();
-  const { data } = await supabase
+  const data = unwrap("news", await supabase
     .from("news")
     .select("*")
-    .order("published_at", { ascending: false });
+    .order("published_at", { ascending: false }));
 
   return (data ?? []).map(mapNews);
 }

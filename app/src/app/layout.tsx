@@ -17,7 +17,8 @@ import "./globals.css";
  */
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://example.com"), // TODO: 本番ドメインに差し替え
+  // 本番ドメインは NEXT_PUBLIC_SITE_URL で指定する（sitemap / robots と共通）
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://example.com"),
   title: {
     default: `${SITE.name} | ${SITE.tagline}`,
     template: `%s | ${SITE.name}`,

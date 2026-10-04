@@ -1,6 +1,7 @@
 import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
+import { unwrap } from "./unwrap";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { SEED_SCHEDULE } from "./seed";
 import type { DayOfWeek, DisciplineId, ScheduleSlot } from "@/types";
@@ -43,12 +44,12 @@ export async function listActiveSlots(): Promise<ScheduleSlot[]> {
   if (!isSupabaseConfigured) return SEED_SCHEDULE;
 
   const supabase = await createClient();
-  const { data } = await supabase
+  const data = unwrap("schedule", await supabase
     .from("schedule_slots")
     .select("*")
     .eq("is_active", true)
     .order("day_of_week", { ascending: true })
-    .order("sort_order", { ascending: true });
+    .order("sort_order", { ascending: true }));
 
   return (data ?? []).map(mapSlot);
 }
@@ -57,11 +58,11 @@ export async function listAllSlots(): Promise<ScheduleSlot[]> {
   if (!isSupabaseConfigured) return SEED_SCHEDULE;
 
   const supabase = await createClient();
-  const { data } = await supabase
+  const data = unwrap("schedule", await supabase
     .from("schedule_slots")
     .select("*")
     .order("day_of_week", { ascending: true })
-    .order("sort_order", { ascending: true });
+    .order("sort_order", { ascending: true }));
 
   return (data ?? []).map(mapSlot);
 }

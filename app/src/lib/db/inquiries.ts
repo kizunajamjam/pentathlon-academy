@@ -1,6 +1,7 @@
 import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
+import { unwrap } from "./unwrap";
 import type { Inquiry } from "@/types";
 
 type InquiryRow = {
@@ -54,10 +55,10 @@ export async function createInquiry(input: InquiryInput) {
 // 管理画面用。
 export async function listInquiries(): Promise<Inquiry[]> {
   const supabase = await createClient();
-  const { data } = await supabase
+  const data = unwrap("inquiries", await supabase
     .from("inquiries")
     .select("*")
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false }));
 
   return (data ?? []).map(mapInquiry);
 }

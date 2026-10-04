@@ -1,6 +1,7 @@
 import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
+import { unwrap } from "./unwrap";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { SEED_EVENTS } from "./seed";
 import type { AcademyEvent, EventCategory } from "@/types";
@@ -52,7 +53,7 @@ export async function listUpcomingEvents(limit?: number): Promise<AcademyEvent[]
 
   if (limit) query = query.limit(limit);
 
-  const { data } = await query;
+  const data = unwrap("events", await query);
   return (data ?? []).map(mapEvent);
 }
 
@@ -77,7 +78,7 @@ export async function listPastEvents(limit?: number): Promise<AcademyEvent[]> {
 
   if (limit) query = query.limit(limit);
 
-  const { data } = await query;
+  const data = unwrap("events", await query);
   return (data ?? []).map(mapEvent);
 }
 
@@ -87,7 +88,7 @@ export async function getEvent(id: string): Promise<AcademyEvent | null> {
   }
 
   const supabase = await createClient();
-  const { data } = await supabase.from("events").select("*").eq("id", id).maybeSingle();
+  const data = unwrap("events", await supabase.from("events").select("*").eq("id", id).maybeSingle());
   return data ? mapEvent(data) : null;
 }
 
@@ -97,10 +98,10 @@ export async function listAllEvents(): Promise<AcademyEvent[]> {
   }
 
   const supabase = await createClient();
-  const { data } = await supabase
+  const data = unwrap("events", await supabase
     .from("events")
     .select("*")
-    .order("starts_at", { ascending: false });
+    .order("starts_at", { ascending: false }));
 
   return (data ?? []).map(mapEvent);
 }
