@@ -1,6 +1,7 @@
 import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
+import { unwrap } from "./unwrap";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { SEED_NEWS } from "./seed";
 import type { News, NewsCategory } from "@/types";
@@ -12,6 +13,7 @@ type NewsRow = {
   body: string;
   published_at: string;
   is_published: boolean;
+  image_url: string | null;
 };
 
 function mapNews(row: NewsRow): News {
@@ -22,6 +24,7 @@ function mapNews(row: NewsRow): News {
     body: row.body,
     publishedAt: row.published_at,
     isPublished: row.is_published,
+    imageUrl: row.image_url,
   };
 }
 
@@ -41,7 +44,7 @@ export async function listPublishedNews(limit?: number): Promise<News[]> {
 
   if (limit) query = query.limit(limit);
 
-  const { data } = await query;
+  const data = unwrap("news", await query);
   return (data ?? []).map(mapNews);
 }
 
@@ -51,7 +54,7 @@ export async function getNews(id: string): Promise<News | null> {
   }
 
   const supabase = await createClient();
-  const { data } = await supabase.from("news").select("*").eq("id", id).maybeSingle();
+  const data = unwrap("news", await supabase.from("news").select("*").eq("id", id).maybeSingle());
   return data ? mapNews(data) : null;
 }
 
@@ -60,10 +63,10 @@ export async function listAllNews(): Promise<News[]> {
   if (!isSupabaseConfigured) return SEED_NEWS;
 
   const supabase = await createClient();
-  const { data } = await supabase
+  const data = unwrap("news", await supabase
     .from("news")
     .select("*")
-    .order("published_at", { ascending: false });
+    .order("published_at", { ascending: false }));
 
   return (data ?? []).map(mapNews);
 }
@@ -74,6 +77,8 @@ export type NewsInput = {
   body: string;
   publishedAt: string;
   isPublished: boolean;
+  // undefined のときは画像を変更しない（編集時に画像を選び直さなかった場合）
+  imageUrl?: string | null;
 };
 
 export async function createNews(input: NewsInput) {
@@ -86,6 +91,7 @@ export async function createNews(input: NewsInput) {
       body: input.body,
       published_at: input.publishedAt,
       is_published: input.isPublished,
+      image_url: input.imageUrl ?? null,
     })
     .select("*")
     .single();
@@ -103,6 +109,7 @@ export async function updateNews(id: string, patch: NewsInput) {
       body: patch.body,
       published_at: patch.publishedAt,
       is_published: patch.isPublished,
+      ...(patch.imageUrl !== undefined ? { image_url: patch.imageUrl } : {}),
     })
     .eq("id", id)
     .select("*")

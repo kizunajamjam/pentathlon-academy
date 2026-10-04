@@ -1,0 +1,40 @@
+# プルリクエストと main への push で、型・lint・ビルドを確認する。
+# pages.yml は管理画面を取り除いてビルドするため、管理画面の検証はここで行う。
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+
+      # sharp のプラットフォーム別依存のため npm ci ではなく npm install（pages.yml と同じ理由）
+      - run: npm install
+        working-directory: app
+
+      - run: npx tsc --noEmit
+        working-directory: app
+
+      - run: npm run lint
+        working-directory: app
+
+      - run: npm test
+        working-directory: app
+
+      - name: ビルド（管理画面を含む）
+        working-directory: app
+        env:
+          # Supabase 未接続でもビルドできるよう、プレビュー扱いにする
+          NEXT_PUBLIC_IS_PREVIEW: "1"
+        run: npm run build

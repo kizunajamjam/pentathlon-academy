@@ -11,6 +11,8 @@ export type News = {
   body: string;
   publishedAt: string;
   isPublished: boolean;
+  // お知らせの画像（Supabase Storage の公開 URL）。無ければ null。
+  imageUrl: string | null;
 };
 
 export type EventCategory = "competition" | "trial" | "camp" | "openday";
@@ -59,4 +61,34 @@ export type Inquiry = {
   message: string;
   isHandled: boolean;
   createdAt: string;
+  // 流入元（utm_source かリファラーのホスト名）。直接訪問は null
+  source: string | null;
+  // 最初に開いたページ
+  landingPath: string | null;
+  // 対応済みにした日時
+  handledAt: string | null;
+};
+
+export type Coach = {
+  id: string;
+  name: string;
+  // 肩書き（カードのバッジに出す）
+  title: string;
+  // 経歴・実績を1行ずつ
+  bio: string[];
+  sortOrder: number;
+  isPublished: boolean;
+};
+
+export type AthleteRecord = { event: string; time: string };
+
+export type Athlete = {
+  id: string;
+  name: string;
+  discipline: DisciplineId;
+  // 強化選手規定のどの種目・ランクで指定されたか（例: 水泳S指定）
+  designation: string;
+  records: AthleteRecord[];
+  sortOrder: number;
+  isPublished: boolean;
 };

@@ -23,6 +23,11 @@ const nextConfig: NextConfig = {
     root: path.resolve(__dirname),
   },
 
+  // お知らせの画像アップロード（上限 4MB）を、Server Action の既定 1MB に阻まれず受けるため。
+  experimental: {
+    serverActions: { bodySizeLimit: "5mb" },
+  },
+
   ...(isStaticExport
     ? {
         output: "export" as const,

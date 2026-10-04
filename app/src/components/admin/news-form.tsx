@@ -82,6 +82,34 @@ export function NewsForm({
         />
       </AdminField>
 
+      <AdminField
+        label="画像"
+        htmlFor="image"
+        hint="JPEG・PNG・WebP、4MB まで。お知らせの冒頭に表示されます。"
+      >
+        {news?.imageUrl && (
+          <div className="mb-3">
+            {/* eslint-disable-next-line @next/next/no-img-element -- Storage の公開URLをそのまま表示する */}
+            <img
+              src={news.imageUrl}
+              alt=""
+              className="max-h-48 rounded-md border border-border object-contain"
+            />
+            <label className="mt-2 flex items-center gap-2 text-xs text-muted">
+              <input type="checkbox" name="removeImage" className="h-4 w-4 accent-navy-800" />
+              この画像を外す
+            </label>
+          </div>
+        )}
+        <input
+          id="image"
+          name="image"
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          className="block w-full text-sm text-navy-700 file:mr-4 file:rounded-full file:border-0 file:bg-navy-50 file:px-4 file:py-2 file:text-sm file:text-navy-800"
+        />
+      </AdminField>
+
       <label className="flex items-center gap-3 rounded-md border border-border bg-white px-4 py-3.5">
         <input
           type="checkbox"

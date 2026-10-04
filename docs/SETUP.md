@@ -43,7 +43,9 @@ npm run dev --prefix pentathlon-academy/app
 ## 2. Supabase をつなぐ
 
 1. Supabase で新規プロジェクトを作成する
-2. SQL Editor で `supabase/migrations/20260815_initial_schema.sql` を実行する
+2. SQL Editor で `supabase/migrations/` のファイルを **日付の古い順に全部** 実行する
+   （`20260815_initial_schema.sql` → `20261004_content_tables.sql` → `20261005_inquiry_analytics.sql`）。
+   2つ目は指導者・強化選手・お知らせ画像の追加で、現在サイトに載っている指導者と強化選手が初期データとして入る
 3. `app/.env.local` を作る（`app/.env.example` をコピー）
 
 ```
@@ -89,10 +91,38 @@ CONTACT_NOTIFY_TO=info@example.com
 CONTACT_NOTIFY_FROM=no-reply@（認証済みドメイン）
 ```
 
-## 5. デプロイ（Vercel）
+## 5. お問い合わせの強化（任意・公開前に推奨）
+
+初期状態では、フォームの保存を匿名ユーザーの insert 権限で行っている。
+次の2つを設定すると、スパムの直接投稿を防げる。
+
+**Turnstile（bot 対策）**: [Cloudflare Turnstile](https://www.cloudflare.com/ja-jp/application-services/products/turnstile/) でサイトを登録し、
+`NEXT_PUBLIC_TURNSTILE_SITE_KEY` と `TURNSTILE_SECRET_KEY` を設定する。フォームにチェックが出る。
+
+**匿名の insert を閉じる**: `SUPABASE_SERVICE_ROLE_KEY`（Supabase → Settings → API Keys の secret key）を
+**サーバー側の環境変数にだけ** 登録する。設定するとフォームの保存はこのキーで行われるので、
+続けて SQL Editor で次を実行し、anon キーでの直接投稿を禁止する。
+
+```sql
+drop policy inquiries_insert_anon on public.inquiries;
+revoke insert on table public.inquiries from anon;
+```
+
+※ 先にキーを登録してデプロイし、フォームが送信できることを確かめてから実行すること。
+
+## 6. アクセス解析と分析（任意）
+
+- ページごとのアクセス数・流入元: [Plausible](https://plausible.io) にドメインを登録し、
+  `NEXT_PUBLIC_PLAUSIBLE_DOMAIN` を設定する。お問い合わせの送信は `inquiry_submit` イベントとして記録される
+  （Plausible の Goals に `inquiry_submit` を追加すると集計される）。
+- お問い合わせの集計: 管理画面の「分析」で、週ごとの件数・種別・流入元・対応までの時間を見られる。
+  CSV で保存もできる。
+- SNS などに載せるリンクには `?utm_source=instagram` のように付けると、流入元がその名前で集計される。
+
+## 7. デプロイ（Vercel）
 
 - Root Directory に `pentathlon-academy/app` を指定する
-- 環境変数は `.env.example` と同じものを登録する
+- 環境変数は `.env.example` と同じものを登録する。Supabase の2つが未設定だとビルドが失敗する（仮データを本番に出さないため）
 - `NEXT_PUBLIC_SITE_URL` に本番URLを入れる（sitemap.xml / robots.txt が参照する）
 - `src/app/layout.tsx` の `metadataBase` を本番ドメインに直す
 
@@ -109,7 +139,8 @@ CONTACT_NOTIFY_FROM=no-reply@（認証済みドメイン）
 | 写真 | `<PhotoSlot />` で grep。`next/image` に置き換える |
 | ロゴ | `src/components/layout/site-logo.tsx`。正式SVGを `public/logo.svg` に置いて差し替え |
 | 仮データ | `src/lib/db/seed.ts`（Supabase 接続後は不要。削除してよい） |
-| 大会日程 | `src/lib/db/seed.ts` の `SEED_EVENTS`。下記参照 |
+| 大会日程 | 管理画面の「大会・イベント」。`src/lib/db/seed.ts` の `SEED_EVENTS` は未接続時の仮データ。下記参照 |
+| 指導者・強化選手 | 管理画面の「指導者」「強化選手」で更新。`site.ts` の `COACHES` / `ATHLETES` は未接続時の表示用 |
 
 ### 大会の日程について
 

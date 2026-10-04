@@ -2,14 +2,17 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { CalendarDays, Home, Inbox, Megaphone, Trophy } from "lucide-react";
+import { BarChart3, CalendarDays, GraduationCap, Home, Inbox, Medal, Megaphone, Trophy } from "lucide-react";
 
 const ITEMS = [
   { href: "/admin", label: "ダッシュボード", icon: Home },
   { href: "/admin/news", label: "お知らせ", icon: Megaphone },
   { href: "/admin/schedule", label: "練習スケジュール", icon: CalendarDays },
   { href: "/admin/events", label: "大会・イベント", icon: Trophy },
+  { href: "/admin/coaches", label: "指導者", icon: GraduationCap },
+  { href: "/admin/athletes", label: "強化選手", icon: Medal },
   { href: "/admin/inquiries", label: "お問い合わせ", icon: Inbox },
+  { href: "/admin/analytics", label: "分析", icon: BarChart3 },
 ];
 
 export function AdminNav() {

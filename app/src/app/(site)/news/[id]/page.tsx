@@ -36,6 +36,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: news.title,
     // 本文の冒頭を説明文に流用する（改行は詰める）
     description: news.body.replace(/\s+/g, " ").slice(0, 120),
+    ...(news.imageUrl ? { openGraph: { images: [{ url: news.imageUrl }] } } : {}),
   };
 }
 
@@ -70,6 +71,15 @@ export default async function NewsDetailPage({ params }: Props) {
 
         <h1 className="mt-4 text-2xl leading-relaxed text-navy-800 sm:text-3xl">{news.title}</h1>
         <span className="mt-6 block h-0.5 w-12 bg-gold-500" />
+
+        {news.imageUrl && (
+          // eslint-disable-next-line @next/next/no-img-element -- Storage の公開URLをそのまま表示する
+          <img
+            src={news.imageUrl}
+            alt=""
+            className="mt-10 w-full rounded-card border border-border object-cover"
+          />
+        )}
 
         {/* 本文は管理画面のテキストエリア入力なので、段落を改行で組み立てる */}
         <div className="mt-10 space-y-5">

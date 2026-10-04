@@ -9,7 +9,8 @@ import { PendingSlot } from "@/components/ui/pending-slot";
 import { PhotoSlot } from "@/components/ui/photo-slot";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { Standards } from "@/components/ui/standards";
-import { COACHES, DISCIPLINES, PARTNERS, SITE, STANDARDS } from "@/lib/constants/site";
+import { DISCIPLINES, PARTNERS, SITE, STANDARDS } from "@/lib/constants/site";
+import { listPublishedCoaches } from "@/lib/db/coaches";
 
 export const metadata: Metadata = {
   title: "アカデミーについて",
@@ -56,7 +57,9 @@ const FACTS = [
   },
 ];
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const coaches = await listPublishedCoaches();
+
   return (
     <>
       <PageHero title="アカデミーについて" titleEn="ABOUT" />
@@ -124,12 +127,12 @@ export default function AboutPage() {
           */}
           <div
             className={`mt-10 grid gap-6 sm:grid-cols-2 ${
-              COACHES.length > 2 ? "lg:grid-cols-3" : "lg:max-w-3xl"
+              coaches.length > 2 ? "lg:grid-cols-3" : "lg:max-w-3xl"
             }`}
           >
-            {COACHES.map((coach) => (
+            {coaches.map((coach) => (
               <div
-                key={coach.name}
+                key={coach.id}
                 className="min-w-0 rounded-card border border-border bg-white p-6"
               >
                 <span className="inline-flex rounded-full bg-navy-50 px-3 py-1 text-xs font-bold text-navy-800">
@@ -294,7 +297,7 @@ export default function AboutPage() {
                   </>
                 ),
               },
-              { label: "指導者", value: COACHES.map((c) => c.name).join(" / ") },
+              { label: "指導者", value: coaches.map((c) => c.name).join(" / ") },
               { label: "連絡先", value: SITE.email },
             ].map((row) => (
               <div key={row.label} className="grid gap-1 py-5 sm:grid-cols-[10rem_1fr] sm:gap-4">
