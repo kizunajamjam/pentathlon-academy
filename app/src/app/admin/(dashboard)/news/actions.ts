@@ -4,7 +4,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { getStaffForAction } from "@/lib/auth-guard";
-import { createNews, deleteNews, updateNews } from "@/lib/db/news";
+import { createNews, deleteNews, updateNews, type NewsInput } from "@/lib/db/news";
+import { uploadNewsImage } from "@/lib/db/news-image";
 import type { NewsCategory } from "@/types";
 
 export type NewsFormState = { message?: string };
@@ -48,9 +49,18 @@ export async function saveNews(
 
   const id = String(formData.get("id") ?? "");
 
-  const { error } = id
-    ? await updateNews(id, parsed.input)
-    : await createNews(parsed.input);
+  // 画像: 新しく選ばれていればアップロード、「削除」なら外す、どちらでもなければ変更しない
+  const input: NewsInput = { ...parsed.input };
+  const file = formData.get("image");
+  if (file instanceof File && file.size > 0) {
+    const uploaded = await uploadNewsImage(file);
+    if ("error" in uploaded) return { message: uploaded.error };
+    input.imageUrl = uploaded.url;
+  } else if (formData.get("removeImage") === "on") {
+    input.imageUrl = null;
+  }
+
+  const { error } = id ? await updateNews(id, input) : await createNews(input);
 
   if (error) {
     console.error("[admin/news] 保存に失敗", error);

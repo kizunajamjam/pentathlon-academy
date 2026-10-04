@@ -5,7 +5,8 @@ import { DisciplineIcon } from "@/components/icons/discipline-icons";
 import { ButtonLink } from "@/components/ui/button-link";
 import { PageHero } from "@/components/ui/page-hero";
 import { SectionHeading } from "@/components/ui/section-heading";
-import { ATHLETES, DISCIPLINES } from "@/lib/constants/site";
+import { DISCIPLINES } from "@/lib/constants/site";
+import { listPublishedAthletes } from "@/lib/db/athletes";
 
 export const metadata: Metadata = {
   title: "強化選手",
@@ -13,7 +14,9 @@ export const metadata: Metadata = {
     "ペンタスロンアカデミーの強化選手規定を満たした、強化選手をご紹介します。",
 };
 
-export default function AthletesPage() {
+export default async function AthletesPage() {
+  const athletes = await listPublishedAthletes();
+
   return (
     <>
       <PageHero title="強化選手" titleEn="ATHLETES" />
@@ -27,11 +30,11 @@ export default function AthletesPage() {
           />
 
           <ul className="mt-10 grid gap-5 sm:grid-cols-2">
-            {ATHLETES.map((a) => {
+            {athletes.map((a) => {
               const d = DISCIPLINES.find((x) => x.id === a.discipline);
               return (
                 <li
-                  key={a.name}
+                  key={a.id}
                   className="min-w-0 rounded-card border border-border bg-white p-6"
                 >
                   <div className="flex items-center gap-3">

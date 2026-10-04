@@ -13,6 +13,7 @@ type NewsRow = {
   body: string;
   published_at: string;
   is_published: boolean;
+  image_url: string | null;
 };
 
 function mapNews(row: NewsRow): News {
@@ -23,6 +24,7 @@ function mapNews(row: NewsRow): News {
     body: row.body,
     publishedAt: row.published_at,
     isPublished: row.is_published,
+    imageUrl: row.image_url,
   };
 }
 
@@ -75,6 +77,8 @@ export type NewsInput = {
   body: string;
   publishedAt: string;
   isPublished: boolean;
+  // undefined のときは画像を変更しない（編集時に画像を選び直さなかった場合）
+  imageUrl?: string | null;
 };
 
 export async function createNews(input: NewsInput) {
@@ -87,6 +91,7 @@ export async function createNews(input: NewsInput) {
       body: input.body,
       published_at: input.publishedAt,
       is_published: input.isPublished,
+      image_url: input.imageUrl ?? null,
     })
     .select("*")
     .single();
@@ -104,6 +109,7 @@ export async function updateNews(id: string, patch: NewsInput) {
       body: patch.body,
       published_at: patch.publishedAt,
       is_published: patch.isPublished,
+      ...(patch.imageUrl !== undefined ? { image_url: patch.imageUrl } : {}),
     })
     .eq("id", id)
     .select("*")
