@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { Check } from "lucide-react";
 
@@ -8,6 +9,7 @@ import { PageHero } from "@/components/ui/page-hero";
 import { PhotoSlot } from "@/components/ui/photo-slot";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { DISCIPLINES } from "@/lib/constants/site";
+import { assetPath } from "@/lib/utils/asset";
 
 export const metadata: Metadata = {
   title: "近代五種 トレーニング内容",
@@ -18,7 +20,7 @@ export const metadata: Metadata = {
 export default function DisciplinesPage() {
   return (
     <>
-      <PageHero title="近代五種 トレーニング内容" titleEn="DISCIPLINES" />
+      <PageHero title={"近代五種\nトレーニング内容"} titleEn="DISCIPLINES" />
 
       <section className="bg-white py-16 sm:py-20">
         <div className="mx-auto max-w-3xl px-4">
@@ -60,7 +62,7 @@ export default function DisciplinesPage() {
                     href={`/about#standards-${d.id}`}
                     className="font-bold text-navy-800 underline decoration-gold-400 underline-offset-4 transition-colors hover:text-gold-600"
                   >
-                    {d.name}経験者向けの強化選手標準記録を見る
+                    {d.name}強化選手規定を見る
                   </Link>
                 </p>
 
@@ -74,13 +76,30 @@ export default function DisciplinesPage() {
                       </li>
                     ))}
                   </ul>
+                  {d.trainingNote && (
+                    <p className="mt-4 rounded-card border border-border bg-white px-4 py-3 text-sm leading-relaxed text-navy-700">
+                      {d.trainingNote}
+                    </p>
+                  )}
                 </div>
               </div>
 
-              <PhotoSlot
-                label={`${d.name}の練習写真が入ります`}
-                className={reversed ? "lg:order-1" : ""}
-              />
+              {d.photo ? (
+                <Image
+                  src={assetPath(d.photo)}
+                  alt={`${d.name}の練習風景`}
+                  width={1200}
+                  height={d.id === "obstacle" ? 855 : 829}
+                  className={`aspect-[4/3] w-full rounded-card object-cover ${
+                    reversed ? "lg:order-1" : ""
+                  }`}
+                />
+              ) : (
+                <PhotoSlot
+                  label={`${d.name}の練習写真が入ります`}
+                  className={reversed ? "lg:order-1" : ""}
+                />
+              )}
             </div>
           </section>
         );

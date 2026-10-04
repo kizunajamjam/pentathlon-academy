@@ -92,7 +92,7 @@ export const COACHES: { name: string; title: string; bio: string[] }[] = [
   {
     name: "福島聡太",
     title: "オブスタクル・スプリントコーチ",
-    bio: ["筑波大学医学群医学類", "東日本医科学生総合体育大会 100m優勝", "100m 10秒50"],
+    bio: ["筑波大学医学群医学類5回生", "東日本医科学生総合体育大会 100m優勝", "100m 10秒50"],
   },
 ];
 
@@ -117,18 +117,17 @@ export const PARTNERS: { name: string; summary: string; url: string | null }[] =
 ];
 
 /*
- * 強化選手標準記録。
+ * 強化選手規定。
  *
- * これまで何かの競技に取り組んできた方に向けて、種目ごとに
- * アカデミーが提示している記録。あくまで目安であって入会条件ではない。
- * 競技紹介ページの各種目から「〇〇経験者向けの強化選手標準記録を見る」で
+ * これまで何かの競技に取り組んできた方に向けて、種目ごとにアカデミーが
+ * 提示している規定。あくまで目安であって入会条件ではない。
+ * 競技紹介ページの各種目から「〇〇強化選手規定を見る」で
  * アカデミーについてページの #standards-<種目id> に飛ぶ。
  *
- * 記録の数値を設けているのは水泳だけ。ほかの4種目は具体的な記録が無いと
- * オーナーに確認済みで null にしてあり、表示側は「競技歴・大会成績をもとに
- * 個別に相談」という文章を出す。いずれ数値を決めたら水泳と同じ形で埋めるだけでよい。
- *
- * プラス評価は男女共通で1つにまとめ、表の下に出す（オーナー指定）。
+ * 形は2種類。
+ *   times   : 記録で判定する種目（水泳・ランニング）。男女別の表。
+ *   ranking : ランキング・大会成績で判定する種目（フェンシング・オブスタクル・射撃）。
+ * どちらも S / A / B の3段階。
  *
  * 水泳の 200m / 400m 個人メドレーは、水泳選手の地力を測るための種目。
  * 近代五種の水泳そのもの（100m自由形）とは別物なので、ここに 200m が
@@ -140,18 +139,48 @@ export const STANDARD_LEVELS = [
   { label: "B", sub: "チャレンジレベル" },
 ] as const;
 
-export type Standard = {
-  groups: {
-    gender: "男子" | "女子";
-    events: { name: string; times: [string, string, string] }[];
-  }[];
-  plus: string[];
-};
+export type Standard =
+  | {
+      kind: "times";
+      // 表の上に出す説明（任意）
+      lead?: string;
+      groups: {
+        gender: "男子" | "女子";
+        events: { name: string; times: [string, string, string] }[];
+      }[];
+      // 表の下に出す注記（任意）
+      notes: string[];
+      plus: string[];
+    }
+  | {
+      kind: "ranking";
+      // 対象（任意）。例: 中学生以上・エペ・個人
+      target?: string;
+      lead: string;
+      // 順位の列の見出し
+      column: string;
+      ranks: [string, string, string];
+      notes: string[];
+    };
 
-export const STANDARDS: Record<DisciplineId, Standard | null> = {
-  fencing: null,
-  obstacle: null,
+export const STANDARDS: Record<DisciplineId, Standard> = {
+  fencing: {
+    kind: "ranking",
+    target: "中学生以上・エペ・個人",
+    lead: "判定日時点で日本フェンシング協会が公表している最新の全国ランキングを使用します。",
+    column: "全国ランキング",
+    ranks: ["1〜10位", "11〜30位", "31〜50位"],
+    notes: [],
+  },
+  obstacle: {
+    kind: "ranking",
+    lead: "ユース・ジュニア・シニアの各カテゴリーについて、日本選手権の成績を基準とします。",
+    column: "日本選手権順位",
+    ranks: ["1〜3位", "4〜8位", "9〜16位"],
+    notes: [],
+  },
   swimming: {
+    kind: "times",
     groups: [
       {
         gender: "男子",
@@ -172,6 +201,7 @@ export const STANDARDS: Record<DisciplineId, Standard | null> = {
         ],
       },
     ],
+    notes: [],
     // 以前は男女別に持っていたものを1つにまとめた。
     // 「ランニングが得意（男子）／好き（女子）」は1項目に寄せている。
     plus: [
@@ -182,14 +212,49 @@ export const STANDARDS: Record<DisciplineId, Standard | null> = {
       "チャレンジ精神がある",
     ],
   },
-  shooting: null,
-  running: null,
+  shooting: {
+    kind: "ranking",
+    lead: "判定日時点で日本ライフル射撃協会が公表している最新の国内ビームピストル（BP）ランキングを使用します。フェンシングと同じ基準で評価します。",
+    column: "国内ランキング",
+    ranks: ["1〜10位", "11〜30位", "31〜50位"],
+    notes: [],
+  },
+  running: {
+    kind: "times",
+    lead: "800m・1500m・3000mのいずれか1種目で基準記録を突破した場合、そのランクを認定します。",
+    groups: [
+      {
+        gender: "男子",
+        events: [
+          { name: "800m", times: ["1:52.00", "1:56.00", "2:00.00"] },
+          { name: "1500m", times: ["3:50.00", "3:55.00", "4:02.00"] },
+          { name: "3000m", times: ["8:15.00", "8:30.00", "8:45.00"] },
+        ],
+      },
+      {
+        gender: "女子",
+        events: [
+          { name: "800m", times: ["2:08.00", "2:12.00", "2:16.00"] },
+          { name: "1500m", times: ["4:22.00", "4:28.00", "4:35.00"] },
+          { name: "3000m", times: ["9:10.00", "9:25.00", "9:45.00"] },
+        ],
+      },
+    ],
+    notes: [
+      "年齢・世代による区分は設けません。",
+      "男子・女子を分けて判定します。",
+      "公式競技会で記録された公認記録を使用します。",
+    ],
+    plus: [],
+  },
 };
 
 export const NAV_ITEMS = [
   { href: "/", label: "トップ", labelEn: "HOME" },
   { href: "/about", label: "アカデミーについて", labelEn: "ABOUT" },
   { href: "/disciplines", label: "近代五種 トレーニング内容", labelEn: "DISCIPLINES" },
+  { href: "/athletes", label: "強化選手", labelEn: "ATHLETES" },
+  { href: "/ancient", label: "古代五種", labelEn: "ANCIENT" },
   { href: "/schedule", label: "練習スケジュール", labelEn: "SCHEDULE" },
   { href: "/events", label: "大会・イベント", labelEn: "EVENTS" },
   { href: "/news", label: "お知らせ", labelEn: "NEWS" },
@@ -212,6 +277,10 @@ export const DISCIPLINES: {
   summary: string;
   detail: string;
   training: string[];
+  // 練習内容の下に添える補足（任意）
+  trainingNote?: string;
+  // public/photos/ 配下の練習写真（任意）。無い種目は PhotoSlot が出る。
+  photo?: string;
   text: string;
   bg: string;
   border: string;
@@ -231,6 +300,7 @@ export const DISCIPLINES: {
       "距離感をつくる練習",
       "1分間の総当たり形式の実戦",
     ],
+    photo: "/photos/fencing.jpg",
     // 文字色だけ一段濃くしている。gold-600 は白地で 3.66:1 しかなく、
     // 競技の説明文やスケジュールの種目名が読みにくかった（要 4.5:1）。
     // 丸や面に使う gold-500 は図形なので、そのままでよい。
@@ -243,10 +313,11 @@ export const DISCIPLINES: {
     id: "obstacle",
     name: "オブスタクル",
     nameEn: "OBSTACLE",
-    summary: "うんてい、壁のぼり。全身を使って駆け抜ける新種目。",
+    summary: "モンキーバー、壁のぼり。全身を使って駆け抜ける新種目。",
     detail:
-      "2028年のロサンゼルス五輪から、馬術に代わって加わった種目です。うんていや壁のぼりなど8つの障害が並ぶコースを、次々に越えて駆け抜けます。腕・体幹・脚をまんべんなく使うため、身体づくりの土台になります。",
-    training: ["うんてい・ぶら下がりの基礎", "体幹と握力のトレーニング", "コースを通しで走る実戦形式"],
+      "モンキーバーやフィニッシュウォールなど8つの障害が並ぶコースを、次々に越えて駆け抜ける種目です。腕・体幹・脚をまんべんなく使うため、身体づくりの土台になります。",
+    training: ["スイング・ぶら下がりの基礎", "体幹と握力のトレーニング", "コースを通しで走る実戦形式"],
+    photo: "/photos/obstacle.jpg",
     text: "text-obstacle-500",
     bg: "bg-obstacle-50",
     border: "border-obstacle-500/20",
@@ -319,3 +390,23 @@ export const INQUIRY_CATEGORIES = [
   "取材・メディア",
   "その他",
 ] as const;
+
+/*
+ * 強化選手。
+ *
+ * designation は強化選手規定のどの種目・ランクで指定されたか。
+ * 記録は大会名や日付が未確認なので、種目と記録だけを載せている。
+ */
+export const ATHLETES: {
+  name: string;
+  discipline: DisciplineId;
+  designation: string;
+  records: { event: string; time: string }[];
+}[] = [
+  {
+    name: "蒲生貴之",
+    discipline: "swimming",
+    designation: "水泳S指定",
+    records: [{ event: "50m 自由形（短水路）", time: "24秒64" }],
+  },
+];

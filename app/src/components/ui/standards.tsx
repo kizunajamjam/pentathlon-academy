@@ -1,7 +1,7 @@
 import { STANDARD_LEVELS, type Standard } from "@/lib/constants/site";
 
 /*
- * 1種目ぶんの強化選手標準記録（男女の表＋共通のプラス評価）。
+ * 1種目ぶんの強化選手規定。記録で判定する種目は男女の表、ランキング・成績で判定する種目は順位の表。
  *
  * 入会条件ではなく目安なので、王冠やゴールド調の装飾は付けず、
  * サイトの他の表と同じ落ち着いた見た目に揃えている。
@@ -11,9 +11,72 @@ import { STANDARD_LEVELS, type Standard } from "@/lib/constants/site";
  * 割合で決め打ちし、一番狭い画面でも4列すべてが収まるようにしている。
  * 種目名と段階の補足ラベルは、収まらなければ2行に折り返してよい。
  */
+function Legend() {
+  return (
+    <p className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-muted">
+      {STANDARD_LEVELS.map((lv) => (
+        <span key={lv.label} className="whitespace-nowrap">
+          <span className="font-display font-bold text-navy-800">{lv.label}</span> {lv.sub}
+        </span>
+      ))}
+    </p>
+  );
+}
+
+function Notes({ notes }: { notes: string[] }) {
+  if (notes.length === 0) return null;
+  return (
+    <ul className="mt-6 space-y-1.5">
+      {notes.map((n) => (
+        <li key={n} className="flex items-start gap-2 text-sm text-muted">
+          <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-gold-500" />
+          {n}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function RankingTable({ standard }: { standard: Extract<Standard, { kind: "ranking" }> }) {
+  return (
+    <div className="max-w-xl">
+      {standard.target && (
+        <p className="mb-3 text-sm text-navy-800">
+          <span className="font-bold">対象：</span>
+          {standard.target}
+        </p>
+      )}
+      <p className="text-sm leading-relaxed text-navy-700">{standard.lead}</p>
+      <table className="mt-4 w-full table-fixed border-collapse text-sm">
+        <thead>
+          <tr className="border-b border-border">
+            <th className="w-[30%] py-3 pr-2 text-left font-normal text-muted">ランク</th>
+            <th className="py-3 text-right font-normal text-muted">{standard.column}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {STANDARD_LEVELS.map((lv, i) => (
+            <tr key={lv.label} className="border-b border-border">
+              <td className="py-3 pr-2 font-display font-bold text-navy-800">{lv.label}</td>
+              <td className="py-3 text-right font-display tabular-nums text-navy-800">
+                {standard.ranks[i]}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <Legend />
+      <Notes notes={standard.notes} />
+    </div>
+  );
+}
+
 export function Standards({ standard }: { standard: Standard }) {
+  if (standard.kind === "ranking") return <RankingTable standard={standard} />;
+
   return (
     <div>
+      {standard.lead && <p className="mb-6 text-sm leading-relaxed text-navy-700">{standard.lead}</p>}
       <div className="grid gap-8 lg:grid-cols-2 lg:gap-10">
         {standard.groups.map((group) => (
           // min-w-0 がないと、表の最小幅がグリッドの列を押し広げてページ全体が
@@ -53,21 +116,12 @@ export function Standards({ standard }: { standard: Standard }) {
               </tbody>
             </table>
 
-            {/*
-              段階の呼び名は表の見出しに入れると列幅を押し広げ、
-              「トップレベ / ル」のように1文字だけ折り返してしまう。
-              表の外に出し、1項目ずつを nowrap にして語の途中で折れないようにする。
-            */}
-            <p className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-muted">
-              {STANDARD_LEVELS.map((lv) => (
-                <span key={lv.label} className="whitespace-nowrap">
-                  <span className="font-display font-bold text-navy-800">{lv.label}</span> {lv.sub}
-                </span>
-              ))}
-            </p>
+            <Legend />
           </div>
         ))}
       </div>
+
+      <Notes notes={standard.notes} />
 
       {/* プラス評価は男女共通。表の下にまとめて1つだけ出す。 */}
       {standard.plus.length > 0 && (

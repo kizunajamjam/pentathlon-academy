@@ -14,7 +14,7 @@ import { COACHES, DISCIPLINES, PARTNERS, SITE, STANDARDS } from "@/lib/constants
 export const metadata: Metadata = {
   title: "アカデミーについて",
   description:
-    "ペンタスロンアカデミーの理念と指導方針、指導者の紹介、強化選手標準記録、連携先、今後の研究についてご紹介します。",
+    "ペンタスロンアカデミーの理念と指導方針、指導者の紹介、強化選手規定、連携先、今後の研究についてご紹介します。",
 };
 
 // ⚠️ 仮テキスト。正式な理念・実績が決まり次第この配列を差し替える。
@@ -48,7 +48,7 @@ const POLICIES = [
  * 初級/選手のクラス分けは実際には設けていないため、項目ごと持たない。
  */
 const FACTS = [
-  { label: "対象", value: "中学生・高校生 〜 社会人の方が中心です（ほかの年代の方もご相談ください）" },
+  { label: "対象", value: "小学生 〜 社会人の方が中心です（ほかの年代の方もご相談ください）" },
   { label: "練習形態", value: "個別 / グループ（ご希望に合わせてご相談ください）" },
   {
     label: "練習日",
@@ -175,18 +175,17 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* ── 強化選手標準記録 ───────────────────────────────────────── */}
+      {/* ── 強化選手規定 ───────────────────────────────────────── */}
       {/*
         種目ごとに小見出しとアンカー（#standards-<種目id>）を持たせ、
-        競技紹介ページの「〇〇経験者向けの強化選手標準記録を見る」から直接飛べるようにする。
-        記録の数値を設けていない種目は STANDARDS が null で、個別に相談する旨の文章を出す。
+        競技紹介ページの「〇〇強化選手規定を見る」から直接飛べるようにする。
       */}
       <section id="standards" className="scroll-mt-20 bg-surface py-16 sm:py-24">
         <div className="mx-auto max-w-6xl px-4">
           <SectionHeading
             eyebrow="STANDARDS"
-            title="強化選手標準記録"
-            description="これまで取り組んできた競技がある方に向けて、種目ごとにひとつの目安として記録を示しています。入会の条件ではありませんので、届いていなくても構いません。"
+            title="強化選手規定"
+            description="これまで取り組んできた競技がある方に向けて、種目ごとにひとつの目安として規定を示しています。入会の条件ではありませんので、届いていなくても構いません。"
           />
           <div className="mt-12 space-y-14">
             {DISCIPLINES.map((d) => {
@@ -195,17 +194,10 @@ export default function AboutPage() {
                 <div key={d.id} id={`standards-${d.id}`} className="scroll-mt-24">
                   <div className="flex items-center gap-3 border-b border-border pb-3">
                     <DisciplineIcon id={d.id} className="h-10 w-10 shrink-0 object-contain" />
-                    <h3 className="text-lg text-navy-800">{d.name}経験者向け</h3>
+                    <h3 className="text-lg text-navy-800">{d.name}強化選手規定</h3>
                   </div>
                   <div className="mt-6">
-                    {standard ? (
-                      <Standards standard={standard} />
-                    ) : (
-                      <p className="rounded-card border border-border bg-white px-5 py-4 text-sm leading-relaxed text-navy-700 sm:px-6">
-                        {d.name}
-                        の経験がある方は、これまでの競技歴や大会成績をもとに、個別にご相談させていただきます。
-                      </p>
-                    )}
+                    <Standards standard={standard} />
                   </div>
                 </div>
               );

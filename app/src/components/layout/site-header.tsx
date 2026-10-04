@@ -20,7 +20,7 @@ export function SiteHeader() {
     <header className="sticky top-0 z-50 bg-navy-800 shadow-sm">
       {/*
         ヘッダーだけ各ページの本文セクションより広いコンテナを使う。
-        max-w-6xl（本文と同じ幅）だと、ロゴ＋7項目＋CTAボタンの合計幅が
+        max-w-6xl（本文と同じ幅）だと、ロゴ＋9項目＋CTAボタンの合計幅が
         コンテナ幅を超え、各リンクが個別に縮んで日本語が途中で折り返されていた。
         ページ幅を広げても直らなかったのは、コンテナ自体に上限があったため。
       */}
@@ -29,8 +29,8 @@ export function SiteHeader() {
           <SiteLogo />
         </Link>
 
-        {/* デスクトップ: 7項目あるので xl 以上でのみ横並びにする */}
-        <nav className="hidden xl:flex xl:items-center xl:gap-1">
+        {/* デスクトップ: 9項目あるので 2xl 以上でのみ横並びにする */}
+        <nav className="hidden 2xl:flex 2xl:items-center 2xl:gap-1">
           {NAV_ITEMS.map((item) => (
             <Link
               key={item.href}
@@ -55,7 +55,7 @@ export function SiteHeader() {
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}
-          className="rounded p-2 text-white hover:bg-navy-700 xl:hidden"
+          className="rounded p-2 text-white hover:bg-navy-700 2xl:hidden"
           aria-label={open ? "メニューを閉じる" : "メニューを開く"}
           aria-expanded={open}
         >
@@ -65,7 +65,7 @@ export function SiteHeader() {
 
       {/* モバイル */}
       {open && (
-        <nav className="border-t border-navy-700 bg-navy-800 xl:hidden">
+        <nav className="border-t border-navy-700 bg-navy-800 2xl:hidden">
           <ul className="mx-auto max-w-6xl px-4 py-2">
             {NAV_ITEMS.map((item) => (
               <li key={item.href}>
