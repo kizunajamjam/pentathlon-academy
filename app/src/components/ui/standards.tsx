@@ -13,7 +13,7 @@ import { STANDARD_LEVELS, type Standard } from "@/lib/constants/site";
  */
 function Legend() {
   return (
-    <p className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-muted">
+    <p className="mt-3 flex flex-wrap justify-center gap-x-4 gap-y-1 text-[11px] text-muted">
       {STANDARD_LEVELS.map((lv) => (
         <span key={lv.label} className="whitespace-nowrap">
           <span className="font-display font-bold text-navy-800">{lv.label}</span> {lv.sub}
@@ -26,7 +26,7 @@ function Legend() {
 function Notes({ notes }: { notes: string[] }) {
   if (notes.length === 0) return null;
   return (
-    <ul className="mt-6 space-y-1.5">
+    <ul className="mx-auto mt-6 w-fit space-y-1.5">
       {notes.map((n) => (
         <li key={n} className="flex items-start gap-2 text-sm text-muted">
           <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-gold-500" />
@@ -39,26 +39,26 @@ function Notes({ notes }: { notes: string[] }) {
 
 function RankingTable({ standard }: { standard: Extract<Standard, { kind: "ranking" }> }) {
   return (
-    <div className="max-w-xl">
+    <div className="mx-auto max-w-sm">
       {standard.target && (
-        <p className="mb-3 text-sm text-navy-800">
+        <p className="mb-3 text-center text-sm text-navy-800">
           <span className="font-bold">対象：</span>
           {standard.target}
         </p>
       )}
-      <p className="text-sm leading-relaxed text-navy-700">{standard.lead}</p>
+      <p className="text-center text-sm leading-relaxed text-navy-700">{standard.lead}</p>
       <table className="mt-4 w-full table-fixed border-collapse text-sm">
         <thead>
           <tr className="border-b border-border">
-            <th className="w-[30%] py-3 pr-2 text-left font-normal text-muted">ランク</th>
-            <th className="py-3 text-right font-normal text-muted">{standard.column}</th>
+            <th className="w-[40%] py-3 text-center font-normal text-muted">ランク</th>
+            <th className="py-3 text-center font-normal text-muted">{standard.column}</th>
           </tr>
         </thead>
         <tbody>
           {STANDARD_LEVELS.map((lv, i) => (
             <tr key={lv.label} className="border-b border-border">
-              <td className="py-3 pr-2 font-display font-bold text-navy-800">{lv.label}</td>
-              <td className="py-3 text-right font-display tabular-nums text-navy-800">
+              <td className="py-3 text-center font-display font-bold text-navy-800">{lv.label}</td>
+              <td className="py-3 text-center font-display tabular-nums text-navy-800">
                 {standard.ranks[i]}
               </td>
             </tr>
@@ -76,23 +76,23 @@ export function Standards({ standard }: { standard: Standard }) {
 
   return (
     <div>
-      {standard.lead && <p className="mb-6 text-sm leading-relaxed text-navy-700">{standard.lead}</p>}
-      <div className="grid gap-8 lg:grid-cols-2 lg:gap-10">
+      {standard.lead && <p className="mb-6 text-center text-sm leading-relaxed text-navy-700">{standard.lead}</p>}
+      <div className="mx-auto grid max-w-3xl gap-8 lg:grid-cols-2 lg:gap-10">
         {standard.groups.map((group) => (
           // min-w-0 がないと、表の最小幅がグリッドの列を押し広げてページ全体が
           // 横スクロールしてしまう（グリッド項目の既定の最小幅は auto のため）
           <div key={group.gender} className="min-w-0">
-            <h4 className="font-display text-base font-bold text-navy-800">{group.gender}</h4>
+            <h4 className="text-center font-display text-base font-bold text-navy-800">{group.gender}</h4>
 
             <table className="mt-3 w-full table-fixed border-collapse text-[13px] sm:text-sm">
               <thead>
                 <tr className="border-b border-border">
                   {/* 残り 3 列が均等に 20% ずつ取れる幅。時計表記は 7 桁が最長。 */}
-                  <th className="w-[40%] py-3 pr-2 text-left font-normal text-muted">種目</th>
+                  <th className="w-[40%] py-3 pr-2 text-center font-normal text-muted">種目</th>
                   {STANDARD_LEVELS.map((lv) => (
                     <th
                       key={lv.label}
-                      className="px-1 py-3 text-right font-bold text-navy-800 sm:px-2"
+                      className="px-1 py-3 text-center font-bold text-navy-800 sm:px-2"
                     >
                       {lv.label}
                     </th>
@@ -102,11 +102,11 @@ export function Standards({ standard }: { standard: Standard }) {
               <tbody>
                 {group.events.map((ev) => (
                   <tr key={ev.name} className="border-b border-border">
-                    <td className="py-3 pr-2 leading-tight text-navy-700">{ev.name}</td>
+                    <td className="py-3 pr-2 text-center leading-tight text-navy-700">{ev.name}</td>
                     {ev.times.map((t, i) => (
                       <td
                         key={STANDARD_LEVELS[i].label}
-                        className="px-1 py-3 text-right font-display tabular-nums text-navy-800 sm:px-2"
+                        className="px-1 py-3 text-center font-display tabular-nums text-navy-800 sm:px-2"
                       >
                         {t}
                       </td>
@@ -122,21 +122,6 @@ export function Standards({ standard }: { standard: Standard }) {
       </div>
 
       <Notes notes={standard.notes} />
-
-      {/* プラス評価は男女共通。表の下にまとめて1つだけ出す。 */}
-      {standard.plus.length > 0 && (
-        <div className="mt-8">
-          <p className="text-sm font-bold text-navy-800">プラス評価（男女共通）</p>
-          <ul className="mt-2 space-y-1.5">
-            {standard.plus.map((p) => (
-              <li key={p} className="flex items-start gap-2 text-sm text-muted">
-                <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-gold-500" />
-                {p}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
     </div>
   );
 }

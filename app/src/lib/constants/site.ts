@@ -202,19 +202,11 @@ export const STANDARDS: Record<DisciplineId, Standard> = {
       },
     ],
     notes: [],
-    // 以前は男女別に持っていたものを1つにまとめた。
-    // 「ランニングが得意（男子）／好き（女子）」は1項目に寄せている。
-    plus: [
-      "ランニングが得意・好き",
-      "身体操作能力が高い（跳ぶ・登る・バランス）",
-      "新しい競技への興味がある",
-      "継続して練習できる",
-      "チャレンジ精神がある",
-    ],
+    plus: [],
   },
   shooting: {
     kind: "ranking",
-    lead: "判定日時点で日本ライフル射撃協会が公表している最新の国内ビームピストル（BP）ランキングを使用します。フェンシングと同じ基準で評価します。",
+    lead: "判定日時点で日本ライフル射撃協会が公表している最新の国内ビームピストル（BP）ランキングを使用します。",
     column: "国内ランキング",
     ranks: ["1〜10位", "11〜30位", "31〜50位"],
     notes: [],
@@ -242,8 +234,7 @@ export const STANDARDS: Record<DisciplineId, Standard> = {
     ],
     notes: [
       "年齢・世代による区分は設けません。",
-      "男子・女子を分けて判定します。",
-      "公式競技会で記録された公認記録を使用します。",
+      "日本陸上競技連盟公認記録を使用します。",
     ],
     plus: [],
   },
@@ -252,12 +243,12 @@ export const STANDARDS: Record<DisciplineId, Standard> = {
 export const NAV_ITEMS = [
   { href: "/", label: "トップ", labelEn: "HOME" },
   { href: "/about", label: "アカデミーについて", labelEn: "ABOUT" },
-  { href: "/disciplines", label: "近代五種 トレーニング内容", labelEn: "DISCIPLINES" },
-  { href: "/athletes", label: "強化選手", labelEn: "ATHLETES" },
-  { href: "/ancient", label: "古代五種", labelEn: "ANCIENT" },
-  { href: "/schedule", label: "練習スケジュール", labelEn: "SCHEDULE" },
-  { href: "/events", label: "大会・イベント", labelEn: "EVENTS" },
   { href: "/news", label: "お知らせ", labelEn: "NEWS" },
+  { href: "/disciplines", label: "トレーニング", labelEn: "TRAINING" },
+  { href: "/schedule", label: "練習スケジュール", labelEn: "SCHEDULE" },
+  { href: "/athletes", label: "強化選手", labelEn: "ATHLETES" },
+  { href: "/events", label: "大会・イベント", labelEn: "EVENTS" },
+  { href: "/ancient", label: "古代五種", labelEn: "ANCIENT" },
   { href: "/contact", label: "お問い合わせ", labelEn: "CONTACT" },
 ] as const;
 
