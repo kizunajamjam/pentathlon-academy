@@ -20,13 +20,13 @@ export const metadata: Metadata = {
 
 // ⚠️ 仮テキスト。正式な理念・実績が決まり次第この配列を差し替える。
 //
-// 「競技よりも先に、人間力向上を」を先頭に置くのはオーナー指定。
+// 「競技力よりも先に、人間力向上を」を先頭に置くのはオーナー指定。
 // EQ測定は具体的な検査名・頻度を決めていないため（オーナー確認済み）、
 // 本文は「取り入れている」ことだけに留めている。
 const POLICIES = [
   {
     icon: HeartHandshake,
-    title: "競技よりも先に、人間力向上を",
+    title: "競技力よりも先に、人間力向上を",
     body: "剣やレーザーピストルの扱い、譲り合って使う施設、対戦相手への礼。近代五種は道具と人に囲まれて成り立つ競技です。アカデミーではEQ（心の知能指数）の測定を取り入れ、自分の感情や人との関わり方を客観的に見つめながら、競技を通じて人としての力を高めていきます。",
   },
   {
@@ -105,7 +105,7 @@ export default async function AboutPage() {
                     <Icon size={26} className="text-gold-400" />
                   </span>
                   <h3 className="mt-5 text-lg text-navy-800">{p.title}</h3>
-                  <p className="mt-3 text-sm leading-relaxed text-muted">{p.body}</p>
+                  <p className="mt-3 text-left text-sm leading-relaxed text-muted">{p.body}</p>
                 </li>
               );
             })}
