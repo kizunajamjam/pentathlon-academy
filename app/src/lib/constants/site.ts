@@ -215,7 +215,6 @@ export const STANDARDS: Record<DisciplineId, Standard> = {
   },
   running: {
     kind: "times",
-    lead: "800m・1500m・3000mのいずれか1種目で基準記録を突破した場合、そのランクを認定します。",
     groups: [
       {
         gender: "男子",

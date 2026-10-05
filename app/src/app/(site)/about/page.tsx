@@ -86,6 +86,9 @@ export default async function AboutPage() {
             <p className="mt-4 max-w-2xl text-sm leading-relaxed text-muted sm:text-base">
               5種目に取り組むなかで身につく、挑戦する力・考える力・やり抜く力。近代五種を通じて、人生を切り拓く総合力を育むことを目指しています。
             </p>
+            <p className="mt-4 max-w-2xl text-sm leading-relaxed text-muted sm:text-base">
+              いずれ、1箇所で近代五種のすべての練習ができる練習拠点をつくり、競技人口を増やし、近代五種を通じてスポーツ教育が行われる環境をつくること。それが私たちの夢です。
+            </p>
           </div>
           <PhotoSlot label="アカデミー全体の集合写真などが入ります" />
         </div>
@@ -220,7 +223,7 @@ export default async function AboutPage() {
           <SectionHeading
             eyebrow="PARTNERS"
             title="連携先"
-            description="5種目を支える環境は、アカデミーだけで揃うものではありません。専門の施設・クラブと連携して練習環境をつくっています。"
+            description="現状、5種目を支える環境はアカデミーだけでは揃っていないので、専門の施設・クラブと連携して練習環境をつくっています。"
           />
           <ul className="mt-10 grid gap-4 sm:grid-cols-2">
             {PARTNERS.map((partner) => (
