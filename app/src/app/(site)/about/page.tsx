@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { Compass, ExternalLink, HeartHandshake, Microscope, Sparkles } from "lucide-react";
 
@@ -11,6 +12,7 @@ import { SectionHeading } from "@/components/ui/section-heading";
 import { Standards } from "@/components/ui/standards";
 import { DISCIPLINES, PARTNERS, SITE, STANDARDS } from "@/lib/constants/site";
 import { listPublishedCoaches } from "@/lib/db/coaches";
+import { assetPath } from "@/lib/utils/asset";
 
 export const metadata: Metadata = {
   title: "アカデミーについて",
@@ -224,8 +226,18 @@ export default async function AboutPage() {
             {PARTNERS.map((partner) => (
               <li
                 key={partner.name}
-                className="rounded-card border border-border bg-surface px-6 py-6"
+                className="overflow-hidden rounded-card border border-border bg-surface"
               >
+                {partner.photo && (
+                  <Image
+                    src={assetPath(partner.photo)}
+                    alt={`${partner.name}の施設`}
+                    width={1546}
+                    height={1060}
+                    className="aspect-[3/2] w-full object-cover"
+                  />
+                )}
+                <div className="px-6 py-6">
                 <p className="font-display text-base font-bold text-navy-800">{partner.name}</p>
                 <p className="mt-2 text-sm leading-relaxed text-muted">{partner.summary}</p>
                 {partner.url && (
@@ -239,6 +251,7 @@ export default async function AboutPage() {
                     <ExternalLink size={14} className="shrink-0" />
                   </a>
                 )}
+                </div>
               </li>
             ))}
           </ul>

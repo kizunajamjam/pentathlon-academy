@@ -103,11 +103,12 @@ export const COACHES: { name: string; title: string; bio: string[] }[] = [
  * オーナーからは「ホームページアドレスとともに」と依頼を受けているが、
  * アドレス自体は未受領。届いたら url を入れるとリンクになる。
  */
-export const PARTNERS: { name: string; summary: string; url: string | null }[] = [
+export const PARTNERS: { name: string; summary: string; url: string | null; photo?: string }[] = [
   {
     name: "ITAMI MED-FIT",
     summary: "コンディショニング・身体づくりの面で連携しています。",
     url: null,
+    photo: "/photos/itami-medfit.jpg",
   },
   {
     name: "無畏フェンシングクラブ",
@@ -349,6 +350,7 @@ export const DISCIPLINES: {
     detail:
       "射撃とランニングを交互に繰り返す「レーザーラン」として行われ、近代五種の最終種目です。ここまでの得点差がスタート時間の差になるため、順位がそのまま目に見える形で競われます。",
     training: ["走り方の基礎", "ダニエルズ理論に基づく強度設定", "射撃と組み合わせた実戦形式"],
+    photo: "/photos/running.jpg",
     text: "text-navy-800",
     bg: "bg-navy-50",
     border: "border-navy-200",

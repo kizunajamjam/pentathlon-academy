@@ -89,10 +89,10 @@ export default function DisciplinesPage() {
                   src={assetPath(d.photo)}
                   alt={`${d.name}の練習風景`}
                   width={1200}
-                  height={d.id === "obstacle" ? 855 : 829}
+                  height={d.id === "obstacle" ? 855 : d.id === "running" ? 1320 : 829}
                   className={`aspect-[4/3] w-full rounded-card object-cover ${
-                    reversed ? "lg:order-1" : ""
-                  }`}
+                    d.id === "running" ? "object-[50%_35%]" : ""
+                  } ${reversed ? "lg:order-1" : ""}`}
                 />
               ) : (
                 <PhotoSlot
