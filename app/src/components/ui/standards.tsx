@@ -11,18 +11,6 @@ import { STANDARD_LEVELS, type Standard } from "@/lib/constants/site";
  * 割合で決め打ちし、一番狭い画面でも4列すべてが収まるようにしている。
  * 種目名と段階の補足ラベルは、収まらなければ2行に折り返してよい。
  */
-function Legend() {
-  return (
-    <p className="mt-3 flex flex-wrap justify-center gap-x-4 gap-y-1 text-[11px] text-muted">
-      {STANDARD_LEVELS.map((lv) => (
-        <span key={lv.label} className="whitespace-nowrap">
-          <span className="font-display font-bold text-navy-800">{lv.label}</span> {lv.sub}
-        </span>
-      ))}
-    </p>
-  );
-}
-
 function Notes({ notes }: { notes: string[] }) {
   if (notes.length === 0) return null;
   return (
@@ -65,7 +53,6 @@ function RankingTable({ standard }: { standard: Extract<Standard, { kind: "ranki
           ))}
         </tbody>
       </table>
-      <Legend />
       <Notes notes={standard.notes} />
     </div>
   );
@@ -116,8 +103,7 @@ export function Standards({ standard }: { standard: Standard }) {
               </tbody>
             </table>
 
-            <Legend />
-          </div>
+                </div>
         ))}
       </div>
 

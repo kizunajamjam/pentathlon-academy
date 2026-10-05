@@ -182,6 +182,7 @@ export const STANDARDS: Record<DisciplineId, Standard> = {
   },
   swimming: {
     kind: "times",
+    lead: "日本水泳連盟公認記録（短水路）での基準です。",
     groups: [
       {
         gender: "男子",
