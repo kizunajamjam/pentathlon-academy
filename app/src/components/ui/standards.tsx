@@ -14,7 +14,7 @@ import { STANDARD_LEVELS, type Standard } from "@/lib/constants/site";
 function Notes({ notes }: { notes: string[] }) {
   if (notes.length === 0) return null;
   return (
-    <ul className="mx-auto mt-6 w-fit space-y-1.5">
+    <ul className="mx-auto mt-6 max-w-3xl space-y-1.5">
       {notes.map((n) => (
         <li key={n} className="flex items-start gap-2 text-sm text-muted">
           <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-gold-500" />
@@ -63,7 +63,9 @@ export function Standards({ standard }: { standard: Standard }) {
 
   return (
     <div>
-      {standard.lead && <p className="mb-6 text-left text-sm leading-relaxed text-navy-700">{standard.lead}</p>}
+      {standard.lead && (
+        <p className="mx-auto mb-6 max-w-3xl text-left text-sm leading-relaxed text-navy-700">{standard.lead}</p>
+      )}
       <div className="mx-auto grid max-w-3xl gap-8 lg:grid-cols-2 lg:gap-10">
         {standard.groups.map((group) => (
           // min-w-0 がないと、表の最小幅がグリッドの列を押し広げてページ全体が
