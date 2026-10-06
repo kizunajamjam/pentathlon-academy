@@ -402,4 +402,10 @@ export const ATHLETES: {
     designation: "水泳S指定",
     records: [{ event: "50m 自由形（短水路）", time: "24秒64" }],
   },
+  {
+    name: "西川陽治",
+    discipline: "obstacle",
+    designation: "オブスタクルA指定",
+    records: [{ event: "第2回OCR100m日本選手権 ユース", time: "7位" }],
+  },
 ];

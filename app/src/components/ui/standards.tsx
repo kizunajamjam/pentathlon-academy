@@ -29,12 +29,12 @@ function RankingTable({ standard }: { standard: Extract<Standard, { kind: "ranki
   return (
     <div className="mx-auto max-w-sm">
       {standard.target && (
-        <p className="mb-3 text-center text-sm text-navy-800">
+        <p className="mb-3 text-left text-sm text-navy-800">
           <span className="font-bold">対象：</span>
           {standard.target}
         </p>
       )}
-      <p className="text-center text-sm leading-relaxed text-navy-700">{standard.lead}</p>
+      <p className="text-left text-sm leading-relaxed text-navy-700">{standard.lead}</p>
       <table className="mt-4 w-full table-fixed border-collapse text-sm">
         <thead>
           <tr className="border-b border-border">
@@ -63,7 +63,7 @@ export function Standards({ standard }: { standard: Standard }) {
 
   return (
     <div>
-      {standard.lead && <p className="mb-6 text-center text-sm leading-relaxed text-navy-700">{standard.lead}</p>}
+      {standard.lead && <p className="mb-6 text-left text-sm leading-relaxed text-navy-700">{standard.lead}</p>}
       <div className="mx-auto grid max-w-3xl gap-8 lg:grid-cols-2 lg:gap-10">
         {standard.groups.map((group) => (
           // min-w-0 がないと、表の最小幅がグリッドの列を押し広げてページ全体が

@@ -5,7 +5,6 @@ import { DisciplineIcon } from "@/components/icons/discipline-icons";
 import { ButtonLink } from "@/components/ui/button-link";
 import { PageHero } from "@/components/ui/page-hero";
 import { SectionHeading } from "@/components/ui/section-heading";
-import { DISCIPLINES } from "@/lib/constants/site";
 import { listPublishedAthletes } from "@/lib/db/athletes";
 
 export const metadata: Metadata = {
@@ -31,7 +30,6 @@ export default async function AthletesPage() {
 
           <ul className="mt-10 grid gap-5 sm:grid-cols-2">
             {athletes.map((a) => {
-              const d = DISCIPLINES.find((x) => x.id === a.discipline);
               return (
                 <li
                   key={a.id}
@@ -47,7 +45,6 @@ export default async function AthletesPage() {
                     </span>
                   </div>
                   <p className="mt-4 font-display text-xl font-bold text-navy-800">{a.name}</p>
-                  {d && <p className="mt-1 text-xs text-muted">{d.name}</p>}
                   <dl className="mt-4 divide-y divide-border border-y border-border">
                     {a.records.map((r) => (
                       <div key={r.event} className="flex items-baseline justify-between gap-4 py-3">
