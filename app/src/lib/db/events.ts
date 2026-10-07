@@ -32,12 +32,19 @@ function mapEvent(row: EventRow): AcademyEvent {
   };
 }
 
-// これから開催されるもの(開催日が今日以降)を古い順に。
+// 今日(JST)の 00:00。大会当日や複数日開催の途中でも「開催予定」に残すための基準。
+function startOfTodayJst(): string {
+  const today = new Date().toLocaleDateString("sv-SE", { timeZone: "Asia/Tokyo" });
+  return new Date(`${today}T00:00:00+09:00`).toISOString();
+}
+
+// これから開催されるもの(最終日が今日以降)を古い順に。
+// 静的書き出しではビルド時点で判定されるため、pages.yml で毎日ビルドし直している。
 export async function listUpcomingEvents(limit?: number): Promise<AcademyEvent[]> {
-  const now = new Date().toISOString();
+  const today = startOfTodayJst();
 
   if (!isSupabaseConfigured) {
-    const list = SEED_EVENTS.filter((e) => e.startsAt >= now).sort((a, b) =>
+    const list = SEED_EVENTS.filter((e) => (e.endsAt ?? e.startsAt) >= today).sort((a, b) =>
       a.startsAt.localeCompare(b.startsAt),
     );
     return limit ? list.slice(0, limit) : list;
@@ -48,7 +55,7 @@ export async function listUpcomingEvents(limit?: number): Promise<AcademyEvent[]
     .from("events")
     .select("*")
     .eq("is_published", true)
-    .gte("starts_at", now)
+    .or(`ends_at.gte.${today},and(ends_at.is.null,starts_at.gte.${today})`)
     .order("starts_at", { ascending: true });
 
   if (limit) query = query.limit(limit);

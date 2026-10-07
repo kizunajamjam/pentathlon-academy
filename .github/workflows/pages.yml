@@ -5,6 +5,10 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+  # 大会の「開催予定」はビルド時点の日付で決まるため、毎日作り直して
+  # 終わった大会を外す。JST 0:17 ごろ（UTC 15:17）。
+  schedule:
+    - cron: "17 15 * * *"
 
 permissions:
   contents: read

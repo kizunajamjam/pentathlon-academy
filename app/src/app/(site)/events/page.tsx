@@ -4,16 +4,16 @@ import { ButtonLink } from "@/components/ui/button-link";
 import { EventCard } from "@/components/ui/event-card";
 import { PageHero } from "@/components/ui/page-hero";
 import { SectionHeading } from "@/components/ui/section-heading";
-import { listPastEvents, listUpcomingEvents } from "@/lib/db/events";
+import { listUpcomingEvents } from "@/lib/db/events";
 
 export const metadata: Metadata = {
   title: "大会・イベント",
   description:
-    "ペンタスロンアカデミーが参加・主催する大会、体験会、合宿、見学会の予定と過去の実施記録です。",
+    "ペンタスロンアカデミーの選手が出場できる大会の予定と、体験・見学のご案内です。",
 };
 
 export default async function EventsPage() {
-  const [upcoming, past] = await Promise.all([listUpcomingEvents(), listPastEvents(6)]);
+  const upcoming = await listUpcomingEvents();
 
   return (
     <>
@@ -57,18 +57,8 @@ export default async function EventsPage() {
         </div>
       </section>
 
-      {past.length > 0 && (
-        <section className="bg-surface py-16 sm:py-20">
-          <div className="mx-auto max-w-6xl px-4">
-            <SectionHeading eyebrow="ARCHIVE" title="これまでの実施" />
-            <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-              {past.map((e) => (
-                <EventCard key={e.id} event={e} past />
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
+      {/* 終わった大会は載せない。協会主催の大会が「これまでの実施」に並ぶと、
+          アカデミーが催したかのように読めてしまうため。 */}
 
       <section className="bg-navy-800 py-16 sm:py-20">
         <div className="mx-auto max-w-3xl px-4 text-center">
