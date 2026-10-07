@@ -7,7 +7,7 @@
 | フレームワーク | Next.js 16.3.1 (App Router) / React 19 / TypeScript |
 | スタイル | Tailwind CSS v4（設定ファイルなし。トークンは `src/app/globals.css` の `@theme`） |
 | DB / 認証 | Supabase |
-| デプロイ想定 | Vercel |
+| デプロイ | Netlify（サイト本体）／ Cloudflare（DNS・メール転送） |
 
 ディレクトリは `school-app` と同じ流儀に揃えてある（`app/` が Next.js 本体、`docs/`・`supabase/` はその兄弟）。
 
@@ -119,12 +119,40 @@ revoke insert on table public.inquiries from anon;
   CSV で保存もできる。
 - SNS などに載せるリンクには `?utm_source=instagram` のように付けると、流入元がその名前で集計される。
 
-## 7. デプロイ（Vercel）
+## 7. デプロイ（Netlify ＋ Cloudflare）
 
-- Root Directory に `pentathlon-academy/app` を指定する
-- 環境変数は `.env.example` と同じものを登録する。Supabase の2つが未設定だとビルドが失敗する（仮データを本番に出さないため）
-- `NEXT_PUBLIC_SITE_URL` に本番URLを入れる（sitemap.xml / robots.txt が参照する）
-- `src/app/layout.tsx` の `metadataBase` を本番ドメインに直す
+ランニングコストを抑えるため、どれも無料プランで運用する（かかるのはドメイン代のみ）。
+
+| 役割 | サービス |
+| --- | --- |
+| サイト本体 | Netlify（無料プランでも商用利用可。Next.js に標準対応） |
+| DNS・独自ドメインのメール転送 | Cloudflare（無料） |
+| DB・認証 | Supabase（無料） |
+| ドメイン | お名前.com で取得（レンタルサーバーは不要） |
+
+### Netlify
+
+1. Netlify に GitHub アカウントでログインし、「Add new site → Import an existing project」でこのリポジトリを選ぶ
+2. ビルド設定はリポジトリ直下の `netlify.toml` が読まれるので、画面では何も変えなくてよい
+3. 「Site configuration → Environment variables」に `.env.example` の値を登録する
+   - Supabase の2つが未設定だとビルドが失敗する（仮データを本番に出さないため）
+   - `NEXT_PUBLIC_SITE_URL` は `https://pentathlon-academy.com`（sitemap.xml / robots.txt / OGP が参照する）
+   - `NEXT_PUBLIC_IS_PREVIEW` は**入れない**（入れると検索エンジンに載らなくなる）
+4. 「Domain management」で `pentathlon-academy.com` を追加する
+
+### Cloudflare
+
+1. Cloudflare に `pentathlon-academy.com` を追加し、表示されたネームサーバー2つを
+   お名前.com の「ネームサーバーの変更」に登録する
+2. DNS に Netlify 向けのレコードを追加する（Netlify の Domain management に表示される値）
+   - プロキシ（オレンジの雲）は**オフ**にする。Netlify 側で SSL 証明書を発行するため
+3. メールを受けたい場合は「Email Routing」で `info@pentathlon-academy.com` などを
+   普段使いのアドレスへ転送する
+
+### 確認用プレビュー（GitHub Pages）
+
+本番が動いたら `.github/workflows/pages.yml` は不要になる。
+毎日の作り直し（大会の入れ替え用）も本番では要らない（ページはアクセスのたびに作られるため）。
 
 ---
 

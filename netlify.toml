@@ -1,0 +1,9 @@
+# Netlify の設定。本番サイトはここで動かす（Next.js の機能はそのまま使える）。
+# 確認用プレビュー（GitHub Pages）は .github/workflows/pages.yml で別に作っている。
+[build]
+  base = "app"
+  command = "npm run build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "22"
