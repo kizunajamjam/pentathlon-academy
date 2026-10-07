@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { AtSign, Mail, MapPin, Phone } from "lucide-react";
+import { Mail, MapPin, Phone } from "lucide-react";
 
+import { InstagramIcon } from "@/components/icons/instagram-icon";
 import { NAV_ITEMS, SITE } from "@/lib/constants/site";
 import { SiteLogo } from "./site-logo";
 
@@ -44,7 +45,7 @@ export function SiteFooter() {
                   rel="noopener noreferrer"
                   className="flex items-start gap-2.5 break-all transition-colors hover:text-gold-400"
                 >
-                  <AtSign size={16} className="mt-0.5 shrink-0 text-gold-500" />
+                  <InstagramIcon size={16} className="mt-0.5 shrink-0 text-gold-500" />
                   {SITE.instagramHandle}
                 </a>
               </li>
@@ -71,6 +72,9 @@ export function SiteFooter() {
           </p>
           <Link href="/terms" className="transition-colors hover:text-gold-400">
             クラブ規約
+          </Link>
+          <Link href="/recruit" className="transition-colors hover:text-gold-400">
+            コーチ・スタッフ募集
           </Link>
         </div>
       </div>

@@ -48,7 +48,6 @@ export const COACHES: { name: string; title: string; bio: string[] }[] = [
       "京都大学大学院理学研究科修士課程修了",
       "元 京都大学バスケットボール部 コーチ",
       "2026 HYROX OSAKA SINGLE OPEN 1:20:26",
-      "2027 HYROX OSAKA SINGLE PRO",
       "OCR100m日本選手権出場",
     ],
   },
@@ -59,13 +58,13 @@ export const COACHES: { name: string; title: string; bio: string[] }[] = [
       "大阪体育大学体育学部スポーツ教育学科卒業",
       "近代五種日本選手権出場",
       "近代三種日本選手権優勝",
-      "オリンピック有望選手育成指導者としてJOCより表彰（2013年）",
       "1500m 3分56秒34",
       "JSPO公認陸上競技コーチ1",
       "JSPO公認水泳上級教師",
       "JSPO公認競泳コーチ3",
       "JSPO公認フェンシングコーチ3",
       "日本オリンピックアカデミー会員",
+      "オリンピック有望選手育成指導者としてJOCより表彰（2013年）",
     ],
   },
   {
@@ -262,6 +261,7 @@ export const NAV_ITEMS = [
   { href: "/schedule", label: "練習スケジュール", labelEn: "SCHEDULE" },
   { href: "/athletes", label: "強化選手", labelEn: "ATHLETES" },
   { href: "/events", label: "大会・イベント", labelEn: "EVENTS" },
+  { href: "/watch", label: "観戦ガイド", labelEn: "WATCH" },
   { href: "/ancient", label: "古代五種", labelEn: "ANCIENT" },
   { href: "/contact", label: "お問い合わせ", labelEn: "CONTACT" },
 ] as const;
@@ -394,6 +394,7 @@ export const INQUIRY_CATEGORIES = [
   "入会について",
   "料金について",
   "取材・メディア",
+  "コーチ・スタッフ募集について",
   "その他",
 ] as const;
 

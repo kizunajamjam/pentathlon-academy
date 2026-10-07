@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
-import { AtSign, Mail, MapPin, Phone } from "lucide-react";
+import { Mail, MapPin, Phone } from "lucide-react";
 
+import { InstagramIcon } from "@/components/icons/instagram-icon";
 import { ContactForm } from "@/components/contact-form";
 import { PageHero } from "@/components/ui/page-hero";
 import { SectionHeading } from "@/components/ui/section-heading";
@@ -83,7 +84,7 @@ export default function ContactPage() {
               rel="noopener noreferrer"
               className="mt-5 flex items-center gap-3 rounded-card border border-border bg-white p-5 transition-colors hover:border-navy-800"
             >
-              <AtSign size={22} className="shrink-0 text-gold-600" />
+              <InstagramIcon size={22} className="shrink-0 text-gold-600" />
               <span>
                 <span className="block text-sm font-bold text-navy-800">
                   Instagram の DM でも受付中

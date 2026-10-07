@@ -73,7 +73,7 @@ export default async function AboutPage() {
             <SectionHeading
               eyebrow="PHILOSOPHY"
               title="練習できる場所が、なかった。"
-              description="ペンタスロンアカデミーは、近代五種に取り組める環境がないという課題から立ち上げたクラブです。"
+              description="ペンタスロンアカデミーは、近代五種に取り組める環境が関西にないという課題から立ち上げました。"
             />
             {/*
               ⚠️ 仮テキスト: いただいた構成案では「5つの競技を通じた総合的な○○」と
@@ -197,6 +197,15 @@ export default async function AboutPage() {
               </div>
             ))}
           </div>
+          <p className="mt-8 text-sm text-muted">
+            一緒にアカデミーをつくってくださる方を募集しています。{" "}
+            <Link
+              href="/recruit"
+              className="font-bold text-navy-800 underline decoration-gold-400 underline-offset-4 transition-colors hover:text-gold-600"
+            >
+              コーチ・スタッフ募集
+            </Link>
+          </p>
         </div>
       </section>
 

@@ -19,12 +19,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "monthly" as const,
       priority: item.href === "/" ? 1 : 0.8,
     })),
-    // 規約はヘッダーのナビには載せていない（footer からのみ）ので個別に足す
+    // 規約と募集はヘッダーのナビには載せていない（footer からのみ）ので個別に足す
     {
       url: `${BASE}/terms`,
       lastModified: new Date(),
       changeFrequency: "yearly" as const,
       priority: 0.3,
+    },
+    {
+      url: `${BASE}/recruit`,
+      lastModified: new Date(),
+      changeFrequency: "monthly" as const,
+      priority: 0.5,
     },
     ...news.map((n) => ({
       url: `${BASE}/news/${n.id}`,

@@ -29,7 +29,7 @@ export function SiteHeader() {
           <SiteLogo />
         </Link>
 
-        {/* デスクトップ: 9項目あるので 2xl 以上でのみ横並びにする */}
+        {/* デスクトップ: 10項目あるので 2xl 以上でのみ横並びにする */}
         <nav className="hidden 2xl:flex 2xl:items-center 2xl:gap-1">
           {NAV_ITEMS.map((item) => (
             <Link
