@@ -27,9 +27,14 @@ export function SiteFooter() {
                   <span>{SITE.tel}</span>
                 </li>
               )}
-              <li className="flex items-start gap-2.5">
-                <Mail size={16} className="mt-0.5 shrink-0 text-gold-500" />
-                <span>{SITE.email}</span>
+              <li>
+                <a
+                  href={`mailto:${SITE.email}`}
+                  className="flex items-start gap-2.5 break-all transition-colors hover:text-gold-400"
+                >
+                  <Mail size={16} className="mt-0.5 shrink-0 text-gold-500" />
+                  {SITE.email}
+                </a>
               </li>
               <li>
                 {/* アイコンも押せるように、行ごとリンクにする */}

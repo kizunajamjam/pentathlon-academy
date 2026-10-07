@@ -48,12 +48,19 @@ export default function ContactPage() {
                     </span>
                   </li>
                 )}
-                <li className="flex items-start gap-3">
-                  <Mail size={17} className="mt-0.5 shrink-0 text-gold-600" />
-                  <span>
-                    <span className="block text-xs text-muted">メール</span>
-                    <span className="mt-0.5 block break-all text-navy-800">{SITE.email}</span>
-                  </span>
+                <li>
+                  <a
+                    href={`mailto:${SITE.email}`}
+                    className="group flex items-start gap-3"
+                  >
+                    <Mail size={17} className="mt-0.5 shrink-0 text-gold-600" />
+                    <span>
+                      <span className="block text-xs text-muted">メール</span>
+                      <span className="mt-0.5 block break-all text-navy-800 underline decoration-gold-400 underline-offset-4 transition-colors group-hover:text-gold-600">
+                        {SITE.email}
+                      </span>
+                    </span>
+                  </a>
                 </li>
                 {SITE.address && (
                   <li className="flex items-start gap-3">

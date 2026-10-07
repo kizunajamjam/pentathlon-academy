@@ -345,7 +345,17 @@ export default async function AboutPage() {
                 ),
               },
               { label: "指導者", value: coaches.map((c) => c.name).join(" / ") },
-              { label: "連絡先", value: SITE.email },
+              {
+                label: "連絡先",
+                value: (
+                  <a
+                    href={`mailto:${SITE.email}`}
+                    className="font-bold text-navy-800 underline decoration-gold-400 underline-offset-4 transition-colors hover:text-gold-600"
+                  >
+                    {SITE.email}
+                  </a>
+                ),
+              },
             ].map((row) => (
               <div key={row.label} className="grid gap-1 py-5 sm:grid-cols-[10rem_1fr] sm:gap-4">
                 <dt className="font-display text-sm font-bold text-navy-800">{row.label}</dt>

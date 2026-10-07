@@ -24,7 +24,15 @@ export function ContactForm() {
       </p>
       <ul className="mt-5 space-y-2 text-sm text-navy-800">
         {SITE.tel && <li>電話: {SITE.tel}</li>}
-        <li>メール: {SITE.email}</li>
+        <li>
+          メール:{" "}
+          <a
+            href={`mailto:${SITE.email}`}
+            className="underline decoration-gold-400 underline-offset-4"
+          >
+            {SITE.email}
+          </a>
+        </li>
         <li>
           Instagram:{" "}
           <a
