@@ -110,7 +110,7 @@ export default function DisciplinesPage() {
           <SectionHeading
             eyebrow="CONTACT"
             title="5種目を、順に積み上げていく。"
-            description="5種目すべての経験がなくても構いません。いまある強みを軸に、足りない種目を重ねていきます。"
+            description={"5種目すべての経験がなくても構いません。\nいまある強みを軸に、足りない種目を重ねていきます。"}
             tone="light"
             align="center"
             descriptionAlign="left"

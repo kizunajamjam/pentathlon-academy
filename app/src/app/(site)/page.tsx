@@ -142,7 +142,7 @@ export default async function HomePage() {
           <SectionHeading
             eyebrow="CONTACT"
             title="まずは練習を見に来て下さい。"
-            description="体験・見学は随時受け付けています。水泳や陸上など、これまで続けてきた競技があれば、それがそのまま武器になります。近代五種が初めての方もご相談ください。"
+            description={"体験・見学は随時受け付けています。\n水泳や陸上など、これまで続けてきた競技があれば、それがそのまま武器になります。\n近代五種が初めての方もご相談ください。"}
             tone="light"
             align="center"
             descriptionAlign="left"

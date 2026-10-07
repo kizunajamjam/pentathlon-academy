@@ -37,7 +37,7 @@ export function SectionHeading({
       />
       {description && (
         <p
-          className={`mt-5 max-w-2xl text-sm leading-relaxed sm:text-base ${
+          className={`mt-5 max-w-2xl whitespace-pre-line text-sm leading-relaxed sm:text-base ${
             align === "center" ? "mx-auto" : ""
           } ${descriptionAlign === "left" ? "text-left" : ""} ${tone === "light" ? "text-navy-200" : "text-muted"}`}
         >
