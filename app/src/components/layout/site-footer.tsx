@@ -31,14 +31,15 @@ export function SiteFooter() {
                 <Mail size={16} className="mt-0.5 shrink-0 text-gold-500" />
                 <span>{SITE.email}</span>
               </li>
-              <li className="flex items-start gap-2.5">
-                <AtSign size={16} className="mt-0.5 shrink-0 text-gold-500" />
+              <li>
+                {/* アイコンも押せるように、行ごとリンクにする */}
                 <a
                   href={SITE.instagram}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="break-all transition-colors hover:text-gold-400"
+                  className="flex items-start gap-2.5 break-all transition-colors hover:text-gold-400"
                 >
+                  <AtSign size={16} className="mt-0.5 shrink-0 text-gold-500" />
                   {SITE.instagramHandle}
                 </a>
               </li>
