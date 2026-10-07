@@ -113,6 +113,7 @@ export default function DisciplinesPage() {
             description="5種目すべての経験がなくても構いません。いまある強みを軸に、足りない種目を重ねていきます。"
             tone="light"
             align="center"
+            descriptionAlign="left"
           />
           <div className="mt-9 flex flex-wrap justify-center gap-3">
             <ButtonLink href="/contact">体験のお申し込み</ButtonLink>

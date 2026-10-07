@@ -10,7 +10,7 @@ import { PendingSlot } from "@/components/ui/pending-slot";
 import { PhotoSlot } from "@/components/ui/photo-slot";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { Standards } from "@/components/ui/standards";
-import { DISCIPLINES, PARTNERS, SITE, STANDARDS } from "@/lib/constants/site";
+import { DISCIPLINES, PARTNERS, SITE, STAFF, STANDARDS } from "@/lib/constants/site";
 import { listPublishedCoaches } from "@/lib/db/coaches";
 import { assetPath } from "@/lib/utils/asset";
 
@@ -163,6 +163,37 @@ export default async function AboutPage() {
                     </li>
                   ))}
                 </ul>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── スタッフ ───────────────────────────────────────────────── */}
+      <section className="bg-white pb-16 sm:pb-24">
+        <div className="mx-auto max-w-6xl px-4">
+          <SectionHeading eyebrow="STAFF" title="スタッフ" />
+          <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:max-w-3xl">
+            {STAFF.map((s) => (
+              <div key={s.name} className="min-w-0 rounded-card border border-border bg-white p-6">
+                <span className="inline-flex rounded-full bg-navy-50 px-3 py-1 text-xs font-bold text-navy-800">
+                  {s.title}
+                </span>
+                <p className="mt-4 font-display text-lg font-bold text-navy-800">{s.name}</p>
+                <ul className="mt-3 space-y-1.5">
+                  {s.bio.map((line) => (
+                    <li
+                      key={line}
+                      className="flex items-start gap-2 text-sm leading-relaxed text-muted [overflow-wrap:anywhere]"
+                    >
+                      <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-gold-500" />
+                      {line}
+                    </li>
+                  ))}
+                </ul>
+                <p className="mt-4 border-t border-border pt-4 text-sm leading-relaxed text-navy-700">
+                  {s.description}
+                </p>
               </div>
             ))}
           </div>

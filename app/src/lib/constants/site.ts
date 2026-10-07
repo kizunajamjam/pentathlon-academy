@@ -97,6 +97,19 @@ export const COACHES: { name: string; title: string; bio: string[] }[] = [
 ];
 
 /*
+ * スタッフ（指導者とは別枠）。
+ */
+export const STAFF: { name: string; title: string; bio: string[]; description: string }[] = [
+  {
+    name: "小路望",
+    title: "女性アスリートサポート",
+    bio: ["近代三種日本選手権優勝", "実用フランス語技能検定（仏検）準2級"],
+    description:
+      "女性選手の身体やコンディションに関する相談窓口として、生理・月経周期に伴う体調変化など、女性特有の悩みに寄り添い、必要に応じてコーチ・トレーナー・医療機関等と連携します。",
+  },
+];
+
+/*
  * 連携先。
  *
  * ⚠️ url が null のあいだはリンクにせず名前だけ出す。

@@ -5,12 +5,15 @@ export function SectionHeading({
   description,
   tone = "dark",
   align = "left",
+  descriptionAlign,
 }: {
   eyebrow: string;
   title: string;
   description?: string;
   tone?: "dark" | "light";
   align?: "left" | "center";
+  // 見出しは中央のまま、説明文だけ左揃えにしたいとき
+  descriptionAlign?: "left";
 }) {
   return (
     <div className={align === "center" ? "text-center" : ""}>
@@ -36,7 +39,7 @@ export function SectionHeading({
         <p
           className={`mt-5 max-w-2xl text-sm leading-relaxed sm:text-base ${
             align === "center" ? "mx-auto" : ""
-          } ${tone === "light" ? "text-navy-200" : "text-muted"}`}
+          } ${descriptionAlign === "left" ? "text-left" : ""} ${tone === "light" ? "text-navy-200" : "text-muted"}`}
         >
           {description}
         </p>

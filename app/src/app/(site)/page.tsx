@@ -145,6 +145,7 @@ export default async function HomePage() {
             description="体験・見学は随時受け付けています。水泳や陸上など、これまで続けてきた競技があれば、それがそのまま武器になります。近代五種が初めての方もご相談ください。"
             tone="light"
             align="center"
+            descriptionAlign="left"
           />
           <div className="mt-9 flex flex-wrap justify-center gap-3">
             <ButtonLink href="/contact">お問い合わせ</ButtonLink>
