@@ -50,6 +50,30 @@ export const SEED_EVENTS: AcademyEvent[] = [
     url: "https://pentathlon.jp/news/2026ranking2/",
     isPublished: true,
   },
+  {
+    id: "seed-e3",
+    title: "第66回近代五種全日本選手権大会",
+    category: "competition",
+    startsAt: jst("2026-11-28"),
+    endsAt: jst("2026-11-29"),
+    location: "リソルの森メディカルトレーニングセンター（千葉県長生郡）",
+    description:
+      "日本近代五種協会が主催する近代五種の日本選手権です。エントリー方法や大会要項は協会サイトの記事をご確認ください。",
+    url: "https://pentathlon.jp/news/%E7%AC%AC%EF%BC%96%EF%BC%96%E5%9B%9E%E8%BF%91%E4%BB%A3%E4%BA%94%E7%A8%AE%E5%85%A8%E6%97%A5%E6%9C%AC%E9%81%B8%E6%89%8B%E6%A8%A9%E5%A4%A7%E4%BC%9A/",
+    isPublished: true,
+  },
+  {
+    id: "seed-e4",
+    title: "第13回近代3種日本選手権大会 兼 第20回JOCジュニアオリンピックカップ",
+    category: "competition",
+    startsAt: jst("2026-11-28"),
+    endsAt: null,
+    location: "リソルの森メディカルトレーニングセンター（千葉県長生郡）",
+    description:
+      "日本近代五種協会が主催する近代3種の日本選手権です。エントリーの締切は2026年10月31日（土）23:59です。大会要項は協会サイトの記事をご確認ください。",
+    url: "https://pentathlon.jp/news/%E7%AC%AC%EF%BC%96%EF%BC%96%E5%9B%9E%E8%BF%91%E4%BB%A3%E4%BA%94%E7%A8%AE%E5%85%A8%E6%97%A5%E6%9C%AC%E9%81%B8%E6%89%8B%E6%A8%A9%E5%A4%A7%E4%BC%9A/",
+    isPublished: true,
+  },
 ];
 
 /*
