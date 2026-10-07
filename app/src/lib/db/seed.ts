@@ -27,9 +27,10 @@ export const SEED_NEWS: News[] = [];
  * ⚠️ ここは自動で更新されない。協会の日程は随時変わるので、
  *    Supabase 接続後は管理画面から登録・更新すること。
  *
- * 終わった大会（最終日を過ぎたもの）は大会ページに出ない。
- * pages.yml で毎日ビルドし直すので、ここから消さなくても自動で外れる。
- * 協会が主催する大会は、出られる予定としてだけ載せる。
+ * 終わった大会（最終日を過ぎたもの）は「開催予定」から外れ、
+ * 「過去の大会」に過去半年ぶんだけ出る。半年を過ぎたものは表示されないので、
+ * ここから消さなくてよい（pages.yml で毎日ビルドし直して判定を更新している）。
+ * アカデミーが催したと読まれないよう、説明文には主催者を明記すること。
  *
  * アカデミー自身の体験会・見学会は、日程を決めて開催する形ではなく
  * 随時受付なので、予定としては持たない（ページ側で案内している）。
@@ -37,6 +38,63 @@ export const SEED_NEWS: News[] = [];
 const jst = (date: string, time = "00:00") => new Date(`${date}T${time}:00+09:00`).toISOString();
 
 export const SEED_EVENTS: AcademyEvent[] = [
+  // ── 過去の大会（過去半年ぶん）──
+  {
+    id: "seed-p1",
+    title: "2026 ジュニア世界選手権大会派遣選考会 兼 シニア記録会",
+    category: "competition",
+    startsAt: jst("2026-04-29"),
+    endsAt: null,
+    location: null,
+    description: "日本近代五種協会が主催した、ジュニア世界選手権の派遣選考会とシニア記録会です。",
+    url: "https://pentathlon.jp/news/%e3%80%90%e3%82%a8%e3%83%b3%e3%83%88%e3%83%aa%e3%83%bc%e5%8f%97%e4%bb%98%e4%b8%ad%e3%80%912026-%e3%82%b8%e3%83%a5%e3%83%8b%e3%82%a2%e4%b8%96%e7%95%8c%e9%81%b8%e6%89%8b%e5%a4%a7%e4%bc%9a%e6%a8%a9/",
+    isPublished: true,
+  },
+  {
+    id: "seed-p2",
+    title: "ブルジャンプCUP2026 第2回 滋賀県東近江市ラウンド",
+    category: "competition",
+    startsAt: jst("2026-05-24"),
+    endsAt: null,
+    location: "滋賀県東近江市",
+    description: "日本近代五種協会が主催した近代3種のシリーズ戦です。",
+    url: "https://pentathlon.jp/news/%e8%bf%91%e4%bb%a33%e7%a8%ae%e3%82%b7%e3%83%aa%e3%83%bc%e3%82%ba%e3%80%8c%e3%83%96%e3%83%ab%e3%82%b8%e3%83%a3%e3%83%b3%e3%83%97cup2026%e3%80%8d%e9%96%8b%e5%82%ac%e6%b1%ba%e5%ae%9a/",
+    isPublished: true,
+  },
+  {
+    id: "seed-p3",
+    title: "ブルジャンプCUP2026 第3回 東京都立川市ラウンド",
+    category: "competition",
+    startsAt: jst("2026-06-28"),
+    endsAt: null,
+    location: "東京都立川市",
+    description: "日本近代五種協会が主催した近代3種のシリーズ戦です。",
+    url: "https://pentathlon.jp/news/%e8%bf%91%e4%bb%a33%e7%a8%ae%e3%82%b7%e3%83%aa%e3%83%bc%e3%82%ba%e3%80%8c%e3%83%96%e3%83%ab%e3%82%b8%e3%83%a3%e3%83%b3%e3%83%97cup2026%e3%80%8d%e9%96%8b%e5%82%ac%e6%b1%ba%e5%ae%9a/",
+    isPublished: true,
+  },
+  {
+    id: "seed-p4",
+    title: "2026 ランキング戦（第1戦）",
+    category: "competition",
+    startsAt: jst("2026-07-05"),
+    endsAt: null,
+    location: null,
+    description: "日本近代五種協会が主催したランキング戦です。",
+    url: "https://pentathlon.jp/news/2026ranking1/",
+    isPublished: true,
+  },
+  {
+    id: "seed-p5",
+    title: "ブルジャンプCUP2026 第4回 福島県棚倉町ラウンド",
+    category: "competition",
+    startsAt: jst("2026-09-27"),
+    endsAt: null,
+    location: "福島県棚倉町",
+    description: "日本近代五種協会が主催した近代3種のシリーズ戦です。",
+    url: "https://pentathlon.jp/news/%e8%bf%91%e4%bb%a33%e7%a8%ae%e3%82%b7%e3%83%aa%e3%83%bc%e3%82%ba%e3%80%8c%e3%83%96%e3%83%ab%e3%82%b8%e3%83%a3%e3%83%b3%e3%83%97cup2026%e3%80%8d%e9%96%8b%e5%82%ac%e6%b1%ba%e5%ae%9a/",
+    isPublished: true,
+  },
+  // ── 開催予定 ──
   {
     id: "seed-e2",
     title: "2026 ランキング戦（第2戦）",

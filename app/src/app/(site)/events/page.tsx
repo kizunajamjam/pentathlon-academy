@@ -4,16 +4,16 @@ import { ButtonLink } from "@/components/ui/button-link";
 import { EventCard } from "@/components/ui/event-card";
 import { PageHero } from "@/components/ui/page-hero";
 import { SectionHeading } from "@/components/ui/section-heading";
-import { listUpcomingEvents } from "@/lib/db/events";
+import { listPastEvents, listUpcomingEvents } from "@/lib/db/events";
 
 export const metadata: Metadata = {
   title: "大会・イベント",
   description:
-    "ペンタスロンアカデミーの選手が出場できる大会の予定と、体験・見学のご案内です。",
+    "ペンタスロンアカデミーの選手が出場できる大会の予定と過去の大会、体験・見学のご案内です。",
 };
 
 export default async function EventsPage() {
-  const upcoming = await listUpcomingEvents();
+  const [upcoming, past] = await Promise.all([listUpcomingEvents(), listPastEvents()]);
 
   return (
     <>
@@ -57,8 +57,23 @@ export default async function EventsPage() {
         </div>
       </section>
 
-      {/* 終わった大会は載せない。協会主催の大会が「これまでの実施」に並ぶと、
-          アカデミーが催したかのように読めてしまうため。 */}
+      {/* 過去半年ぶん。アカデミーが催したと読まれないよう、主催者を見出しの説明で明記する */}
+      {past.length > 0 && (
+        <section className="bg-surface py-16 sm:py-20">
+          <div className="mx-auto max-w-6xl px-4">
+            <SectionHeading
+              eyebrow="PAST EVENTS"
+              title="過去の大会"
+              description="過去半年に開催された、日本近代五種協会主催の大会です。結果は協会サイトをご確認ください。"
+            />
+            <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+              {past.map((e) => (
+                <EventCard key={e.id} event={e} past />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       <section className="bg-navy-800 py-16 sm:py-20">
         <div className="mx-auto max-w-3xl px-4 text-center">

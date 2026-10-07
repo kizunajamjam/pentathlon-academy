@@ -64,28 +64,31 @@ export async function listUpcomingEvents(limit?: number): Promise<AcademyEvent[]
   return (data ?? []).map(mapEvent);
 }
 
-// 終了したものを新しい順に。
-export async function listPastEvents(limit?: number): Promise<AcademyEvent[]> {
-  const now = new Date().toISOString();
+// 過去 months か月以内に終わったものを新しい順に。
+// 協会の記事は年をまたいでも残っているが、古いものほどリンク切れの心配が増えるので期間を区切る。
+export async function listPastEvents(months = 6): Promise<AcademyEvent[]> {
+  const today = startOfTodayJst();
+  const since = new Date(today);
+  since.setMonth(since.getMonth() - months);
+  const from = since.toISOString();
 
   if (!isSupabaseConfigured) {
-    const list = SEED_EVENTS.filter((e) => e.startsAt < now).sort((a, b) =>
-      b.startsAt.localeCompare(a.startsAt),
+    return SEED_EVENTS.filter((e) => (e.endsAt ?? e.startsAt) < today && e.startsAt >= from).sort(
+      (a, b) => b.startsAt.localeCompare(a.startsAt),
     );
-    return limit ? list.slice(0, limit) : list;
   }
 
   const supabase = await createClient();
-  let query = supabase
-    .from("events")
-    .select("*")
-    .eq("is_published", true)
-    .lt("starts_at", now)
-    .order("starts_at", { ascending: false });
-
-  if (limit) query = query.limit(limit);
-
-  const data = unwrap("events", await query);
+  const data = unwrap(
+    "events",
+    await supabase
+      .from("events")
+      .select("*")
+      .eq("is_published", true)
+      .gte("starts_at", from)
+      .or(`ends_at.lt.${today},and(ends_at.is.null,starts_at.lt.${today})`)
+      .order("starts_at", { ascending: false }),
+  );
   return (data ?? []).map(mapEvent);
 }
 
