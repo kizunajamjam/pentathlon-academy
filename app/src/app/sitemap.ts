@@ -10,7 +10,8 @@ const BASE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://example.com";
 export const dynamic = "force-static";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const news = await listPublishedNews();
+  // DB に一時的につながらなくても、ビルド（デプロイ）ごと止めないよう、お知らせ抜きで返す
+  const news = await listPublishedNews().catch(() => []);
 
   return [
     ...NAV_ITEMS.map((item) => ({

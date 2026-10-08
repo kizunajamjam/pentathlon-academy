@@ -11,8 +11,7 @@ type Props = { params: Promise<{ id: string }> };
 
 /*
  * 静的書き出し（GitHub Pages）では、生成する詳細ページの一覧が必要になる。
- * 通常のビルドでも公開済みのお知らせが事前生成されるだけで、
- * 新しく追加されたものはリクエスト時に生成されるため支障はない。
+ * 通常のビルドでは事前生成せず、すべてリクエスト時に生成する。
  *
  * お知らせが1件も無いときでも、空の配列は返せない。Next.js は
  * generateStaticParams が最低1件返すことを求めており、空だと
@@ -23,6 +22,10 @@ type Props = { params: Promise<{ id: string }> };
 const NO_NEWS_ID = "none";
 
 export async function generateStaticParams() {
+  // 本番（Netlify）では事前生成しない。ビルド時には cookie を読めず、
+  // Supabase の取得が失敗してビルドごと止まるため。詳細ページはアクセス時に作られる。
+  if (process.env.STATIC_EXPORT !== "1") return [];
+
   const news = await listPublishedNews();
   return news.length > 0 ? news.map((n) => ({ id: n.id })) : [{ id: NO_NEWS_ID }];
 }
