@@ -10,7 +10,15 @@ import { PendingSlot } from "@/components/ui/pending-slot";
 import { PhotoSlot } from "@/components/ui/photo-slot";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { Standards } from "@/components/ui/standards";
-import { DISCIPLINES, PARTNERS, SITE, STAFF, STANDARDS } from "@/lib/constants/site";
+import {
+  ADVISORS,
+  DISCIPLINES,
+  PARTNERS,
+  SITE,
+  STAFF,
+  STANDARDS,
+  type Person,
+} from "@/lib/constants/site";
 import { listPublishedCoaches } from "@/lib/db/coaches";
 import { assetPath } from "@/lib/utils/asset";
 
@@ -170,42 +178,25 @@ export default async function AboutPage() {
       </section>
 
       {/* ── スタッフ ───────────────────────────────────────────────── */}
+      <PeopleSection eyebrow="STAFF" title="スタッフ" people={STAFF} />
+
+      {/* ── 顧問・アドバイザー ─────────────────────────────────────── */}
       <section className="bg-white pb-16 sm:pb-24">
         <div className="mx-auto max-w-6xl px-4">
-          <SectionHeading eyebrow="STAFF" title="スタッフ" />
-          <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:max-w-3xl">
-            {STAFF.map((s) => (
-              <div key={s.name} className="min-w-0 rounded-card border border-border bg-white p-6">
-                <span className="inline-flex rounded-full bg-navy-50 px-3 py-1 text-xs font-bold text-navy-800">
-                  {s.title}
-                </span>
-                <p className="mt-4 font-display text-lg font-bold text-navy-800">{s.name}</p>
-                <ul className="mt-3 space-y-1.5">
-                  {s.bio.map((line) => (
-                    <li
-                      key={line}
-                      className="flex items-start gap-2 text-sm leading-relaxed text-muted [overflow-wrap:anywhere]"
-                    >
-                      <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-gold-500" />
-                      {line}
-                    </li>
-                  ))}
-                </ul>
-                <p className="mt-4 border-t border-border pt-4 text-sm leading-relaxed text-navy-700">
-                  {s.description}
-                </p>
-              </div>
-            ))}
+          <SectionHeading eyebrow="ADVISORS" title="顧問・アドバイザー" />
+          <PeopleGrid people={ADVISORS} />
+          {/* 文の途中でリンクが折り返さないよう、リンクは段落を分けて置く */}
+          <div className="mt-10 space-y-2 text-sm text-muted">
+            <p>一緒にアカデミーをつくってくださる方を募集しています。</p>
+            <p>
+              <Link
+                href="/recruit"
+                className="font-bold text-navy-800 underline decoration-gold-400 underline-offset-4 transition-colors hover:text-gold-600"
+              >
+                コーチ・スタッフ募集
+              </Link>
+            </p>
           </div>
-          <p className="mt-8 text-sm text-muted">
-            一緒にアカデミーをつくってくださる方を募集しています。{" "}
-            <Link
-              href="/recruit"
-              className="font-bold text-navy-800 underline decoration-gold-400 underline-offset-4 transition-colors hover:text-gold-600"
-            >
-              コーチ・スタッフ募集
-            </Link>
-          </p>
         </div>
       </section>
 
@@ -392,5 +383,56 @@ export default async function AboutPage() {
         </div>
       </section>
     </>
+  );
+}
+
+// スタッフ・顧問のカード。指導者と同じ見た目で、補足の説明文があれば線の下に出す。
+function PeopleGrid({ people }: { people: Person[] }) {
+  return (
+    <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:max-w-3xl">
+      {people.map((s) => (
+        <div key={s.name} className="min-w-0 rounded-card border border-border bg-white p-6">
+          <span className="inline-flex rounded-full bg-navy-50 px-3 py-1 text-xs font-bold text-navy-800">
+            {s.title}
+          </span>
+          <p className="mt-4 font-display text-lg font-bold text-navy-800">{s.name}</p>
+          <ul className="mt-3 space-y-1.5">
+            {s.bio.map((line) => (
+              <li
+                key={line}
+                className="flex items-start gap-2 text-sm leading-relaxed text-muted [overflow-wrap:anywhere]"
+              >
+                <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-gold-500" />
+                {line}
+              </li>
+            ))}
+          </ul>
+          {s.description && (
+            <p className="mt-4 border-t border-border pt-4 text-sm leading-relaxed text-navy-700">
+              {s.description}
+            </p>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function PeopleSection({
+  eyebrow,
+  title,
+  people,
+}: {
+  eyebrow: string;
+  title: string;
+  people: Person[];
+}) {
+  return (
+    <section className="bg-white pb-16 sm:pb-24">
+      <div className="mx-auto max-w-6xl px-4">
+        <SectionHeading eyebrow={eyebrow} title={title} />
+        <PeopleGrid people={people} />
+      </div>
+    </section>
   );
 }

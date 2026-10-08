@@ -98,13 +98,30 @@ export const COACHES: { name: string; title: string; bio: string[] }[] = [
 /*
  * スタッフ（指導者とは別枠）。
  */
-export const STAFF: { name: string; title: string; bio: string[]; description: string }[] = [
+export type Person = { name: string; title: string; bio: string[]; description?: string };
+
+export const STAFF: Person[] = [
   {
     name: "小路望",
     title: "女性アスリートサポート",
     bio: ["近代三種日本選手権優勝", "実用フランス語技能検定（仏検）準2級"],
     description:
       "女性選手の身体やコンディションに関する相談窓口として、生理・月経周期に伴う体調変化など、女性特有の悩みに寄り添い、必要に応じてコーチ・トレーナー・医療機関等と連携します。",
+  },
+];
+
+/*
+ * 顧問・アドバイザー（指導者・スタッフとは別枠）。
+ */
+export const ADVISORS: Person[] = [
+  {
+    name: "樋井 豊",
+    title: "特別顧問",
+    bio: [
+      "元大阪府警近代五種部監督",
+      "元近代五種ナショナルチーム監督",
+      "公益社団法人日本近代五種協会 西日本支部長",
+    ],
   },
 ];
 
