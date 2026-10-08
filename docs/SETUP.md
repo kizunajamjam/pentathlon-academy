@@ -149,6 +149,19 @@ revoke insert on table public.inquiries from anon;
 3. メールを受けたい場合は「Email Routing」で `info@pentathlon-academy.com` などを
    普段使いのアドレスへ転送する
 
+### 協会サイトの新着チェック（週1回）
+
+`.github/workflows/federation-news.yml` が毎週月曜 9:07（JST）に日本近代五種協会のお知らせを確認し、
+直近7日間に大会関連の記事があれば管理者に知らせる（大会の登録自体は管理画面から手で行う）。
+
+- 何も設定しなければ、GitHub の Issue として届く（リポジトリの持ち主に GitHub から通知メールが届く）
+- メールで受け取りたい場合は、GitHub の「Settings → Secrets and variables → Actions」に3つ登録する
+  - `RESEND_API_KEY`（お問い合わせ通知と同じキーでよい）
+  - `NOTIFY_TO`（受け取るアドレス。カンマ区切りで複数可）
+  - `NOTIFY_FROM`（Resend で認証したドメインのアドレス。例: `no-reply@pentathlon-academy.com`）
+- 「Actions → Check federation news → Run workflow」で、いつでも手動で実行できる
+- 協会サイトの作りが変わって読み取れなくなった場合も、その旨が届く
+
 ### 確認用プレビュー（GitHub Pages）
 
 本番が動いたら `.github/workflows/pages.yml` は不要になる。

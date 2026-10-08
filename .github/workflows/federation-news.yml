@@ -1,0 +1,36 @@
+# 日本近代五種協会のお知らせを週1回確認し、大会関連の記事があれば管理者に知らせる。
+# 中身は .github/scripts/check-federation-news.mjs。
+name: Check federation news
+
+on:
+  schedule:
+    # 毎週月曜 9:07（JST）＝ 月曜 0:07（UTC）
+    - cron: "7 0 * * 1"
+  workflow_dispatch:
+    inputs:
+      days:
+        description: "さかのぼる日数"
+        default: "7"
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - run: node .github/scripts/check-federation-news.mjs
+        env:
+          DAYS: ${{ inputs.days || '7' }}
+          # メールで受け取る場合はリポジトリの Secrets に3つとも登録する（未登録なら Issue で通知）
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          NOTIFY_TO: ${{ secrets.NOTIFY_TO }}
+          NOTIFY_FROM: ${{ secrets.NOTIFY_FROM }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
