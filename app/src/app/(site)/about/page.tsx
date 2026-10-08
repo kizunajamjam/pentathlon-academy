@@ -14,6 +14,7 @@ import {
   ADVISORS,
   DISCIPLINES,
   PARTNERS,
+  SHOW_PLACEHOLDERS,
   SITE,
   STAFF,
   STANDARDS,
@@ -76,7 +77,11 @@ export default async function AboutPage() {
 
       {/* ── 理念 ───────────────────────────────────────────────────── */}
       <section className="bg-white py-16 sm:py-24">
-        <div className="mx-auto grid max-w-6xl gap-12 px-4 lg:grid-cols-2 lg:items-center">
+        <div
+          className={`mx-auto grid gap-12 px-4 lg:items-center ${
+            SHOW_PLACEHOLDERS ? "max-w-6xl lg:grid-cols-2" : "max-w-3xl"
+          }`}
+        >
           <div>
             <SectionHeading
               eyebrow="PHILOSOPHY"
@@ -98,7 +103,7 @@ export default async function AboutPage() {
               いずれ、1箇所で近代五種のすべての練習ができる練習拠点をつくり、競技人口を増やし、近代五種を通じてスポーツ教育が行われる環境をつくること。それが私たちの夢です。
             </p>
           </div>
-          <PhotoSlot label="アカデミー全体の集合写真などが入ります" />
+          {SHOW_PLACEHOLDERS && <PhotoSlot label="アカデミー全体の集合写真などが入ります" />}
         </div>
       </section>
 
@@ -200,19 +205,23 @@ export default async function AboutPage() {
         </div>
       </section>
 
-      {/* ── 育成・評価システム ─────────────────────────────────────── */}
-      <section className="bg-white py-16 sm:py-24">
-        <div className="mx-auto max-w-4xl px-4">
-          <SectionHeading
-            eyebrow="ACADEMY METHOD"
-            title="育成・評価のしくみ"
-            description="5種目それぞれの現在地を測り、どこを伸ばすかを決めていくための、アカデミー独自の進め方です。"
-          />
-          <div className="mt-10">
-            <PendingSlot label="育成・評価システムの内容は準備中です。" />
+      {SHOW_PLACEHOLDERS && (
+        <>
+        {/* ── 育成・評価システム ─────────────────────────────────────── */}
+        <section className="bg-white py-16 sm:py-24">
+          <div className="mx-auto max-w-4xl px-4">
+            <SectionHeading
+              eyebrow="ACADEMY METHOD"
+              title="育成・評価のしくみ"
+              description="5種目それぞれの現在地を測り、どこを伸ばすかを決めていくための、アカデミー独自の進め方です。"
+            />
+            <div className="mt-10">
+              <PendingSlot label="育成・評価システムの内容は準備中です。" />
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+        </>
+      )}
 
       {/* ── 強化選手規定 ───────────────────────────────────────── */}
       {/*
@@ -292,35 +301,39 @@ export default async function AboutPage() {
         </div>
       </section>
 
-      {/* ── 選手・大会実績 ─────────────────────────────────────────── */}
-      <section className="bg-surface py-16 sm:py-24">
-        <div className="mx-auto max-w-4xl px-4">
-          <SectionHeading
-            eyebrow="ATHLETE / RESULTS"
-            title="選手・大会実績"
-            description="所属選手と、大会での成績をご紹介します。"
-          />
-          <div className="mt-10">
-            <PendingSlot label="選手・大会実績は準備中です。掲載できる内容が揃い次第こちらに載せます。" />
-          </div>
-        </div>
-      </section>
-
-      {/* ── 研究 ───────────────────────────────────────────────────── */}
-      <section className="bg-white py-16 sm:py-24">
-        <div className="mx-auto max-w-4xl px-4">
-          <SectionHeading eyebrow="RESEARCH" title="研究への取り組み" />
-          {/* ⚠️ 仮テキスト。研究テーマ・所属・発表予定が決まり次第差し替える。 */}
-          <div className="mt-10 flex items-start gap-5 rounded-card border border-border bg-surface px-6 py-7 sm:px-8">
-            <Microscope size={26} className="mt-0.5 hidden shrink-0 text-gold-600 sm:block" />
-            <div>
-              <p className="text-sm leading-relaxed text-navy-700 sm:text-base">
-                指導と並行して、近代五種の育成に関する研究に取り組んでいきます。修士・博士課程での研究、学会での発表、論文を通じて得たものを、日々の練習の組み立てに戻していくことを考えています。
-              </p>
+      {SHOW_PLACEHOLDERS && (
+        <>
+        {/* ── 選手・大会実績 ─────────────────────────────────────────── */}
+        <section className="bg-surface py-16 sm:py-24">
+          <div className="mx-auto max-w-4xl px-4">
+            <SectionHeading
+              eyebrow="ATHLETE / RESULTS"
+              title="選手・大会実績"
+              description="所属選手と、大会での成績をご紹介します。"
+            />
+            <div className="mt-10">
+              <PendingSlot label="選手・大会実績は準備中です。掲載できる内容が揃い次第こちらに載せます。" />
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+
+        {/* ── 研究 ───────────────────────────────────────────────────── */}
+        <section className="bg-white py-16 sm:py-24">
+          <div className="mx-auto max-w-4xl px-4">
+            <SectionHeading eyebrow="RESEARCH" title="研究への取り組み" />
+            {/* ⚠️ 仮テキスト。研究テーマ・所属・発表予定が決まり次第差し替える。 */}
+            <div className="mt-10 flex items-start gap-5 rounded-card border border-border bg-surface px-6 py-7 sm:px-8">
+              <Microscope size={26} className="mt-0.5 hidden shrink-0 text-gold-600 sm:block" />
+              <div>
+                <p className="text-sm leading-relaxed text-navy-700 sm:text-base">
+                  指導と並行して、近代五種の育成に関する研究に取り組んでいきます。修士・博士課程での研究、学会での発表、論文を通じて得たものを、日々の練習の組み立てに戻していくことを考えています。
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+        </>
+      )}
 
       {/* ── 概要 ───────────────────────────────────────────────────── */}
       <section className="bg-surface py-16 sm:py-24">

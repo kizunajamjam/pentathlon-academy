@@ -5,7 +5,7 @@ import { EventCard } from "@/components/ui/event-card";
 import { NewsRow } from "@/components/ui/news-row";
 import { PhotoSlot } from "@/components/ui/photo-slot";
 import { SectionHeading } from "@/components/ui/section-heading";
-import { SITE } from "@/lib/constants/site";
+import { SHOW_PLACEHOLDERS, SITE } from "@/lib/constants/site";
 import { listUpcomingEvents } from "@/lib/db/events";
 import { listPublishedNews } from "@/lib/db/news";
 
@@ -77,8 +77,12 @@ export default async function HomePage() {
 
       {/* ── アカデミー紹介 ─────────────────────────────────────────── */}
       <section className="bg-surface py-16 sm:py-24">
-        <div className="mx-auto grid max-w-6xl gap-12 px-4 lg:grid-cols-2 lg:items-center">
-          <PhotoSlot label="練習風景の写真が入ります（横長 4:3 推奨）" />
+        <div
+          className={`mx-auto grid gap-12 px-4 lg:items-center ${
+            SHOW_PLACEHOLDERS ? "max-w-6xl lg:grid-cols-2" : "max-w-3xl"
+          }`}
+        >
+          {SHOW_PLACEHOLDERS && <PhotoSlot label="練習風景の写真が入ります（横長 4:3 推奨）" />}
           <div>
             <SectionHeading
               eyebrow="ABOUT"

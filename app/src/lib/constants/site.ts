@@ -270,6 +270,12 @@ export const STANDARDS: Record<DisciplineId, Standard> = {
   },
 };
 
+/*
+ * 写真の枠・「準備中」の欄・仮の文章を表示するかどうか。
+ * 本番公開では中身が揃うまで隠す（オーナー判断）。揃ったら true にするか、該当箇所の条件を外す。
+ */
+export const SHOW_PLACEHOLDERS = false;
+
 export const NAV_ITEMS = [
   { href: "/", label: "トップ", labelEn: "HOME" },
   { href: "/about", label: "アカデミーについて", labelEn: "ABOUT" },
