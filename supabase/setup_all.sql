@@ -444,3 +444,10 @@ update public.coaches
         'オリンピック有望選手育成指導者としてJOCより表彰（2013年）'),
       updated_at = now()
   where name = '小路瑛';
+
+
+-- ── 20261009_kin3_notation.sql ──────────────────────────────────────────
+-- 「近代三種」を正式表記の「近代3種」にそろえる（site.ts の COACHES と同じ内容）。
+update public.coaches
+  set bio = array_replace(bio, '近代三種日本選手権優勝', '近代3種日本選手権優勝'), updated_at = now()
+  where '近代三種日本選手権優勝' = any (bio);
