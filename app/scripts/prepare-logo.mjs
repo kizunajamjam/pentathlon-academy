@@ -1,4 +1,6 @@
 /*
+ * ⚠️ 旧ロゴ（白地版）用。現在の黒地・発光版のロゴでは scripts/prepare-logo-glow.mjs を使うこと。
+ *
  * public/logo.png から、サイトで使う画像を切り出す。
  *
  *   public/icons/{競技}.png          各面（競技アイコン・余白を詰めたもの）

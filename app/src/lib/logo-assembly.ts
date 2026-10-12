@@ -7,30 +7,28 @@ import type { DisciplineId } from "@/types";
  * 時刻 t（秒）を渡すと、その瞬間の各素材の位置・不透明度・拡大率が返る。
  * ここには DOM が出てこないので、スクロール連動でも自動再生でも同じ計算を使える。
  *
- * 5つの面 → 星が出て煌めく → 中央の P、の順。オーナーの指示による。
- * 面の出る順は左上→右上→左→下→右で、画面のうえで左右に振りながら最後に
- * 真ん中下が入る。競技の並び順（フェンシング→オブスタクル→…）にすると
- * 画面上を飛び回る動きになるため、ここでは見た目の流れを優先している。
+ * 5つの面 → 中央の P → 星が出て煌めく、の順。オーナーの指示による。
+ * 面は競技の並び順（フェンシング→オブスタクル→水泳→射撃→ランニング）で入る。
  */
 
 /** 各面が入りはじめる時刻（秒）。 */
 const ENTER: Record<DisciplineId, number> = {
-  running: 0,
-  fencing: 0.55,
+  fencing: 0,
+  obstacle: 0.55,
   swimming: 1.1,
-  obstacle: 1.6,
-  shooting: 2.1,
+  shooting: 1.6,
+  running: 2.1,
 };
 /** 1枚が入りきるまでの時間（秒）。 */
 const ENTER_DURATION = 0.95;
 
-const STAR_AT = 2.95;
+const P_AT = 2.95;
+const P_DURATION = 1;
+
+const STAR_AT = 3.85;
 const STAR_DURATION = 0.75;
 /** きらめきが続く時間。この幅のなかで強弱3回の山をつくる。 */
 const TWINKLE_SPAN = 1.5;
-
-const P_AT = 3.7;
-const P_DURATION = 1;
 
 /*
  * 最初の面が動き出してから、最後の素材が収まりきるまで（秒）。

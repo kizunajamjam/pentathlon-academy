@@ -9,9 +9,8 @@ import { assetPath } from "@/lib/utils/asset";
  * LogoMark    … 実物ロゴの五角形部分（public/logo-mark.png）
  * PentagonMotif … 五角形だけを再現したSVG。背景の透かし用。
  *
- * 実物ロゴは白背景なので、紺地のヘッダーでは白いバッジに載せている。
- * 背景を透過させるとロゴ中央の紺色の "P" が地色に溶けて消えるため、
- * ロゴ自体は加工せずそのまま使う方針。
+ * ロゴは黒背景の発光デザインなので、ヘッダーでは黒いバッジに載せている。
+ * 背景を透過させると発光のにじみが紺の地色の上で濁るため、ロゴ自体は加工せずそのまま使う。
  */
 
 export function LogoMark({ size = 40, className = "" }: { size?: number; className?: string }) {
@@ -71,7 +70,7 @@ export function SiteLogo({ tone = "light" }: { tone?: "light" | "dark" }) {
 
   return (
     <span className="flex items-center gap-2.5">
-      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-white p-1">
+      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-black p-0.5">
         <LogoMark size={40} className="h-full w-full object-contain" />
       </span>
       <span className="flex flex-col leading-none">

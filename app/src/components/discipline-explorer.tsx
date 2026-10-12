@@ -467,7 +467,7 @@ export function DisciplineExplorer() {
           ロゴ全体（等倍）の上に、その面の「塗られている部分だけ」を切り出した
           画像を重ねて拡大している。素の三角形で切ると面のあいだの白い隙間や
           中央の「P」まで一緒に拡大されてしまうため、
-          overlay-*.png は scripts/prepare-logo.mjs 側で
+          overlay-*.png は scripts/prepare-logo-glow.mjs 側で
           隙間と中心を除いた形に作ってある。
 
           拡大の基点はその塗り領域の重心なので、外へせり出さずその場で膨らむ。
@@ -527,17 +527,17 @@ export function DisciplineExplorer() {
             <div className="lg:min-h-[15rem]">
               {current ? (
                 <>
-                  <p className="eyebrow text-xs text-gold-700">
+                  <p className="eyebrow text-xs text-gold-400">
                     {String(currentIndex + 1).padStart(2, "0")} /{" "}
                     {current.nameEn}
                   </p>
-                  <h3 className={`mt-3 text-2xl sm:text-3xl ${current.text}`}>
+                  <h3 className="mt-3 text-2xl text-white sm:text-3xl">
                     {current.name}
                   </h3>
-                  <p className="mt-4 text-sm leading-relaxed text-navy-700 sm:text-base">
+                  <p className="mt-4 text-sm leading-relaxed text-navy-100 sm:text-base">
                     {current.summary}
                   </p>
-                  <p className="mt-3 text-sm leading-relaxed text-muted">
+                  <p className="mt-3 text-sm leading-relaxed text-navy-300">
                     {current.detail}
                   </p>
                 </>
@@ -545,14 +545,14 @@ export function DisciplineExplorer() {
                 <>
                   {/* 既定表示ではラベルを出さない。セクション見出しの
                   「DISCIPLINES」と重なって同じ語が2回並んでしまうため。 */}
-                  <h3 className="text-2xl text-navy-800 sm:text-3xl">
+                  <h3 className="text-2xl text-white sm:text-3xl">
                     ひとりで、5つすべてを。
                   </h3>
-                  <p className="mt-4 text-sm leading-relaxed text-muted sm:text-base">
+                  <p className="mt-4 text-sm leading-relaxed text-navy-200 sm:text-base">
                     近代五種は、性質のまったく違う5つの競技を1人の選手がすべて行い、
                     総合力で順位を決める競技です。ロゴの5つの面が、その5種目にあたります。
                   </p>
-                  <p className="mt-4 hidden text-xs text-muted lg:block">
+                  <p className="mt-4 hidden text-xs text-navy-300 lg:block">
                     ロゴの各面にカーソルを合わせると、競技の説明が表示されます。
                   </p>
                 </>
@@ -570,8 +570,8 @@ export function DisciplineExplorer() {
                     onBlur={() => setActive(null)}
                     className={`flex items-center gap-2 rounded-full border px-4 py-2 text-sm transition-colors ${
                       active === d.id
-                        ? "border-navy-800 bg-navy-800 text-white"
-                        : "border-border text-navy-700 hover:border-navy-300"
+                        ? "border-white bg-white text-navy-900"
+                        : "border-white/20 text-navy-100 hover:border-white/50"
                     }`}
                   >
                     <span
@@ -586,7 +586,7 @@ export function DisciplineExplorer() {
             <div className="mt-8">
               <Link
                 href="/disciplines"
-                className="inline-flex items-center gap-2 text-sm font-bold text-navy-800 transition-colors hover:text-gold-600"
+                className="inline-flex items-center gap-2 text-sm font-bold text-white transition-colors hover:text-gold-400"
               >
                 5種目とトレーニング内容を詳しく見る
                 <ArrowRight size={16} />

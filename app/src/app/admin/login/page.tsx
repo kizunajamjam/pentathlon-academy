@@ -18,7 +18,7 @@ export default function AdminLoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-navy-800 px-4 py-12">
       <div className="w-full max-w-sm">
         <div className="flex flex-col items-center">
-          <span className="flex h-16 w-16 items-center justify-center rounded-xl bg-white p-1.5">
+          <span className="flex h-16 w-16 items-center justify-center rounded-xl bg-black p-1.5">
             <LogoMark size={56} className="h-full w-full object-contain" />
           </span>
           <h1 className="mt-5 font-display text-lg text-white">管理画面</h1>
