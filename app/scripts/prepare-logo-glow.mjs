@@ -2,6 +2,7 @@
  * 黒背景・発光版のロゴ（public/logo.png）から、サイトで使う画像を切り出す。
  *
  *   public/logo-mark.png               五角形マークのみ（正方形・ヘッダー用）
+ *   public/icons/{競技}.png            競技アイコン（各面を余白を詰めて切り出したもの）
  *   public/icons/overlay-{競技}.png    各面をマークと同じ座標に置いたもの（トップの組み上がり用）
  *   public/icons/center-p.png          中央の「P」
  *   public/icons/center-star.png       中央の星
@@ -289,6 +290,49 @@ for (const id of ORDER)
   await sharp(outBufs[id], { raw: { width: OUT, height: OUT, channels: 4 } })
     .png()
     .toFile(`public/icons/overlay-${id}.png`);
+
+// ── 競技アイコン（各面を余白を詰めて正方形に）──
+// 白いページの上に置くので、面の外の黒は透明にする。フチの発光は明るさを不透明度にして残す。
+const ICON = 256;
+for (const id of ORDER) {
+  const [x0, y0, x1, y1] = hulls[id].reduce(
+    (b2, [x, y]) => [Math.min(b2[0], x), Math.min(b2[1], y), Math.max(b2[2], x), Math.max(b2[3], y)],
+    [S, S, 0, 0],
+  );
+  const bx0 = Math.max(0, Math.floor(x0 - GROW));
+  const by0 = Math.max(0, Math.floor(y0 - GROW));
+  const bx1 = Math.min(S - 1, Math.ceil(x1 + GROW));
+  const by1 = Math.min(S - 1, Math.ceil(y1 + GROW));
+  const w = bx1 - bx0 + 1;
+  const h = by1 - by0 + 1;
+  const buf = Buffer.alloc(w * h * 4);
+  for (let y = by0; y <= by1; y++)
+    for (let x = bx0; x <= bx1; x++) {
+      const d = dist(id, x, y);
+      if (d > GROW) continue;
+      // 隣の面のほうが近い画素は入れない
+      if (ORDER.some((other) => other !== id && dist(other, x, y) < d)) continue;
+      const [r, g, b] = at(x, y);
+      const o = ((y - by0) * w + (x - bx0)) * 4;
+      if (d === 0) {
+        buf[o] = r;
+        buf[o + 1] = g;
+        buf[o + 2] = b;
+        buf[o + 3] = 255;
+      } else {
+        const a = Math.max(r, g, b);
+        if (a < 8) continue;
+        buf[o] = Math.min(255, Math.round((r * 255) / a));
+        buf[o + 1] = Math.min(255, Math.round((g * 255) / a));
+        buf[o + 2] = Math.min(255, Math.round((b * 255) / a));
+        buf[o + 3] = a;
+      }
+    }
+  await sharp(buf, { raw: { width: w, height: h, channels: 4 } })
+    .resize(ICON, ICON, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } })
+    .png()
+    .toFile(`public/icons/${id}.png`);
+}
 
 // ── 中央の P と星 ──
 const outline = convexHull(ORDER.flatMap((id) => hulls[id]));
