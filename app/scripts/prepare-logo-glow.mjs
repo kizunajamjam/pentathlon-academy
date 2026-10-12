@@ -11,15 +11,20 @@
  *
  * 実行: node scripts/prepare-logo-glow.mjs
  *
- * ── 旧ロゴ用の prepare-logo.mjs との違い ─────────────────────────────
- * 旧ロゴは白地で、面と面のあいだが白い隙間で切れていたため、画像から面を
- * 自動で見つけられた。新ロゴは黒地で、面のあいだを発光する金の線がつないで
- * いるので、その方法では面が1つにつながってしまう。
+ * ── 面の求め方 ──────────────────────────────────────────────────────
+ * 旧ロゴ（白地）用の prepare-logo.mjs は、面のあいだの白い隙間で面を分けていた。
+ * 新ロゴは黒地で、面のあいだを発光する金の線がつないでいるので、色で分ける。
  *
- * 新ロゴは旧ロゴと同じ構図（五角形の配置・面の分け方）なので、旧ロゴで求めた
- * 面の輪郭（BASE_WEDGES）を、五角形の外接矩形どうしが重なるように写して使う。
- * 面の画像は輪郭を少し太らせて切り、境目の金の線も含める。黒い余白が
- * 少し入るが、トップのロゴ欄は背景を同じ黒にしているので見えない。
+ *   1. 各画素を色（金・赤・緑・青）で分類する
+ *   2. 色ごとの塗りを少し削る（収縮）。面のフチの細い発光線が切れ、面の本体だけが残る
+ *      （金の面はそのままだと、五角形を一周する金の線とつながってしまう）
+ *   3. 色ごとに一番大きい塊を面とする。青は2つ（上がランニング、左下が水泳）
+ *   4. 塊の凸包を取る。面は凸な四角形なので、中の白い選手のシルエットも含まれる
+ *   5. 削った分とフチの発光線の分だけ凸包を外へ広げて、面の範囲とする
+ *
+ * 面の画像を切るときは、どの画素も一番近い面にだけ入れる。隣の面の色が
+ * 混ざらないようにするため。面の外に少し入る黒は、トップのロゴ欄の背景も
+ * 同じ黒にしているので見えない。
  *
  * 中央の「P」と星は黒地の上にあるので、明るさをそのまま不透明度にして
  * 抜き出す（黒＝透明）。黒の上に重ねると元の画像と同じ見た目に戻る。
@@ -28,35 +33,23 @@ import { writeFile } from "node:fs/promises";
 import sharp from "sharp";
 
 const SRC = "public/logo.png";
-
-/*
- * 旧ロゴ（白地版）で求めた各面の輪郭。旧 logo-mark.png 上の座標（0〜100）。
- * 旧ロゴでは、マークの正方形の左端・幅が五角形の外接矩形の左端・幅と一致し、
- * 上下は外接矩形（高さ900px）を幅945pxの正方形の中央に置いていた。
- */
-const BASE = { side: 945, top: 1, bboxTop: 23, bboxH: 900 };
-const BASE_WEDGES = {
-  fencing: "50.90,2.33 51.01,2.33 51.64,2.65 52.70,3.28 54.81,4.66 57.57,6.46 68.99,14.07 78.10,20.21 83.07,23.60 85.08,24.97 88.57,27.41 91.11,29.21 91.85,29.74 94.18,31.43 96.93,33.44 98.73,34.81 99.68,35.56 99.79,35.66 99.79,35.77 73.97,45.08 73.65,45.19 73.54,45.19 71.64,43.81 52.80,30.05 51.22,28.89 50.90,28.57",
-  obstacle: "20.85,97.35 21.16,96.83 35.34,73.76 35.56,73.44 35.77,73.23 61.27,63.60 61.59,63.60 62.01,64.13 62.12,64.34 77.67,97.35 77.67,97.46 20.85,97.46",
-  swimming: "0.00,37.88 0.11,37.78 1.69,38.31 5.93,39.89 25.08,47.09 25.61,47.30 25.71,47.51 33.86,71.53 33.97,71.96 33.97,72.17 33.54,72.91 25.50,86.03 22.12,91.53 20.53,94.07 19.26,96.08 19.05,96.40 18.84,96.61 18.73,96.61 18.20,95.03 0.42,39.47 0.00,38.10",
-  shooting: "64.66,71.32 65.93,67.94 67.51,63.81 69.31,59.15 70.58,55.87 73.54,48.36 73.97,47.30 74.39,47.09 78.31,45.61 87.83,42.01 91.22,40.74 94.92,39.37 98.10,38.31 99.58,37.88 99.89,37.88 95.66,50.79 86.35,78.73 81.06,94.29 80.11,97.04 80.00,97.14 79.89,97.04 64.76,71.64 64.66,71.43",
-  running: "0.11,35.66 0.32,35.45 3.92,32.91 4.97,32.17 7.72,30.26 9.42,29.10 16.83,24.02 22.86,19.89 25.50,18.10 38.94,8.99 42.86,6.35 47.41,3.28 48.68,2.43 48.99,2.43 48.99,28.47 48.68,28.78 48.25,29.10 26.24,45.19 26.03,45.19 0.11,35.77",
-};
 const ORDER = ["fencing", "obstacle", "swimming", "shooting", "running"];
-
 const OUT = 512;
-/** 面を切るときに輪郭を太らせる量（マーク幅に対する%）。境目の金の線を含めるため。 */
-const GROW = 1.2;
 
-const { data, info } = await sharp(SRC).removeAlpha().raw().toBuffer({ resolveWithObject: true });
-const { width: W, height: H } = info;
-const px = (x, y) => {
-  const i = (y * W + x) * 3;
-  return [data[i], data[i + 1], data[i + 2]];
-};
-const lit = (x, y) => Math.max(...px(x, y)) > 90;
+/** 収縮の半径（元画像のpx）。フチの発光線（幅およそ10px）が切れる量。 */
+const ERODE = 9;
+/** 凸包を外へ広げる量（元画像のpx）。収縮で削った分＋フチの線の半分。 */
+const GROW = ERODE + 5;
+/** 中央（P・星）の範囲を面からどれだけ離すか（元画像のpx）。面のフチの光を含めないため。 */
+const CENTER_GAP = GROW + 10;
 
 // ── 五角形の外接矩形（ワードマークとの間の空行で下端が決まる） ──
+const src = await sharp(SRC).removeAlpha().raw().toBuffer({ resolveWithObject: true });
+const { width: W, height: H } = src.info;
+const lit = (x, y) => {
+  const i = (y * W + x) * 3;
+  return Math.max(src.data[i], src.data[i + 1], src.data[i + 2]) > 90;
+};
 let top = -1;
 let bottom = -1;
 for (let y = 0; y < H; y++) {
@@ -77,52 +70,163 @@ for (let y = top; y <= bottom; y++)
     }
 const bw = right - left + 1;
 const bh = bottom - top + 1;
-const side = Math.max(bw, bh);
-const sqLeft = left - (side - bw) / 2;
-const sqTop = top - (side - bh) / 2;
-console.log("pentagon bbox:", { left, right, top, bottom, side });
+const S = Math.max(bw, bh); // マークの正方形の一辺（元画像のpx）
+const sqLeft = Math.round(left - (S - bw) / 2);
+const sqTop = Math.round(top - (S - bh) / 2);
+console.log("pentagon bbox:", { left, right, top, bottom, side: S });
 
-// 旧マーク座標(0〜100) → 新マーク座標(0〜100)
-function mapPoint(x, y) {
-  const u = x / 100; // 旧マークは左端・幅が外接矩形と一致
-  const v = (BASE.top + (y / 100) * BASE.side - BASE.bboxTop) / BASE.bboxH;
-  const nx = left + u * bw;
-  const ny = top + v * bh;
-  return [((nx - sqLeft) / side) * 100, ((ny - sqTop) / side) * 100];
-}
-const wedges = Object.fromEntries(
-  ORDER.map((id) => [
-    id,
-    BASE_WEDGES[id].split(" ").map((p) => mapPoint(...p.split(",").map(Number))),
-  ]),
-);
-
-// ── マークを正方形で切り出す（はみ出す分は黒で埋める） ──
-const pad = Math.ceil(Math.max(0, -sqTop, -sqLeft)) + 2;
-const padded = await sharp(SRC)
-  .removeAlpha()
+// ── マークを正方形で切り出す（元の解像度）──
+// 五角形の下の発光より下（ワードマークの光）は黒で消す。残すとマークの下端に線が入る。
+const CUT_BELOW = bottom + 14;
+const cleaned = Buffer.from(src.data);
+for (let y = CUT_BELOW; y < H; y++) cleaned.fill(0, y * W * 3, (y + 1) * W * 3);
+const pad = Math.max(0, -sqTop, -sqLeft, sqTop + S - H, sqLeft + S - W) + 2;
+// sharp は extract を extend より先に処理するので、2段階に分ける
+const padded = await sharp(cleaned, { raw: { width: W, height: H, channels: 3 } })
   .extend({ top: pad, bottom: pad, left: pad, right: pad, background: "#000000" })
+  .png()
   .toBuffer();
-const markRaw = await sharp(padded)
-  .extract({
-    left: Math.round(sqLeft + pad),
-    top: Math.round(sqTop + pad),
-    width: Math.round(side),
-    height: Math.round(side),
-  })
-  .resize(OUT, OUT)
+const mark = await sharp(padded)
+  .extract({ left: sqLeft + pad, top: sqTop + pad, width: S, height: S })
+  .removeAlpha()
   .raw()
   .toBuffer();
-await sharp(markRaw, { raw: { width: OUT, height: OUT, channels: 3 } })
+if (mark.length !== S * S * 3) throw new Error("マークの切り出しサイズが想定と違う");
+const at = (x, y) => {
+  const i = (y * S + x) * 3;
+  return [mark[i], mark[i + 1], mark[i + 2]];
+};
+
+await sharp(mark, { raw: { width: S, height: S, channels: 3 } })
+  .resize(OUT, OUT)
   .png()
   .toFile("public/logo-mark.png");
 
-const mp = (x, y) => {
-  const i = (y * OUT + x) * 3;
-  return [markRaw[i], markRaw[i + 1], markRaw[i + 2]];
+// ── 1. 色で分類 ──
+function hsv(r, g, b) {
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const d = max - min;
+  let h = 0;
+  if (d > 0) {
+    if (max === r) h = ((g - b) / d) % 6;
+    else if (max === g) h = (b - r) / d + 2;
+    else h = (r - g) / d + 4;
+    h *= 60;
+    if (h < 0) h += 360;
+  }
+  return [h, max === 0 ? 0 : d / max, max / 255];
+}
+const CLASSES = {
+  gold: (h, s, v) => h >= 25 && h <= 58 && s > 0.55 && v > 0.25,
+  red: (h, s, v) => (h <= 14 || h >= 340) && s > 0.6 && v > 0.25,
+  green: (h, s, v) => h >= 90 && h <= 170 && s > 0.5 && v > 0.12,
+  blue: (h, s, v) => h >= 195 && h <= 250 && s > 0.45 && v > 0.15,
+};
+const masks = {};
+for (const name of Object.keys(CLASSES)) masks[name] = new Uint8Array(S * S);
+for (let y = 0; y < S; y++)
+  for (let x = 0; x < S; x++) {
+    const [h, s, v] = hsv(...at(x, y));
+    for (const [name, test] of Object.entries(CLASSES)) if (test(h, s, v)) masks[name][y * S + x] = 1;
+  }
+
+// ── 2. 収縮 ──
+// 窓（一辺 2r+1）のうち FILL 以上が同じ色なら残す。面の質感のむらで所々色が外れるため、
+// 「窓がすべて同じ色」だと面の本体まで消える。細い線は窓の大半を占めないので消える。
+const FILL = 0.8;
+function erode(m, r) {
+  const n = S + 1;
+  const sat = new Int32Array(n * n); // 2次元の累積和
+  for (let y = 0; y < S; y++)
+    for (let x = 0; x < S; x++)
+      sat[(y + 1) * n + x + 1] = m[y * S + x] + sat[y * n + x + 1] + sat[(y + 1) * n + x] - sat[y * n + x];
+  const out = new Uint8Array(S * S);
+  for (let y = 0; y < S; y++)
+    for (let x = 0; x < S; x++) {
+      const x0 = Math.max(0, x - r);
+      const y0 = Math.max(0, y - r);
+      const x1 = Math.min(S, x + r + 1);
+      const y1 = Math.min(S, y + r + 1);
+      const sum = sat[y1 * n + x1] - sat[y0 * n + x1] - sat[y1 * n + x0] + sat[y0 * n + x0];
+      out[y * S + x] = sum >= FILL * (x1 - x0) * (y1 - y0) ? 1 : 0;
+    }
+  return out;
+}
+
+// ── 3. 連結成分 ──
+function components(m) {
+  const label = new Int32Array(S * S).fill(-1);
+  const comps = [];
+  for (let p0 = 0; p0 < S * S; p0++) {
+    if (!m[p0] || label[p0] !== -1) continue;
+    const pts = [];
+    const stack = [p0];
+    label[p0] = comps.length;
+    while (stack.length) {
+      const p = stack.pop();
+      const x = p % S;
+      const y = (p / S) | 0;
+      pts.push([x, y]);
+      for (const [nx, ny] of [
+        [x + 1, y],
+        [x - 1, y],
+        [x, y + 1],
+        [x, y - 1],
+      ]) {
+        if (nx < 0 || ny < 0 || nx >= S || ny >= S) continue;
+        const np = ny * S + nx;
+        if (m[np] && label[np] === -1) {
+          label[np] = comps.length;
+          stack.push(np);
+        }
+      }
+    }
+    comps.push(pts);
+  }
+  return comps.sort((a, b) => b.length - a.length);
+}
+
+function convexHull(points) {
+  const pts = points.slice().sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+  const cross = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]);
+  const half = (list) => {
+    const h = [];
+    for (const p of list) {
+      while (h.length >= 2 && cross(h[h.length - 2], h[h.length - 1], p) <= 0) h.pop();
+      h.push(p);
+    }
+    h.pop();
+    return h;
+  };
+  return half(pts).concat(half(pts.slice().reverse()));
+}
+const meanY = (pts) => pts.reduce((s, p) => s + p[1], 0) / pts.length;
+
+
+
+// 選手のシルエットで面が分断されることがあるので、一定以上の大きさの塊はすべて面の一部とする
+const MIN_PART = 3000;
+const parts = (name) => components(erode(masks[name], ERODE)).filter((c) => c.length >= MIN_PART);
+const one = (name) => {
+  const ps = parts(name);
+  if (!ps.length) throw new Error(`${name} の面を見つけられなかった（ロゴの構造が想定と違う可能性がある）`);
+  return convexHull(ps.flat());
+};
+// 青は2面。五角形の上半分にあるのがランニング、下半分が水泳
+const blue = parts("blue");
+const upper = blue.filter((c) => meanY(c) < S * 0.42).flat();
+const lower = blue.filter((c) => meanY(c) >= S * 0.42).flat();
+if (!upper.length || !lower.length) throw new Error("青の面を2つに分けられなかった");
+const hulls = {
+  fencing: one("gold"),
+  shooting: one("red"),
+  obstacle: one("green"),
+  running: convexHull(upper),
+  swimming: convexHull(lower),
 };
 
-// ── 点が多角形の内側か（太らせ量つき） ──
+// ── 点と多角形 ──
 function inside(poly, x, y) {
   let c = false;
   for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
@@ -144,90 +248,103 @@ function distToPoly(poly, x, y) {
   }
   return d;
 }
-const inGrown = (poly, x, y) => inside(poly, x, y) || distToPoly(poly, x, y) <= GROW;
+/** 面の凸包からの距離（内側なら0） */
+const dist = (id, x, y) => (inside(hulls[id], x, y) ? 0 : distToPoly(hulls[id], x, y));
 
-// ── 各面の画像 ──
-for (const id of ORDER) {
-  const out = Buffer.alloc(OUT * OUT * 4);
-  for (let y = 0; y < OUT; y++)
-    for (let x = 0; x < OUT; x++) {
-      const X = ((x + 0.5) / OUT) * 100;
-      const Y = ((y + 0.5) / OUT) * 100;
-      if (!inGrown(wedges[id], X, Y)) continue;
-      const [r, g, b] = mp(x, y);
-      const o = (y * OUT + x) * 4;
-      out[o] = r;
-      out[o + 1] = g;
-      out[o + 2] = b;
-      out[o + 3] = 255;
-    }
-  await sharp(out, { raw: { width: OUT, height: OUT, channels: 4 } })
+// ── 4・5. 各面の画像（出力解像度で、元画像の座標に戻して判定）──
+const k = S / OUT;
+const outBufs = Object.fromEntries(ORDER.map((id) => [id, Buffer.alloc(OUT * OUT * 4)]));
+const small = await sharp(mark, { raw: { width: S, height: S, channels: 3 } }).resize(OUT, OUT).raw().toBuffer();
+const sp = (x, y) => {
+  const i = (y * OUT + x) * 3;
+  return [small[i], small[i + 1], small[i + 2]];
+};
+const nearest = new Int8Array(OUT * OUT).fill(-1); // その画素が属する面（なければ -1）
+const minDist = new Float32Array(OUT * OUT);
+for (let y = 0; y < OUT; y++)
+  for (let x = 0; x < OUT; x++) {
+    const X = (x + 0.5) * k;
+    const Y = (y + 0.5) * k;
+    let best = -1;
+    let bd = Infinity;
+    ORDER.forEach((id, n) => {
+      const d = dist(id, X, Y);
+      if (d < bd) {
+        bd = d;
+        best = n;
+      }
+    });
+    minDist[y * OUT + x] = bd;
+    if (bd > GROW) continue;
+    nearest[y * OUT + x] = best;
+    const [r, g, b] = sp(x, y);
+    const o = (y * OUT + x) * 4;
+    const buf = outBufs[ORDER[best]];
+    buf[o] = r;
+    buf[o + 1] = g;
+    buf[o + 2] = b;
+    buf[o + 3] = 255;
+  }
+for (const id of ORDER)
+  await sharp(outBufs[id], { raw: { width: OUT, height: OUT, channels: 4 } })
     .png()
     .toFile(`public/icons/overlay-${id}.png`);
-}
 
-// ── 中央の P と星（明るさ＝不透明度で抜く） ──
-// 五角形の外（外側の発光）と、面の内側のフチの金の線は含めない
-const outline = convexHull(ORDER.flatMap((id) => wedges[id]));
-const CENTER_GAP = 2.4;
-const isCenter = (X, Y) =>
-  inside(outline, X, Y) && !ORDER.some((id) => inside(wedges[id], X, Y) || distToPoly(wedges[id], X, Y) <= CENTER_GAP);
-// 星は旧ロゴでの位置の近く（半径 STAR_R）にある金色だけ。それ以外の金（P のフチの光など）は P に含める
-const [starX0, starY0] = mapPoint(52.13, 60.79);
-const STAR_R = 7;
-const STAR_CORE = 5;
+// ── 中央の P と星 ──
+const outline = convexHull(ORDER.flatMap((id) => hulls[id]));
 // 金色（星）か。P は銀色で彩度が低い。
 const isGold = (r, g, b) => r > 60 && r - b > 45 && g - b > 20;
 
-let sx = 0;
-let sy = 0;
-let sn = 0;
+// 星の位置: 中央の範囲にある、明るい金色の画素の塊のうち最大のもの
+const goldCenter = new Uint8Array(S * S);
+for (let y = 0; y < S; y++)
+  for (let x = 0; x < S; x++) {
+    if (!inside(outline, x, y)) continue;
+    if (ORDER.some((id) => dist(id, x, y) <= CENTER_GAP)) continue;
+    const [r, g, b] = at(x, y);
+    if (isGold(r, g, b) && Math.max(r, g, b) > 120) goldCenter[y * S + x] = 1;
+  }
+// 星は五角形の中心よりやや下（旧ロゴで マーク上の 52%, 61% 付近）。その近くの塊だけを見る
+const near = (c) => {
+  const cx = c.reduce((s2, p) => s2 + p[0], 0) / c.length;
+  const cy = c.reduce((s2, p) => s2 + p[1], 0) / c.length;
+  return Math.hypot(cx - S * 0.52, cy - S * 0.6) < S * 0.12;
+};
+const starBlob = components(goldCenter).filter(near)[0];
+if (!starBlob) throw new Error("星を見つけられなかった");
+const starCx = starBlob.reduce((s, p) => s + p[0], 0) / starBlob.length;
+const starCy = starBlob.reduce((s, p) => s + p[1], 0) / starBlob.length;
+// 星の大きさはマークの一辺のおよそ1割（外接円の半径で 5〜6%）
+const starR = S * 0.075;
+const STAR_CORE = S * 0.062;
+
 const pBuf = Buffer.alloc(OUT * OUT * 4);
 const sBuf = Buffer.alloc(OUT * OUT * 4);
 for (let y = 0; y < OUT; y++)
   for (let x = 0; x < OUT; x++) {
-    const X = ((x + 0.5) / OUT) * 100;
-    const Y = ((y + 0.5) / OUT) * 100;
-    if (!isCenter(X, Y)) continue;
-    const [r, g, b] = mp(x, y);
+    const X = (x + 0.5) * k;
+    const Y = (y + 0.5) * k;
+    if (!inside(outline, X, Y)) continue;
+    if (minDist[y * OUT + x] <= CENTER_GAP) continue;
+    const [r, g, b] = sp(x, y);
     const a = Math.max(r, g, b);
     if (a < 8) continue;
-    const dStar = Math.hypot(X - starX0, Y - starY0);
-    // 星の芯（白い光の部分も含む）は色に関係なく星へ。周りの光は金色のものだけ星へ
-    const gold = dStar <= STAR_CORE || (isGold(r, g, b) && dStar <= STAR_R);
-    const buf = gold ? sBuf : pBuf;
+    const dStar = Math.hypot(X - starCx, Y - starCy);
+    // 星の芯は色に関係なく星へ（白い光も含む）。周りの光は金色のものだけ星へ
+    const toStar = dStar <= STAR_CORE || (isGold(r, g, b) && dStar <= starR);
+    const buf = toStar ? sBuf : pBuf;
     const o = (y * OUT + x) * 4;
     // 黒の上に重ねたとき元の色に戻るよう、色を不透明度で割り戻す
     buf[o] = Math.min(255, Math.round((r * 255) / a));
     buf[o + 1] = Math.min(255, Math.round((g * 255) / a));
     buf[o + 2] = Math.min(255, Math.round((b * 255) / a));
     buf[o + 3] = a;
-    if (gold && a > 120) {
-      sx += X;
-      sy += Y;
-      sn++;
-    }
   }
 await sharp(pBuf, { raw: { width: OUT, height: OUT, channels: 4 } }).png().toFile("public/icons/center-p.png");
 await sharp(sBuf, { raw: { width: OUT, height: OUT, channels: 4 } }).png().toFile("public/icons/center-star.png");
-const star = { x: sx / sn, y: sy / sn };
 
-function convexHull(points) {
-  const pts = points.slice().sort((a, b) => a[0] - b[0] || a[1] - b[1]);
-  const cross = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]);
-  const half = (list) => {
-    const h = [];
-    for (const p of list) {
-      while (h.length >= 2 && cross(h[h.length - 2], h[h.length - 1], p) <= 0) h.pop();
-      h.push(p);
-    }
-    h.pop();
-    return h;
-  };
-  return half(pts).concat(half(pts.slice().reverse()));
-}
-
-// ── 輪郭と重心を書き出す ──
+// ── 輪郭と重心を書き出す（0〜100）──
+const pct = (v) => (v / S) * 100;
 const centroid = (poly) => {
   let a = 0;
   let cx = 0;
@@ -242,15 +359,15 @@ const centroid = (poly) => {
 };
 const f2 = (v) => v.toFixed(2);
 const lines = ORDER.map((id) => {
-  const pts = wedges[id].map(([x, y]) => `${f2(x)},${f2(y)}`).join(" ");
-  const c = centroid(wedges[id]);
-  return `  { id: "${id}", points: "${pts}", centroid: { x: ${f2(c.x)}, y: ${f2(c.y)} } },`;
+  const pts = hulls[id].map(([x, y]) => `${f2(pct(x))},${f2(pct(y))}`).join(" ");
+  const c = centroid(hulls[id]);
+  return `  { id: "${id}", points: "${pts}", centroid: { x: ${f2(pct(c.x))}, y: ${f2(pct(c.y))} } },`;
 });
 await writeFile(
   "src/lib/constants/logo-geometry.ts",
   `// scripts/prepare-logo-glow.mjs が生成。直接編集しないこと。
 // logo-mark.png 上での各面の情報（viewBox="0 0 100 100" 基準）。
-//   points   … 面の輪郭。ホバーの当たり判定に使う
+//   points   … 面の輪郭（凸包）。ホバーの当たり判定に使う
 //   centroid … 面の重心。拡大の基点に使う
 import type { DisciplineId } from "@/types";
 
@@ -263,7 +380,7 @@ ${lines.join("\n")}
 ];
 
 // 中央の星の重心。組み上がる演出で、きらめきの光をここから出す。
-export const LOGO_STAR = { x: ${f2(star.x)}, y: ${f2(star.y)} };
+export const LOGO_STAR = { x: ${f2(pct(starCx))}, y: ${f2(pct(starCy))} };
 `,
 );
 
@@ -276,5 +393,6 @@ await sharp({ create: { width: 1200, height: 630, channels: 3, background: "#000
   .png()
   .toFile("public/og.png");
 
-console.log("star:", star);
+console.log("hull points:", Object.fromEntries(ORDER.map((id) => [id, hulls[id].length])));
+console.log("star:", { x: pct(starCx), y: pct(starCy) });
 console.log("done");
