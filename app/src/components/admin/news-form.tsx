@@ -20,7 +20,7 @@ export function NewsForm({
   // (クライアントで生成するとハイドレーション不一致になるため)。
   defaultPublishedAt: string;
 }) {
-  const [state, formAction] = useActionState(saveNews, INITIAL);
+  const [state, formAction, pending] = useActionState(saveNews, INITIAL);
 
   return (
     <form action={formAction} onSubmit={keepInputsOnSubmit(formAction)} className="space-y-6">
@@ -127,7 +127,7 @@ export function NewsForm({
       </label>
 
       <div className="flex gap-3 pt-2">
-        <SubmitButton>保存する</SubmitButton>
+        <SubmitButton pending={pending}>保存する</SubmitButton>
       </div>
     </form>
   );

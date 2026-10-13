@@ -11,7 +11,7 @@ import type { Coach } from "@/types";
 const INITIAL: CoachFormState = {};
 
 export function CoachForm({ coach }: { coach?: Coach }) {
-  const [state, formAction] = useActionState(saveCoach, INITIAL);
+  const [state, formAction, pending] = useActionState(saveCoach, INITIAL);
 
   return (
     <form action={formAction} onSubmit={keepInputsOnSubmit(formAction)} className="space-y-6">
@@ -62,7 +62,7 @@ export function CoachForm({ coach }: { coach?: Coach }) {
         <span className="text-sm text-navy-800">サイトに公開する</span>
       </label>
 
-      <SubmitButton>保存する</SubmitButton>
+      <SubmitButton pending={pending}>保存する</SubmitButton>
     </form>
   );
 }

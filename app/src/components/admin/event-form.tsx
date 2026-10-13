@@ -21,7 +21,7 @@ export function EventForm({
   defaultStartsAt: string;
   defaultEndsAt: string;
 }) {
-  const [state, formAction] = useActionState(saveEvent, INITIAL);
+  const [state, formAction, pending] = useActionState(saveEvent, INITIAL);
 
   return (
     <form action={formAction} onSubmit={keepInputsOnSubmit(formAction)} className="space-y-6">
@@ -135,7 +135,7 @@ export function EventForm({
       </label>
 
       <div className="pt-2">
-        <SubmitButton>保存する</SubmitButton>
+        <SubmitButton pending={pending}>保存する</SubmitButton>
       </div>
     </form>
   );

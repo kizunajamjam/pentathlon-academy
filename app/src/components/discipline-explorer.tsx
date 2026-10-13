@@ -346,10 +346,11 @@ export function DisciplineExplorer() {
       return stop;
     };
 
+    let frame = 0;
     function onScroll() {
       if (queued) return;
       queued = true;
-      requestAnimationFrame(update);
+      frame = requestAnimationFrame(update);
     }
 
     function detach() {
@@ -363,6 +364,8 @@ export function DisciplineExplorer() {
 
     return () => {
       detach();
+      // 予約済みの描画が離れたあとに走ると、移った先のページに見張りを付けてしまう
+      cancelAnimationFrame(frame);
       stopWatching?.();
     };
   }, []);

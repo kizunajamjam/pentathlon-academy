@@ -33,12 +33,17 @@ export function SubmitButton({
   children,
   pendingLabel = "保存中...",
   variant = "primary",
+  pending: pendingProp = false,
 }: {
   children: React.ReactNode;
   pendingLabel?: string;
   variant?: "primary" | "danger";
+  // useActionState の送信中フラグ。onSubmit から送るフォーム（lib/form-submit.ts）でも
+  // 確実に二重送信を防ぐため、useFormStatus と両方を見る
+  pending?: boolean;
 }) {
-  const { pending } = useFormStatus();
+  const status = useFormStatus();
+  const pending = pendingProp || status.pending;
 
   const style =
     variant === "danger"

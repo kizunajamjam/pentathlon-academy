@@ -252,6 +252,28 @@ function distToPoly(poly, x, y) {
 /** 面の凸包からの距離（内側なら0） */
 const dist = (id, x, y) => (inside(hulls[id], x, y) ? 0 : distToPoly(hulls[id], x, y));
 
+/**
+ * 1画素を書き込む。面の内側は不透明のまま、外側のフチは黒を透明にして光だけ残す
+ * （明るさを不透明度にし、黒の上に重ねたとき元の色に戻るよう色を割り戻す）。
+ * 戻り値: 書き込んだら true（ほぼ黒で捨てたら false）
+ */
+function writeGlowPixel(buf, o, r, g, b, opaque) {
+  if (opaque) {
+    buf[o] = r;
+    buf[o + 1] = g;
+    buf[o + 2] = b;
+    buf[o + 3] = 255;
+    return true;
+  }
+  const a = Math.max(r, g, b);
+  if (a < 8) return false;
+  buf[o] = Math.min(255, Math.round((r * 255) / a));
+  buf[o + 1] = Math.min(255, Math.round((g * 255) / a));
+  buf[o + 2] = Math.min(255, Math.round((b * 255) / a));
+  buf[o + 3] = a;
+  return true;
+}
+
 // ── 4・5. 各面の画像（出力解像度で、元画像の座標に戻して判定）──
 const k = S / OUT;
 const outBufs = Object.fromEntries(ORDER.map((id) => [id, Buffer.alloc(OUT * OUT * 4)]));
@@ -280,22 +302,8 @@ for (let y = 0; y < OUT; y++)
     nearest[y * OUT + x] = best;
     const [r, g, b] = sp(x, y);
     const o = (y * OUT + x) * 4;
-    const buf = outBufs[ORDER[best]];
-    if (bd === 0) {
-      buf[o] = r;
-      buf[o + 1] = g;
-      buf[o + 2] = b;
-      buf[o + 3] = 255;
-    } else {
-      // 面の外側のフチは、黒を透明にして光だけ残す。ホバーで拡大したとき、
-      // 黒い縁が隣の面に覆いかぶさらないようにするため
-      const a = Math.max(r, g, b);
-      if (a < 8) continue;
-      buf[o] = Math.min(255, Math.round((r * 255) / a));
-      buf[o + 1] = Math.min(255, Math.round((g * 255) / a));
-      buf[o + 2] = Math.min(255, Math.round((b * 255) / a));
-      buf[o + 3] = a;
-    }
+    // 外側のフチの黒を透明にするのは、ホバーで拡大したとき黒い縁が隣の面にかぶらないようにするため
+    writeGlowPixel(outBufs[ORDER[best]], o, r, g, b, bd === 0);
   }
 for (const id of ORDER)
   await sharp(outBufs[id], { raw: { width: OUT, height: OUT, channels: 4 } })
@@ -324,20 +332,7 @@ for (const id of ORDER) {
       // 隣の面のほうが近い画素は入れない
       if (ORDER.some((other) => other !== id && dist(other, x, y) < d)) continue;
       const [r, g, b] = at(x, y);
-      const o = ((y - by0) * w + (x - bx0)) * 4;
-      if (d === 0) {
-        buf[o] = r;
-        buf[o + 1] = g;
-        buf[o + 2] = b;
-        buf[o + 3] = 255;
-      } else {
-        const a = Math.max(r, g, b);
-        if (a < 8) continue;
-        buf[o] = Math.min(255, Math.round((r * 255) / a));
-        buf[o + 1] = Math.min(255, Math.round((g * 255) / a));
-        buf[o + 2] = Math.min(255, Math.round((b * 255) / a));
-        buf[o + 3] = a;
-      }
+      writeGlowPixel(buf, ((y - by0) * w + (x - bx0)) * 4, r, g, b, d === 0);
     }
   await sharp(buf, { raw: { width: w, height: h, channels: 4 } })
     .resize(ICON, ICON, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } })
