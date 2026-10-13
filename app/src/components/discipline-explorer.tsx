@@ -295,7 +295,8 @@ export function DisciplineExplorer() {
         // 戻ってもばらけないし、二度目は最初から完成した姿になる。
         rememberSeen();
         detach();
-        watchToCollapse();
+        // 畳む前に別のページへ移ったら、見張りだけやめる（移った先のスクロールを動かさない）
+        stopWatching = watchToCollapse();
       }
     };
 
@@ -321,14 +322,10 @@ export function DisciplineExplorer() {
         window.removeEventListener("scroll", onMove);
         window.removeEventListener("resize", onMove);
       };
-      // 畳む前に別のページへ移ったときは、何もせずに見張りだけやめる。
-      // 残しておくと、移った先のページでスクロール位置を動かしてしまう。
-      stopWatching = stop;
 
       const finish = () => {
         stop();
-        stopWatching = null;
-        if (track.isConnected) collapse();
+        collapse();
       };
 
       const onMove = () => {
@@ -346,6 +343,7 @@ export function DisciplineExplorer() {
       window.addEventListener("scroll", onMove, { passive: true });
       window.addEventListener("resize", onMove);
       onMove();
+      return stop;
     };
 
     function onScroll() {
@@ -409,7 +407,9 @@ export function DisciplineExplorer() {
                 alt=""
                 width={512}
                 height={512}
-                priority
+                // 1枚目の画面（ヒーロー）より下にあるので先読みはしないが、
+                // 遅延読み込みにすると組み上がりの途中で絵が欠けるため即時に読む
+                loading="eager"
                 className="absolute inset-0 h-full w-full"
                 style={{ opacity: ASSEMBLED.pieces[wedge.id].opacity }}
               />
@@ -420,7 +420,7 @@ export function DisciplineExplorer() {
               alt=""
               width={512}
               height={512}
-              priority
+              loading="eager"
               className="absolute inset-0 h-full w-full"
               style={{ opacity: ASSEMBLED.star.opacity }}
             />
@@ -430,7 +430,7 @@ export function DisciplineExplorer() {
               alt={SITE.nameEn}
               width={512}
               height={512}
-              priority
+              loading="eager"
               className="absolute inset-0 h-full w-full"
               style={{ opacity: ASSEMBLED.p.opacity }}
             />

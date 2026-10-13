@@ -33,17 +33,12 @@ export function SubmitButton({
   children,
   pendingLabel = "保存中...",
   variant = "primary",
-  pending: pendingProp,
 }: {
   children: React.ReactNode;
   pendingLabel?: string;
   variant?: "primary" | "danger";
-  // onSubmit で送るフォーム（lib/form-submit.ts）では useFormStatus が働かないので、
-  // useActionState の pending を渡す
-  pending?: boolean;
 }) {
-  const status = useFormStatus();
-  const pending = pendingProp ?? status.pending;
+  const { pending } = useFormStatus();
 
   const style =
     variant === "danger"

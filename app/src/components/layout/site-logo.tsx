@@ -20,7 +20,7 @@ export function LogoMark({ size = 40, className = "" }: { size?: number; classNa
       alt={SITE.nameEn}
       width={size}
       height={size}
-      priority
+      preload
       className={className}
     />
   );

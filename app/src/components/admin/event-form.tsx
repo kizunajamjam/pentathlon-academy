@@ -5,7 +5,7 @@ import { AlertCircle } from "lucide-react";
 
 import { saveEvent, type EventFormState } from "@/app/admin/(dashboard)/events/actions";
 import { AdminField, SubmitButton, adminInput } from "./form-ui";
-import { submitWithoutReset } from "@/lib/form-submit";
+import { keepInputsOnSubmit } from "@/lib/form-submit";
 import { EVENT_CATEGORY_LABEL } from "@/lib/constants/site";
 import type { AcademyEvent, EventCategory } from "@/types";
 
@@ -21,10 +21,10 @@ export function EventForm({
   defaultStartsAt: string;
   defaultEndsAt: string;
 }) {
-  const [state, formAction, pending] = useActionState(saveEvent, INITIAL);
+  const [state, formAction] = useActionState(saveEvent, INITIAL);
 
   return (
-    <form onSubmit={submitWithoutReset(formAction)} className="space-y-6">
+    <form action={formAction} onSubmit={keepInputsOnSubmit(formAction)} className="space-y-6">
       {event && <input type="hidden" name="id" value={event.id} />}
 
       {state.message && (
@@ -135,7 +135,7 @@ export function EventForm({
       </label>
 
       <div className="pt-2">
-        <SubmitButton pending={pending}>保存する</SubmitButton>
+        <SubmitButton>保存する</SubmitButton>
       </div>
     </form>
   );

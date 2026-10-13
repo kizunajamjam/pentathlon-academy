@@ -5,7 +5,7 @@ import { AlertCircle } from "lucide-react";
 
 import { saveNews, type NewsFormState } from "@/app/admin/(dashboard)/news/actions";
 import { AdminField, SubmitButton, adminInput } from "./form-ui";
-import { submitWithoutReset } from "@/lib/form-submit";
+import { keepInputsOnSubmit } from "@/lib/form-submit";
 import { NEWS_CATEGORY_LABEL } from "@/lib/constants/site";
 import type { News, NewsCategory } from "@/types";
 
@@ -20,10 +20,10 @@ export function NewsForm({
   // (クライアントで生成するとハイドレーション不一致になるため)。
   defaultPublishedAt: string;
 }) {
-  const [state, formAction, pending] = useActionState(saveNews, INITIAL);
+  const [state, formAction] = useActionState(saveNews, INITIAL);
 
   return (
-    <form onSubmit={submitWithoutReset(formAction)} className="space-y-6">
+    <form action={formAction} onSubmit={keepInputsOnSubmit(formAction)} className="space-y-6">
       {news && <input type="hidden" name="id" value={news.id} />}
 
       {state.message && (
@@ -127,7 +127,7 @@ export function NewsForm({
       </label>
 
       <div className="flex gap-3 pt-2">
-        <SubmitButton pending={pending}>保存する</SubmitButton>
+        <SubmitButton>保存する</SubmitButton>
       </div>
     </form>
   );

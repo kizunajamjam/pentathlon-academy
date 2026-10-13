@@ -2,7 +2,7 @@
 
 import { useActionState } from "react";
 
-import { submitWithoutReset } from "@/lib/form-submit";
+import { keepInputsOnSubmit } from "@/lib/form-submit";
 import { AlertCircle } from "lucide-react";
 
 import { LogoMark } from "@/components/layout/site-logo";
@@ -27,7 +27,7 @@ export default function AdminLoginPage() {
           <p className="mt-1.5 text-xs text-navy-300">ペンタスロンアカデミー</p>
         </div>
 
-        <form onSubmit={submitWithoutReset(formAction)} className="mt-8 rounded-card bg-white p-7 shadow-lg">
+        <form action={formAction} onSubmit={keepInputsOnSubmit(formAction)} className="mt-8 rounded-card bg-white p-7 shadow-lg">
           {state.message && (
             <p className="mb-5 flex items-start gap-2.5 rounded-md border border-shoot-500/30 bg-shoot-50 px-4 py-3 text-sm leading-relaxed text-shoot-700">
               <AlertCircle size={17} className="mt-0.5 shrink-0" />

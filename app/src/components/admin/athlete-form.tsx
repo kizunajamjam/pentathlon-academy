@@ -5,17 +5,17 @@ import { AlertCircle } from "lucide-react";
 
 import { saveAthlete, type AthleteFormState } from "@/app/admin/(dashboard)/athletes/actions";
 import { AdminField, SubmitButton, adminInput } from "./form-ui";
-import { submitWithoutReset } from "@/lib/form-submit";
+import { keepInputsOnSubmit } from "@/lib/form-submit";
 import { DISCIPLINES } from "@/lib/constants/site";
 import type { Athlete } from "@/types";
 
 const INITIAL: AthleteFormState = {};
 
 export function AthleteForm({ athlete }: { athlete?: Athlete }) {
-  const [state, formAction, pending] = useActionState(saveAthlete, INITIAL);
+  const [state, formAction] = useActionState(saveAthlete, INITIAL);
 
   return (
-    <form onSubmit={submitWithoutReset(formAction)} className="space-y-6">
+    <form action={formAction} onSubmit={keepInputsOnSubmit(formAction)} className="space-y-6">
       {athlete && <input type="hidden" name="id" value={athlete.id} />}
 
       {state.message && (
@@ -88,7 +88,7 @@ export function AthleteForm({ athlete }: { athlete?: Athlete }) {
         <span className="text-sm text-navy-800">サイトに公開する</span>
       </label>
 
-      <SubmitButton pending={pending}>保存する</SubmitButton>
+      <SubmitButton>保存する</SubmitButton>
     </form>
   );
 }
