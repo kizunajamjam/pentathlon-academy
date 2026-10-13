@@ -274,6 +274,9 @@ function writeGlowPixel(buf, o, r, g, b, opaque) {
   return true;
 }
 
+// 五角形全体の輪郭（中央の範囲を決めるのに使う）
+const outline = convexHull(ORDER.flatMap((id) => hulls[id]));
+
 // ── 4・5. 各面の画像（出力解像度で、元画像の座標に戻して判定）──
 const k = S / OUT;
 const outBufs = Object.fromEntries(ORDER.map((id) => [id, Buffer.alloc(OUT * OUT * 4)]));
@@ -298,7 +301,10 @@ for (let y = 0; y < OUT; y++)
       }
     });
     minDist[y * OUT + x] = bd;
-    if (bd > GROW) continue;
+    // 中央（P と星の層）に回す範囲だけは面に入れない。それ以外は、面の外側の光や
+    // 面と中央のあいだの金のフチも含めて、すべて一番近い面に入れる。
+    // 入れ漏らすと、組み上がったロゴが元の画像より欠けて見える。
+    if (inside(outline, X, Y) && bd > CENTER_GAP) continue;
     nearest[y * OUT + x] = best;
     const [r, g, b] = sp(x, y);
     const o = (y * OUT + x) * 4;
@@ -341,7 +347,6 @@ for (const id of ORDER) {
 }
 
 // ── 中央の P と星 ──
-const outline = convexHull(ORDER.flatMap((id) => hulls[id]));
 // 金色（星）か。P は銀色で彩度が低い。
 const isGold = (r, g, b) => r > 60 && r - b > 45 && g - b > 20;
 
