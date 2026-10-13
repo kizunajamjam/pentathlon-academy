@@ -7,6 +7,7 @@ import { submitInquiry, type ContactState } from "@/app/(site)/contact/actions";
 import { INQUIRY_CATEGORIES } from "@/lib/constants/site";
 import { readAttribution, trackEvent } from "@/lib/attribution";
 import { TurnstileWidget } from "@/components/turnstile-widget";
+import { submitWithoutReset } from "@/lib/form-submit";
 
 const INITIAL: ContactState = { status: "idle" };
 
@@ -62,13 +63,13 @@ export function ContactForm() {
 
   return (
     <form
-      action={(formData) => {
+      // 入力エラーで差し戻したときに、書いた内容が消えないようにする（lib/form-submit.ts）
+      onSubmit={submitWithoutReset(formAction, (formData) => {
         // 流入元はブラウザにしか無いので、送信の直前に読んで添える
         const { source, landingPath } = readAttribution();
         formData.set("source", source);
         formData.set("landingPath", landingPath);
-        formAction(formData);
-      }}
+      })}
       className="space-y-6"
     >
       {state.status === "error" && state.message && (

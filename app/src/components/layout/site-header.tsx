@@ -10,7 +10,18 @@ import { SiteLogo } from "./site-logo";
 
 export function SiteHeader() {
   const pathname = usePathname();
-  const [open, setOpen] = useState(false);
+  /*
+   * メニューを開いたページ。別のページへ移ったら（戻る・進むや、メニュー以外の
+   * リンクでも）閉じた扱いにする。開閉を true/false で持つと、移動しても
+   * 開いたまま残ってしまう。
+   */
+  const [openOn, setOpenOn] = useState<string | null>(null);
+  const open = openOn === pathname;
+  const setOpen = (next: boolean | ((v: boolean) => boolean)) =>
+    setOpenOn(() => {
+      const value = typeof next === "function" ? next(open) : next;
+      return value ? pathname : null;
+    });
 
   // 「/」だけは完全一致。それ以外は詳細ページ(/news/xxx)でも親を点灯させる。
   const isActive = (href: string) =>
@@ -65,7 +76,12 @@ export function SiteHeader() {
 
       {/* モバイル */}
       {open && (
-        <nav className="border-t border-navy-700 bg-navy-800 2xl:hidden">
+        /*
+          ヘッダーは画面上部に貼りついているので、メニューが画面より長いと
+          下の項目に届かない（iPhone SE など背の低い端末）。メニューの中だけ
+          スクロールできるようにする。
+        */
+        <nav className="max-h-[calc(100svh-4rem)] overflow-y-auto overscroll-contain border-t border-navy-700 bg-navy-800 2xl:hidden">
           <ul className="mx-auto max-w-6xl px-4 py-2">
             {NAV_ITEMS.map((item) => (
               <li key={item.href}>

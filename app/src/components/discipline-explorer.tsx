@@ -30,7 +30,7 @@ import type { DisciplineId } from "@/types";
  * ロゴは1枚絵ではなく、面5枚＋星＋P の7枚を重ねて組み立てている。
  * スクロールしてこのセクションに入ってくるあいだに、その7枚が順に
  * 寄ってきて組み上がる（動きの計算は lib/logo-assembly.ts）。
- * 素材の切り出しとホバー領域の座標は scripts/prepare-logo.mjs が
+ * 素材の切り出しとホバー領域の座標は scripts/prepare-logo-glow.mjs が
  * 書き出すので、ロゴを差し替えても手で直す必要はない。
  *
  * SVG はマウス操作の補助なので aria-hidden にし、
@@ -269,6 +269,7 @@ export function DisciplineExplorer() {
 
     let queued = false;
     let wasAssembled = false;
+    let stopWatching: (() => void) | null = null;
     /*
      * ここまで進んだ、という印。進み具合はここから戻さない。
      *
@@ -315,11 +316,19 @@ export function DisciplineExplorer() {
       let timer = 0;
       let lastY = window.scrollY;
 
-      const finish = () => {
+      const stop = () => {
         window.clearTimeout(timer);
         window.removeEventListener("scroll", onMove);
         window.removeEventListener("resize", onMove);
-        collapse();
+      };
+      // 畳む前に別のページへ移ったときは、何もせずに見張りだけやめる。
+      // 残しておくと、移った先のページでスクロール位置を動かしてしまう。
+      stopWatching = stop;
+
+      const finish = () => {
+        stop();
+        stopWatching = null;
+        if (track.isConnected) collapse();
       };
 
       const onMove = () => {
@@ -354,7 +363,10 @@ export function DisciplineExplorer() {
     window.addEventListener("resize", onScroll);
     update();
 
-    return detach;
+    return () => {
+      detach();
+      stopWatching?.();
+    };
   }, []);
 
   return (
@@ -408,6 +420,7 @@ export function DisciplineExplorer() {
               alt=""
               width={512}
               height={512}
+              priority
               className="absolute inset-0 h-full w-full"
               style={{ opacity: ASSEMBLED.star.opacity }}
             />
@@ -417,6 +430,7 @@ export function DisciplineExplorer() {
               alt={SITE.nameEn}
               width={512}
               height={512}
+              priority
               className="absolute inset-0 h-full w-full"
               style={{ opacity: ASSEMBLED.p.opacity }}
             />

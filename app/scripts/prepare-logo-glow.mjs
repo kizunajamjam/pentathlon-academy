@@ -281,10 +281,21 @@ for (let y = 0; y < OUT; y++)
     const [r, g, b] = sp(x, y);
     const o = (y * OUT + x) * 4;
     const buf = outBufs[ORDER[best]];
-    buf[o] = r;
-    buf[o + 1] = g;
-    buf[o + 2] = b;
-    buf[o + 3] = 255;
+    if (bd === 0) {
+      buf[o] = r;
+      buf[o + 1] = g;
+      buf[o + 2] = b;
+      buf[o + 3] = 255;
+    } else {
+      // 面の外側のフチは、黒を透明にして光だけ残す。ホバーで拡大したとき、
+      // 黒い縁が隣の面に覆いかぶさらないようにするため
+      const a = Math.max(r, g, b);
+      if (a < 8) continue;
+      buf[o] = Math.min(255, Math.round((r * 255) / a));
+      buf[o + 1] = Math.min(255, Math.round((g * 255) / a));
+      buf[o + 2] = Math.min(255, Math.round((b * 255) / a));
+      buf[o + 3] = a;
+    }
   }
 for (const id of ORDER)
   await sharp(outBufs[id], { raw: { width: OUT, height: OUT, channels: 4 } })
