@@ -318,6 +318,73 @@ const sp = (x, y) => {
   const i = (y * OUT + x) * 3;
   return [small[i], small[i + 1], small[i + 2]];
 };
+// ── 中央の P と星 ──
+// 金色（星）か。P は銀色で彩度が低い。
+const isGold = (r, g, b) => r > 60 && r - b > 45 && g - b > 20;
+
+// 星の位置: 中央の範囲にある、明るい金色の画素の塊のうち最大のもの
+const goldCenter = new Uint8Array(S * S);
+for (let y = 0; y < S; y++)
+  for (let x = 0; x < S; x++) {
+    if (!inside(outline, x, y)) continue;
+    if (ORDER.some((id) => dist(id, x, y) <= CENTER_GAP)) continue;
+    const [r, g, b] = at(x, y);
+    if (isGold(r, g, b) && Math.max(r, g, b) > 120) goldCenter[y * S + x] = 1;
+  }
+// 星は五角形の中心よりやや下（旧ロゴで マーク上の 52%, 61% 付近）。その近くの塊だけを見る
+const near = (c) => {
+  const cx = c.reduce((s2, p) => s2 + p[0], 0) / c.length;
+  const cy = c.reduce((s2, p) => s2 + p[1], 0) / c.length;
+  return Math.hypot(cx - S * 0.52, cy - S * 0.6) < S * 0.12;
+};
+const starBlob = components(goldCenter).filter(near)[0];
+if (!starBlob) throw new Error("星を見つけられなかった");
+const starCx = starBlob.reduce((s, p) => s + p[0], 0) / starBlob.length;
+const starCy = starBlob.reduce((s, p) => s + p[1], 0) / starBlob.length;
+// 星の大きさはマークの一辺のおよそ1割（外接円の半径で 5〜6%）
+const starR = S * 0.075;
+const STAR_CORE = S * 0.062;
+
+// 星の本体: 星の塊から、暖色で明るい画素をたどった範囲。面の近く（CENTER_GAP 以内）でも
+// たどるので、面のフチに近い星の先も星に入る。銀色の P や、黒いすき間の向こうの金のフチは含まない。
+const starMask = new Uint8Array(S * S);
+{
+  const stack = [];
+  for (const [x, y] of starBlob) {
+    starMask[y * S + x] = 1;
+    stack.push(x, y);
+  }
+  while (stack.length) {
+    const y = stack.pop();
+    const x = stack.pop();
+    for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+      const nx = x + dx;
+      const ny = y + dy;
+      if (nx < 0 || ny < 0 || nx >= S || ny >= S || starMask[ny * S + nx]) continue;
+      if (Math.hypot(nx - starCx, ny - starCy) > starR * 1.3) continue;
+      if (ORDER.some((id) => dist(id, nx, ny) === 0)) continue;
+      const [r, g, b] = at(nx, ny);
+      if (Math.max(r, g, b) <= 90 || r - b < 25) continue;
+      starMask[ny * S + nx] = 1;
+      stack.push(nx, ny);
+    }
+  }
+}
+// 縁の光も星に入るよう少し太らせる
+const STAR_PAD = 4;
+const starZone = new Uint8Array(S * S);
+for (let y = 0; y < S; y++)
+  for (let x = 0; x < S; x++) {
+    if (!starMask[y * S + x]) continue;
+    for (let dy = -STAR_PAD; dy <= STAR_PAD; dy++)
+      for (let dx = -STAR_PAD; dx <= STAR_PAD; dx++) {
+        const nx = x + dx;
+        const ny = y + dy;
+        if (nx >= 0 && ny >= 0 && nx < S && ny < S && dx * dx + dy * dy <= STAR_PAD * STAR_PAD) starZone[ny * S + nx] = 1;
+      }
+  }
+const inStar = (X, Y) => starZone[Math.min(S - 1, Math.floor(Y)) * S + Math.min(S - 1, Math.floor(X))] === 1;
+
 const nearest = new Int8Array(OUT * OUT).fill(-1); // その画素が属する面（なければ -1）
 const minDist = new Float32Array(OUT * OUT);
 for (let y = 0; y < OUT; y++)
@@ -338,6 +405,8 @@ for (let y = 0; y < OUT; y++)
     // 面と中央のあいだの金のフチも含めて、すべて一番近い面に入れる。
     // 入れ漏らすと、組み上がったロゴが元の画像より欠けて見える。
     if (inside(outline, X, Y) && bd > CENTER_GAP) continue;
+    // 星の本体とその光は、面の近くでも星に回す（面の内側は除く）
+    if (bd > 0 && inStar(X, Y)) continue;
     nearest[y * OUT + x] = best;
     const [r, g, b] = sp(x, y);
     const o = (y * OUT + x) * 4;
@@ -379,33 +448,6 @@ for (const id of ORDER) {
     .toFile(`public/icons/${id}.png`);
 }
 
-// ── 中央の P と星 ──
-// 金色（星）か。P は銀色で彩度が低い。
-const isGold = (r, g, b) => r > 60 && r - b > 45 && g - b > 20;
-
-// 星の位置: 中央の範囲にある、明るい金色の画素の塊のうち最大のもの
-const goldCenter = new Uint8Array(S * S);
-for (let y = 0; y < S; y++)
-  for (let x = 0; x < S; x++) {
-    if (!inside(outline, x, y)) continue;
-    if (ORDER.some((id) => dist(id, x, y) <= CENTER_GAP)) continue;
-    const [r, g, b] = at(x, y);
-    if (isGold(r, g, b) && Math.max(r, g, b) > 120) goldCenter[y * S + x] = 1;
-  }
-// 星は五角形の中心よりやや下（旧ロゴで マーク上の 52%, 61% 付近）。その近くの塊だけを見る
-const near = (c) => {
-  const cx = c.reduce((s2, p) => s2 + p[0], 0) / c.length;
-  const cy = c.reduce((s2, p) => s2 + p[1], 0) / c.length;
-  return Math.hypot(cx - S * 0.52, cy - S * 0.6) < S * 0.12;
-};
-const starBlob = components(goldCenter).filter(near)[0];
-if (!starBlob) throw new Error("星を見つけられなかった");
-const starCx = starBlob.reduce((s, p) => s + p[0], 0) / starBlob.length;
-const starCy = starBlob.reduce((s, p) => s + p[1], 0) / starBlob.length;
-// 星の大きさはマークの一辺のおよそ1割（外接円の半径で 5〜6%）
-const starR = S * 0.075;
-const STAR_CORE = S * 0.062;
-
 const pBuf = Buffer.alloc(OUT * OUT * 4);
 const sBuf = Buffer.alloc(OUT * OUT * 4);
 for (let y = 0; y < OUT; y++)
@@ -413,13 +455,14 @@ for (let y = 0; y < OUT; y++)
     const X = (x + 0.5) * k;
     const Y = (y + 0.5) * k;
     if (!inside(outline, X, Y)) continue;
-    if (minDist[y * OUT + x] <= CENTER_GAP) continue;
+    const star = inStar(X, Y);
+    if (minDist[y * OUT + x] <= CENTER_GAP && !(star && minDist[y * OUT + x] > 0)) continue;
     const [r, g, b] = sp(x, y);
     const a = Math.max(r, g, b);
     if (a < 8) continue;
     const dStar = Math.hypot(X - starCx, Y - starCy);
-    // 星の芯は色に関係なく星へ（白い光も含む）。周りの光は金色のものだけ星へ
-    const toStar = dStar <= STAR_CORE || (isGold(r, g, b) && dStar <= starR);
+    // 星の本体は星へ。芯の近くの暗い光も星へ。それ以外の明るい画素（P のフチなど）は P へ
+    const toStar = star || (dStar <= STAR_CORE && a < 90);
     const buf = toStar ? sBuf : pBuf;
     const o = (y * OUT + x) * 4;
     // 黒の上に重ねたとき元の色に戻るよう、色を不透明度で割り戻す
