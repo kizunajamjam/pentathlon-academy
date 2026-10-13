@@ -502,8 +502,9 @@ for (let y = 0; y < OUT; y++)
     const a = Math.max(r, g, b);
     if (a < 8) continue;
     const dStar = Math.hypot(X - starCx, Y - starCy);
-    // 星の本体は星へ。芯の近くの暗い光も星へ。それ以外の明るい画素（P のフチなど）は P へ
-    const toStar = star || (dStar <= STAR_CORE && a < 90);
+    // 星の本体と、星のまわりの光はすべて星へ（P の本体は除く）。
+    // 光を P に残すと、星が出る前に星の形の影が見えてしまう。
+    const toStar = star || (dStar <= starR * 1.3 && !inP(X, Y));
     const buf = toStar ? sBuf : pBuf;
     const o = (y * OUT + x) * 4;
     // 黒の上に重ねたとき元の色に戻るよう、色を不透明度で割り戻す
