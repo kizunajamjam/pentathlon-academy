@@ -372,18 +372,58 @@ const starMask = new Uint8Array(S * S);
 }
 // 縁の光も星に入るよう少し太らせる
 const STAR_PAD = 4;
-const starZone = new Uint8Array(S * S);
-for (let y = 0; y < S; y++)
-  for (let x = 0; x < S; x++) {
-    if (!starMask[y * S + x]) continue;
-    for (let dy = -STAR_PAD; dy <= STAR_PAD; dy++)
-      for (let dx = -STAR_PAD; dx <= STAR_PAD; dx++) {
-        const nx = x + dx;
-        const ny = y + dy;
-        if (nx >= 0 && ny >= 0 && nx < S && ny < S && dx * dx + dy * dy <= STAR_PAD * STAR_PAD) starZone[ny * S + nx] = 1;
-      }
+const dilate = (m) => {
+  const z = new Uint8Array(S * S);
+  for (let y = 0; y < S; y++)
+    for (let x = 0; x < S; x++) {
+      if (!m[y * S + x]) continue;
+      for (let dy = -STAR_PAD; dy <= STAR_PAD; dy++)
+        for (let dx = -STAR_PAD; dx <= STAR_PAD; dx++) {
+          const nx = x + dx;
+          const ny = y + dy;
+          if (nx >= 0 && ny >= 0 && nx < S && ny < S && dx * dx + dy * dy <= STAR_PAD * STAR_PAD) z[ny * S + nx] = 1;
+        }
+    }
+  return z;
+};
+const starZone = dilate(starMask);
+// P の本体も同じように、中央の明るい画素から明るい画素をたどる（星は除く）。
+// P の先が面の近くまで伸びていても、面のパーツに入らないようにする。
+const pMask = new Uint8Array(S * S);
+{
+  const bright = (x, y) => Math.max(...at(x, y)) > 90;
+  // 種は P の塊だけ（中央の明るい塊のうち最大のもの）。面のあいだの金の線から始めないように
+  const seed = new Uint8Array(S * S);
+  for (let y = 0; y < S; y++)
+    for (let x = 0; x < S; x++) {
+      if (starMask[y * S + x] || !inside(outline, x, y) || !bright(x, y)) continue;
+      if (ORDER.some((id) => dist(id, x, y) <= CENTER_GAP)) continue;
+      seed[y * S + x] = 1;
+    }
+  const pBlob = components(seed).sort((a, b) => b.length - a.length)[0];
+  const stack = [];
+  for (const [x, y] of pBlob) {
+    pMask[y * S + x] = 1;
+    stack.push(x, y);
   }
-const inStar = (X, Y) => starZone[Math.min(S - 1, Math.floor(Y)) * S + Math.min(S - 1, Math.floor(X))] === 1;
+  while (stack.length) {
+    const y = stack.pop();
+    const x = stack.pop();
+    for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+      const nx = x + dx;
+      const ny = y + dy;
+      if (nx < 0 || ny < 0 || nx >= S || ny >= S || pMask[ny * S + nx] || starMask[ny * S + nx]) continue;
+      if (ORDER.some((id) => dist(id, nx, ny) === 0)) continue;
+      if (!bright(nx, ny)) continue;
+      pMask[ny * S + nx] = 1;
+      stack.push(nx, ny);
+    }
+  }
+}
+const zoneAt = (z, X, Y) => z[Math.min(S - 1, Math.floor(Y)) * S + Math.min(S - 1, Math.floor(X))] === 1;
+const inStar = (X, Y) => zoneAt(starZone, X, Y);
+const pZone = dilate(pMask);
+const inP = (X, Y) => zoneAt(pZone, X, Y);
 
 const nearest = new Int8Array(OUT * OUT).fill(-1); // その画素が属する面（なければ -1）
 const minDist = new Float32Array(OUT * OUT);
@@ -405,8 +445,8 @@ for (let y = 0; y < OUT; y++)
     // 面と中央のあいだの金のフチも含めて、すべて一番近い面に入れる。
     // 入れ漏らすと、組み上がったロゴが元の画像より欠けて見える。
     if (inside(outline, X, Y) && bd > CENTER_GAP) continue;
-    // 星の本体とその光は、面の近くでも星に回す（面の内側は除く）
-    if (bd > 0 && inStar(X, Y)) continue;
+    // P と星の本体とその光は、面の近くでも中央に回す（面の内側は除く）
+    if (bd > 0 && (inStar(X, Y) || inP(X, Y))) continue;
     nearest[y * OUT + x] = best;
     const [r, g, b] = sp(x, y);
     const o = (y * OUT + x) * 4;
@@ -456,7 +496,8 @@ for (let y = 0; y < OUT; y++)
     const Y = (y + 0.5) * k;
     if (!inside(outline, X, Y)) continue;
     const star = inStar(X, Y);
-    if (minDist[y * OUT + x] <= CENTER_GAP && !(star && minDist[y * OUT + x] > 0)) continue;
+    const md = minDist[y * OUT + x];
+    if (md <= CENTER_GAP && !((star || inP(X, Y)) && md > 0)) continue;
     const [r, g, b] = sp(x, y);
     const a = Math.max(r, g, b);
     if (a < 8) continue;
