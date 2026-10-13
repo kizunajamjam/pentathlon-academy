@@ -69,16 +69,49 @@ for (let y = top; y <= bottom; y++)
       left = Math.min(left, x);
       right = Math.max(right, x);
     }
-const bw = right - left + 1;
-const bh = bottom - top + 1;
+/*
+ * 五角形の下の光は、そのまま下のワードマーク（PENTATHLON）の光につながっている。
+ * 間でいちばん暗い行で切り、そこから下は黒で消す。残すとマークの下端に線が入る。
+ */
+const rowMax = (y) => {
+  let m = 0;
+  for (let x = 0; x < W; x++) {
+    const i = (y * W + x) * 3;
+    m = Math.max(m, src.data[i], src.data[i + 1], src.data[i + 2]);
+  }
+  return m;
+};
+let CUT_BELOW = bottom + 1;
+for (let y = bottom + 1; y < Math.min(H, bottom + 50); y++) if (rowMax(y) < rowMax(CUT_BELOW)) CUT_BELOW = y;
+
+/*
+ * 正方形の切り出し範囲は、塗りの範囲ではなく外側の光の届く範囲で決める。
+ * 塗りの範囲で切ると、左右と上の光が端で切れて、元の画像より欠けて見える。
+ */
+const GLOW_MIN = 15;
+let gl = W;
+let gr = 0;
+let gt = H;
+let gb = 0;
+for (let y = 0; y < CUT_BELOW; y++)
+  for (let x = 0; x < W; x++) {
+    const i = (y * W + x) * 3;
+    if (Math.max(src.data[i], src.data[i + 1], src.data[i + 2]) > GLOW_MIN) {
+      gl = Math.min(gl, x);
+      gr = Math.max(gr, x);
+      gt = Math.min(gt, y);
+      gb = Math.max(gb, y);
+    }
+  }
+const EDGE = 4; // 光の外側に残す余白
+const bw = gr - gl + 1 + EDGE * 2;
+const bh = gb - gt + 1 + EDGE * 2;
 const S = Math.max(bw, bh); // マークの正方形の一辺（元画像のpx）
-const sqLeft = Math.round(left - (S - bw) / 2);
-const sqTop = Math.round(top - (S - bh) / 2);
-console.log("pentagon bbox:", { left, right, top, bottom, side: S });
+const sqLeft = Math.round(gl - EDGE - (S - bw) / 2);
+const sqTop = Math.round(gt - EDGE - (S - bh) / 2);
+console.log("pentagon bbox:", { left, right, top, bottom }, "glow bbox:", { gl, gr, gt, gb }, { side: S, cut: CUT_BELOW });
 
 // ── マークを正方形で切り出す（元の解像度）──
-// 五角形の下の発光より下（ワードマークの光）は黒で消す。残すとマークの下端に線が入る。
-const CUT_BELOW = bottom + 14;
 const cleaned = Buffer.from(src.data);
 for (let y = CUT_BELOW; y < H; y++) cleaned.fill(0, y * W * 3, (y + 1) * W * 3);
 const pad = Math.max(0, -sqTop, -sqLeft, sqTop + S - H, sqLeft + S - W) + 2;
