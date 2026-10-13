@@ -285,6 +285,59 @@ function distToPoly(poly, x, y) {
 /** 面の凸包からの距離（内側なら0） */
 const dist = (id, x, y) => (inside(hulls[id], x, y) ? 0 : distToPoly(hulls[id], x, y));
 
+// 背景の黒: 画像の端から、暗い画素だけをたどって届く範囲。
+// 面の凸包が面のフチより少し外まで広がっている所（ランニングの上辺など）は背景の黒なので、
+// 不透明にすると白いページの上で黒い帯に見える。面の中の暗い部分はフチに囲まれていて届かない。
+const BG_DARK = 40;
+const bgDark = new Uint8Array(S * S);
+{
+  const stack = [];
+  const push = (x, y) => {
+    const i = y * S + x;
+    if (bgDark[i] || Math.max(...at(x, y)) >= BG_DARK) return;
+    bgDark[i] = 1;
+    stack.push(x, y);
+  };
+  for (let x = 0; x < S; x++) {
+    push(x, 0);
+    push(x, S - 1);
+  }
+  for (let y = 0; y < S; y++) {
+    push(0, y);
+    push(S - 1, y);
+  }
+  while (stack.length) {
+    const y = stack.pop();
+    const x = stack.pop();
+    if (x > 0) push(x - 1, y);
+    if (x < S - 1) push(x + 1, y);
+    if (y > 0) push(x, y - 1);
+    if (y < S - 1) push(x, y + 1);
+  }
+  // 背景の黒から面のフチまでの暗いぼかし（明るさ BG_FADE 未満）も、数画素ぶんだけ背景とみなす。
+  // 深くたどらないので、面の中の暗い色までは届かない。
+  const BG_FADE = 80;
+  const FADE_DEPTH = 16;
+  let front = [];
+  for (let i = 0; i < S * S; i++) if (bgDark[i]) front.push(i);
+  for (let step = 0; step < FADE_DEPTH && front.length; step++) {
+    const next = [];
+    for (const i of front) {
+      const x = i % S;
+      const y = (i - x) / S;
+      for (const [nx, ny] of [[x - 1, y], [x + 1, y], [x, y - 1], [x, y + 1]]) {
+        if (nx < 0 || ny < 0 || nx >= S || ny >= S) continue;
+        const j = ny * S + nx;
+        if (bgDark[j] || Math.max(...at(nx, ny)) >= BG_FADE) continue;
+        bgDark[j] = 1;
+        next.push(j);
+      }
+    }
+    front = next;
+  }
+}
+const isBgDark = (X, Y) => bgDark[Math.min(S - 1, Math.floor(Y)) * S + Math.min(S - 1, Math.floor(X))] === 1;
+
 /**
  * 1画素を書き込む。面の内側は不透明のまま、外側のフチは黒を透明にして光だけ残す
  * （明るさを不透明度にし、黒の上に重ねたとき元の色に戻るよう色を割り戻す）。
@@ -343,7 +396,6 @@ const starCx = starBlob.reduce((s, p) => s + p[0], 0) / starBlob.length;
 const starCy = starBlob.reduce((s, p) => s + p[1], 0) / starBlob.length;
 // 星の大きさはマークの一辺のおよそ1割（外接円の半径で 5〜6%）
 const starR = S * 0.075;
-const STAR_CORE = S * 0.062;
 
 // 星の本体: 星の塊から、暖色で明るい画素をたどった範囲。面の近く（CENTER_GAP 以内）でも
 // たどるので、面のフチに近い星の先も星に入る。銀色の P や、黒いすき間の向こうの金のフチは含まない。
@@ -372,16 +424,16 @@ const starMask = new Uint8Array(S * S);
 }
 // 縁の光も星に入るよう少し太らせる
 const STAR_PAD = 4;
-const dilate = (m) => {
+const dilate = (m, R = STAR_PAD) => {
   const z = new Uint8Array(S * S);
   for (let y = 0; y < S; y++)
     for (let x = 0; x < S; x++) {
       if (!m[y * S + x]) continue;
-      for (let dy = -STAR_PAD; dy <= STAR_PAD; dy++)
-        for (let dx = -STAR_PAD; dx <= STAR_PAD; dx++) {
+      for (let dy = -R; dy <= R; dy++)
+        for (let dx = -R; dx <= R; dx++) {
           const nx = x + dx;
           const ny = y + dy;
-          if (nx >= 0 && ny >= 0 && nx < S && ny < S && dx * dx + dy * dy <= STAR_PAD * STAR_PAD) z[ny * S + nx] = 1;
+          if (nx >= 0 && ny >= 0 && nx < S && ny < S && dx * dx + dy * dy <= R * R) z[ny * S + nx] = 1;
         }
     }
   return z;
@@ -420,10 +472,56 @@ const pMask = new Uint8Array(S * S);
     }
   }
 }
+// P の内側の暗い画素（銀の濃い部分）も P に入れる: 外からたどれない穴を埋める
+{
+  const outside = new Uint8Array(S * S);
+  const stack = [0, 0];
+  outside[0] = 1;
+  while (stack.length) {
+    const y = stack.pop();
+    const x = stack.pop();
+    for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+      const nx = x + dx;
+      const ny = y + dy;
+      if (nx < 0 || ny < 0 || nx >= S || ny >= S) continue;
+      const i = ny * S + nx;
+      if (outside[i] || pMask[i]) continue;
+      outside[i] = 1;
+      stack.push(nx, ny);
+    }
+  }
+  for (let i = 0; i < S * S; i++) if (!outside[i]) pMask[i] = 1;
+}
 const zoneAt = (z, X, Y) => z[Math.min(S - 1, Math.floor(Y)) * S + Math.min(S - 1, Math.floor(X))] === 1;
 const inStar = (X, Y) => zoneAt(starZone, X, Y);
 const pZone = dilate(pMask);
 const inP = (X, Y) => zoneAt(pZone, X, Y);
+// P のまわりのやわらかい光（P の層に入れる範囲）
+const pGlowZone = dilate(pMask, 14);
+// P のフチの光（星の近くでも P に入れる範囲）
+const pEdgeZone = dilate(pMask, 8);
+
+// 面の色（緑・青・赤）がはっきりした画素か。金色や銀色は含まない
+const isFaceHue = (r, g, b) => {
+  const mx = Math.max(r, g, b);
+  if (mx - Math.min(r, g, b) < mx * 0.5) return false; // 銀色（P）のような鈍い色は除く
+  return (g > r + 20 && g > b + 10) || (b > r + 30 && b > g + 10) || (r > g + 60 && r > b + 40);
+};
+
+// 画素をどの層に入れるか: "star" / "p" / null（一番近い面）
+// - 星と P の本体（とそのすぐ外の縁）は、面の近くでも中央の層へ
+// - 面の色の光は、中央にあっても面の層へ（P や星といっしょに出ると、緑や青のかけらに見える）
+// - 中央の残りは、星のまわりなら星、P のまわりなら P。どちらでもない光（面のつなぎ目の光など）は面へ
+const centerLayer = (X, Y, r, g, b, bd) => {
+  if (bd === 0) return null;
+  if (inStar(X, Y)) return "star";
+  if (inP(X, Y)) return "p";
+  if (isFaceHue(r, g, b) || bd <= CENTER_GAP || !inside(outline, X, Y)) return null;
+  if (Math.hypot(X - starCx, Y - starCy) <= starR * 1.3 && !zoneAt(pEdgeZone, X, Y)) return "star";
+  if (zoneAt(pGlowZone, X, Y)) return "p";
+  return null;
+};
+const layerOf = new Array(OUT * OUT).fill(null);
 
 const nearest = new Int8Array(OUT * OUT).fill(-1); // その画素が属する面（なければ -1）
 const minDist = new Float32Array(OUT * OUT);
@@ -441,17 +539,18 @@ for (let y = 0; y < OUT; y++)
       }
     });
     minDist[y * OUT + x] = bd;
-    // 中央（P と星の層）に回す範囲だけは面に入れない。それ以外は、面の外側の光や
-    // 面と中央のあいだの金のフチも含めて、すべて一番近い面に入れる。
-    // 入れ漏らすと、組み上がったロゴが元の画像より欠けて見える。
-    if (inside(outline, X, Y) && bd > CENTER_GAP) continue;
-    // P と星の本体とその光は、面の近くでも中央に回す（面の内側は除く）
-    if (bd > 0 && (inStar(X, Y) || inP(X, Y))) continue;
-    nearest[y * OUT + x] = best;
+    // P と星の層に回すもの以外は、面の外側の光や面と中央のあいだの金のフチも含めて、
+    // すべて一番近い面に入れる。入れ漏らすと、組み上がったロゴが元の画像より欠けて見える。
     const [r, g, b] = sp(x, y);
+    const layer = centerLayer(X, Y, r, g, b, bd);
+    if (layer) {
+      layerOf[y * OUT + x] = layer;
+      continue;
+    }
+    nearest[y * OUT + x] = best;
     const o = (y * OUT + x) * 4;
     // 外側のフチの黒を透明にするのは、ホバーで拡大したとき黒い縁が隣の面にかぶらないようにするため
-    writeGlowPixel(outBufs[ORDER[best]], o, r, g, b, bd === 0);
+    writeGlowPixel(outBufs[ORDER[best]], o, r, g, b, bd === 0 && !isBgDark(X, Y));
   }
 for (const id of ORDER)
   await sharp(outBufs[id], { raw: { width: OUT, height: OUT, channels: 4 } })
@@ -480,7 +579,7 @@ for (const id of ORDER) {
       // 隣の面のほうが近い画素は入れない
       if (ORDER.some((other) => other !== id && dist(other, x, y) < d)) continue;
       const [r, g, b] = at(x, y);
-      writeGlowPixel(buf, ((y - by0) * w + (x - bx0)) * 4, r, g, b, d === 0);
+      writeGlowPixel(buf, ((y - by0) * w + (x - bx0)) * 4, r, g, b, d === 0 && !bgDark[y * S + x]);
     }
   await sharp(buf, { raw: { width: w, height: h, channels: 4 } })
     .resize(ICON, ICON, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } })
@@ -492,20 +591,12 @@ const pBuf = Buffer.alloc(OUT * OUT * 4);
 const sBuf = Buffer.alloc(OUT * OUT * 4);
 for (let y = 0; y < OUT; y++)
   for (let x = 0; x < OUT; x++) {
-    const X = (x + 0.5) * k;
-    const Y = (y + 0.5) * k;
-    if (!inside(outline, X, Y)) continue;
-    const star = inStar(X, Y);
-    const md = minDist[y * OUT + x];
-    if (md <= CENTER_GAP && !((star || inP(X, Y)) && md > 0)) continue;
+    const layer = layerOf[y * OUT + x];
+    if (!layer) continue;
     const [r, g, b] = sp(x, y);
     const a = Math.max(r, g, b);
     if (a < 8) continue;
-    const dStar = Math.hypot(X - starCx, Y - starCy);
-    // 星の本体と、星のまわりの光はすべて星へ（P の本体は除く）。
-    // 光を P に残すと、星が出る前に星の形の影が見えてしまう。
-    const toStar = star || (dStar <= starR * 1.3 && !inP(X, Y));
-    const buf = toStar ? sBuf : pBuf;
+    const buf = layer === "star" ? sBuf : pBuf;
     const o = (y * OUT + x) * 4;
     // 黒の上に重ねたとき元の色に戻るよう、色を不透明度で割り戻す
     buf[o] = Math.min(255, Math.round((r * 255) / a));
