@@ -2,7 +2,7 @@
  * 黒背景・発光版のロゴ（public/logo.png）から、サイトで使う画像を切り出す。
  *
  *   public/logo-mark.png               五角形マークのみ（正方形・ヘッダー用）
- *   public/icons/{競技}.png            競技アイコン（各面をフチの外側で直線的に切り抜いたもの）
+ *   public/icons/{競技}.png            競技アイコン（各面を黒いタイルに載せたもの。角丸は CSS）
  *   public/icons/overlay-{競技}.png    各面をマークと同じ座標に置いたもの（トップの組み上がり用）
  *   public/icons/center-p.png          中央の「P」
  *   public/icons/center-star.png       中央の星
@@ -557,156 +557,45 @@ for (const id of ORDER)
     .png()
     .toFile(`public/icons/overlay-${id}.png`);
 
-// ── 競技アイコン（各面を余白を詰めて正方形に）──
-// 白いページの上に置くので、面の形（金のフチまで）でくっきり切り抜き、外側の発光は入れない。
-// 発光を明るさの不透明度で残すと、白地の上では途中で切れた光がギザギザに見えるため。
-//
-// 切り抜きの線は、面の各辺について「フチの外側の端」を元画像から測って引いた直線。
-// 凸包をそのまま広げると、辺によってフチが欠けたり背景の黒がはみ出したりする。
+// ── 競技アイコン（各面を黒いタイルに載せる）──
+// ロゴは黒地の発光デザインなので、面だけを白地に切り抜くと、どこで切っても光の切れ目が雑に見える。
+// ヘッダーのロゴと同じく黒い角丸タイルに載せ、面の外側の光もそのまま残す（角丸は CSS 側）。
+// 隣の面・中央の P と星の画素は入れない（黒のまま）。
 const ICON = 256;
-const lum = (x, y) => {
-  const [r, g, b] = at(Math.max(0, Math.min(S - 1, Math.round(x))), Math.max(0, Math.min(S - 1, Math.round(y))));
-  return Math.max(r, g, b);
-};
-// 閉じた多角形を、角だけ残して単純化する（Douglas-Peucker）
-function simplifyClosed(poly, eps) {
-  // いちばん離れた2点で2本の折れ線に分けてから、それぞれを単純化する
-  let a = 0;
-  let b = 0;
-  let best = -1;
-  for (let i = 0; i < poly.length; i++)
-    for (let j = i + 1; j < poly.length; j++) {
-      const d = Math.hypot(poly[i][0] - poly[j][0], poly[i][1] - poly[j][1]);
-      if (d > best) {
-        best = d;
-        a = i;
-        b = j;
-      }
-    }
-  const dp = (pts) => {
-    if (pts.length < 3) return pts;
-    const [x1, y1] = pts[0];
-    const [x2, y2] = pts[pts.length - 1];
-    const L = Math.hypot(x2 - x1, y2 - y1) || 1;
-    let far = 0;
-    let idx = 0;
-    for (let i = 1; i < pts.length - 1; i++) {
-      const d = Math.abs((x2 - x1) * (y1 - pts[i][1]) - (x1 - pts[i][0]) * (y2 - y1)) / L;
-      if (d > far) {
-        far = d;
-        idx = i;
-      }
-    }
-    if (far <= eps) return [pts[0], pts[pts.length - 1]];
-    const left = dp(pts.slice(0, idx + 1));
-    return [...left.slice(0, -1), ...dp(pts.slice(idx))];
-  };
-  const first = poly.slice(a, b + 1);
-  const second = [...poly.slice(b), ...poly.slice(0, a + 1)];
-  return [...dp(first).slice(0, -1), ...dp(second).slice(0, -1)];
-}
-// 2直線（点と方向）の交点
-const intersect = (p1, d1, p2, d2) => {
-  const den = d1[0] * d2[1] - d1[1] * d2[0];
-  if (Math.abs(den) < 1e-9) return p2;
-  const t = ((p2[0] - p1[0]) * d2[1] - (p2[1] - p1[1]) * d2[0]) / den;
-  return [p1[0] + d1[0] * t, p1[1] + d1[1] * t];
-};
-const iconPolys = {};
-// 凸包はフチより外まで広がっていることがあるので、内側から探しはじめる
-const T0 = -22;
-// フチの線: 明るさが最大の9割に最初に届いた所。切る位置: そこから明るさが75%を切る所
-const PEAK_RATIO = 0.9;
-const DROP_RATIO = 0.75;
+const ICON_GLOW = 40; // 面の外側の光をどこまで残すか（元画像の px）
+const ICON_MARGIN = 0.1; // タイルの余白（一辺に対する割合）
 for (const id of ORDER) {
-  const base = simplifyClosed(hulls[id], 6);
-  const cx = base.reduce((v, p) => v + p[0], 0) / base.length;
-  const cy = base.reduce((v, p) => v + p[1], 0) / base.length;
-  const lines = base.map((A, i) => {
-    const B = base[(i + 1) % base.length];
-    const len = Math.hypot(B[0] - A[0], B[1] - A[1]);
-    const u = [(B[0] - A[0]) / len, (B[1] - A[1]) / len];
-    let n = [u[1], -u[0]];
-    const mx = (A[0] + B[0]) / 2;
-    const my = (A[1] + B[1]) / 2;
-    if ((mx - cx) * n[0] + (my - cy) * n[1] < 0) n = [-n[0], -n[1]];
-    // 辺に沿って何か所かで外向きに明るさを見て、フチ（明るい線）の外側の端を探す
-    const offs = [];
-    for (let k = 1; k < 20; k++) {
-      const s = 0.1 + (0.8 * k) / 20;
-      const px = A[0] + u[0] * len * s;
-      const py = A[1] + u[1] * len * s;
-      // フチの線は、面の内側から見て最初に現れる明るい線。その外の発光も明るいことがあるので、
-      // いちばん明るい所ではなく「最大の9割に最初に届いた所」をフチとみなす
-      let peak = -1;
-      for (let t = T0; t <= 16; t += 0.5) peak = Math.max(peak, lum(px + n[0] * t, py + n[1] * t));
-      let tPeak = T0;
-      for (let t = T0; t <= 16; t += 0.5) {
-        if (lum(px + n[0] * t, py + n[1] * t) >= peak * PEAK_RATIO) {
-          tPeak = t;
-          break;
-        }
-      }
-      // その線の明るさの山の上まで進む
-      while (tPeak < 16 && lum(px + n[0] * (tPeak + 0.5), py + n[1] * (tPeak + 0.5)) >= lum(px + n[0] * tPeak, py + n[1] * tPeak)) tPeak += 0.5;
-      peak = lum(px + n[0] * tPeak, py + n[1] * tPeak);
-      // フチの線が終わる所（明るさが線の75%を切る所）か、元画像の背景の黒に入る所の、近いほう。
-      // 外側に発光がある辺でも、フチから大きく離れた所では切らない
-      let tEdge = tPeak;
-      for (let t = tPeak; t <= tPeak + 12; t += 0.5) {
-        tEdge = t;
-        const qx = Math.max(0, Math.min(S - 1, Math.round(px + n[0] * t)));
-        const qy = Math.max(0, Math.min(S - 1, Math.round(py + n[1] * t)));
-        if (lum(qx, qy) < peak * DROP_RATIO || bgDark[qy * S + qx]) break;
-      }
-      offs.push(tEdge);
-    }
-    offs.sort((p, q) => p - q);
-    const off = offs[Math.floor(offs.length / 2)];
-    return { p: [A[0] + n[0] * off, A[1] + n[1] * off], d: u, off };
-  });
-  iconPolys[id] = lines.map((l, i) => {
-    const prev = lines[(i - 1 + lines.length) % lines.length];
-    return intersect(prev.p, prev.d, l.p, l.d);
-  });
-}
-for (const id of ORDER) {
-  const poly = iconPolys[id];
-  const [x0, y0, x1, y1] = poly.reduce(
+  const [x0, y0, x1, y1] = hulls[id].reduce(
     (b2, [x, y]) => [Math.min(b2[0], x), Math.min(b2[1], y), Math.max(b2[2], x), Math.max(b2[3], y)],
     [S, S, 0, 0],
   );
-  const bx0 = Math.max(0, Math.floor(x0) - 2);
-  const by0 = Math.max(0, Math.floor(y0) - 2);
-  const bx1 = Math.min(S - 1, Math.ceil(x1) + 2);
-  const by1 = Math.min(S - 1, Math.ceil(y1) + 2);
-  const w = bx1 - bx0 + 1;
-  const h = by1 - by0 + 1;
-  const buf = Buffer.alloc(w * h * 4);
-  for (let y = by0; y <= by1; y++)
-    for (let x = bx0; x <= bx1; x++) {
-      const isIn = inside(poly, x + 0.5, y + 0.5);
-      const d = distToPoly(poly, x + 0.5, y + 0.5);
-      // 輪郭の1画素だけ半透明にしてなめらかにする（縮小でさらに整う）
-      let a = isIn ? Math.min(1, 0.5 + d) : Math.max(0, 0.5 - d);
-      if (a <= 0) continue;
-      // 隣の面とのすき間では、真ん中で切る（隣の面のフチを入れない）。P と星も入れない
+  // 面の外接矩形を中心にした正方形（余白込み）
+  const side = Math.max(x1 - x0, y1 - y0) / (1 - ICON_MARGIN * 2);
+  const left = Math.round((x0 + x1) / 2 - side / 2);
+  const top = Math.round((y0 + y1) / 2 - side / 2);
+  const T = Math.round(side);
+  const buf = Buffer.alloc(T * T * 3); // 黒で初期化
+  for (let yy = 0; yy < T; yy++)
+    for (let xx = 0; xx < T; xx++) {
+      const x = left + xx;
+      const y = top + yy;
+      if (x < 0 || y < 0 || x >= S || y >= S) continue;
       const own = dist(id, x, y);
+      if (own > ICON_GLOW) continue;
       if (own > 0) {
-        const other = Math.min(...ORDER.filter((o) => o !== id).map((o) => dist(o, x, y)));
-        a = Math.min(a, Math.max(0, Math.min(1, other - own + 0.5)));
-        if (starZone[y * S + x] || pZone[y * S + x]) a = 0;
+        if (ORDER.some((o) => o !== id && dist(o, x, y) < own)) continue;
+        if (starZone[y * S + x] || pZone[y * S + x]) continue;
       }
-      if (a <= 0) continue;
       const [r, g, b] = at(x, y);
-      const o = ((y - by0) * w + (x - bx0)) * 4;
-      buf[o] = r;
-      buf[o + 1] = g;
-      buf[o + 2] = b;
-      buf[o + 3] = Math.round(255 * a);
+      // 光の端が急に切れないよう、残す範囲の外寄りでは少しずつ暗くする
+      const f = own <= ICON_GLOW - 12 ? 1 : Math.max(0, (ICON_GLOW - own) / 12);
+      const o = (yy * T + xx) * 3;
+      buf[o] = Math.round(r * f);
+      buf[o + 1] = Math.round(g * f);
+      buf[o + 2] = Math.round(b * f);
     }
-  await sharp(buf, { raw: { width: w, height: h, channels: 4 } })
-    .resize(ICON, ICON, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } })
+  await sharp(buf, { raw: { width: T, height: T, channels: 3 } })
+    .resize(ICON, ICON)
     .png()
     .toFile(`public/icons/${id}.png`);
 }
