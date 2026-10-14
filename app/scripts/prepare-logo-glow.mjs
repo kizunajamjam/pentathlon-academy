@@ -613,6 +613,11 @@ const intersect = (p1, d1, p2, d2) => {
   return [p1[0] + d1[0] * t, p1[1] + d1[1] * t];
 };
 const iconPolys = {};
+// 凸包はフチより外まで広がっていることがあるので、内側から探しはじめる
+const T0 = -22;
+// フチの線: 明るさが最大の9割に最初に届いた所。切る位置: そこから明るさが75%を切る所
+const PEAK_RATIO = 0.9;
+const DROP_RATIO = 0.75;
 for (const id of ORDER) {
   const base = simplifyClosed(hulls[id], 6);
   const cx = base.reduce((v, p) => v + p[0], 0) / base.length;
@@ -631,19 +636,28 @@ for (const id of ORDER) {
       const s = 0.1 + (0.8 * k) / 20;
       const px = A[0] + u[0] * len * s;
       const py = A[1] + u[1] * len * s;
-      let tPeak = -6;
+      // フチの線は、面の内側から見て最初に現れる明るい線。その外の発光も明るいことがあるので、
+      // いちばん明るい所ではなく「最大の9割に最初に届いた所」をフチとみなす
       let peak = -1;
-      for (let t = -6; t <= 16; t += 0.5) {
-        const v = lum(px + n[0] * t, py + n[1] * t);
-        if (v > peak) {
-          peak = v;
+      for (let t = T0; t <= 16; t += 0.5) peak = Math.max(peak, lum(px + n[0] * t, py + n[1] * t));
+      let tPeak = T0;
+      for (let t = T0; t <= 16; t += 0.5) {
+        if (lum(px + n[0] * t, py + n[1] * t) >= peak * PEAK_RATIO) {
           tPeak = t;
+          break;
         }
       }
+      // その線の明るさの山の上まで進む
+      while (tPeak < 16 && lum(px + n[0] * (tPeak + 0.5), py + n[1] * (tPeak + 0.5)) >= lum(px + n[0] * tPeak, py + n[1] * tPeak)) tPeak += 0.5;
+      peak = lum(px + n[0] * tPeak, py + n[1] * tPeak);
+      // フチの線が終わる所（明るさが線の75%を切る所）か、元画像の背景の黒に入る所の、近いほう。
+      // 外側に発光がある辺でも、フチから大きく離れた所では切らない
       let tEdge = tPeak;
-      for (let t = tPeak; t <= tPeak + 20; t += 0.5) {
+      for (let t = tPeak; t <= tPeak + 12; t += 0.5) {
         tEdge = t;
-        if (lum(px + n[0] * t, py + n[1] * t) < peak * 0.45) break;
+        const qx = Math.max(0, Math.min(S - 1, Math.round(px + n[0] * t)));
+        const qy = Math.max(0, Math.min(S - 1, Math.round(py + n[1] * t)));
+        if (lum(qx, qy) < peak * DROP_RATIO || bgDark[qy * S + qx]) break;
       }
       offs.push(tEdge);
     }
@@ -655,7 +669,6 @@ for (const id of ORDER) {
     const prev = lines[(i - 1 + lines.length) % lines.length];
     return intersect(prev.p, prev.d, l.p, l.d);
   });
-  console.log("icon edge offsets", id, lines.map((l) => l.off).join(","));
 }
 for (const id of ORDER) {
   const poly = iconPolys[id];
