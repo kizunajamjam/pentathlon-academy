@@ -141,18 +141,19 @@ export default function WatchPage() {
                   </div>
                 </div>
                 <p className="mt-4 text-sm leading-relaxed text-navy-700">{s.basis}</p>
-                <table className="mt-4 w-full border-collapse text-sm">
+                {/* 左右の端に寄ると目で行を追いにくいので、2列とも中央にそろえる */}
+                <table className="mt-4 w-full table-fixed border-collapse text-sm">
                   <thead>
                     <tr className="border-b border-border">
-                      <th className="py-2 text-left font-normal text-muted">{s.head[0]}</th>
-                      <th className="py-2 text-right font-normal text-muted">{s.head[1]}</th>
+                      <th className="py-2 text-center font-normal text-muted">{s.head[0]}</th>
+                      <th className="py-2 text-center font-normal text-muted">{s.head[1]}</th>
                     </tr>
                   </thead>
                   <tbody>
                     {s.rows.map(([a, b]) => (
                       <tr key={a} className="border-b border-border">
-                        <td className="py-2 font-display tabular-nums text-navy-800">{a}</td>
-                        <td className="py-2 text-right font-display font-bold tabular-nums text-navy-800">
+                        <td className="py-2 text-center font-display tabular-nums text-navy-800">{a}</td>
+                        <td className="py-2 text-center font-display font-bold tabular-nums text-navy-800">
                           {b}
                         </td>
                       </tr>
