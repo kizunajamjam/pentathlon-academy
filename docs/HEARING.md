@@ -8,6 +8,8 @@
 
 LINE などで送る用のテキスト版: [HEARING-line.txt](HEARING-line.txt)
 
+サイト点検（2026年10月）のあとの追加の確認事項: [HEARING-review.txt](HEARING-review.txt)
+
 ## 優先度
 
 | | 意味 |
