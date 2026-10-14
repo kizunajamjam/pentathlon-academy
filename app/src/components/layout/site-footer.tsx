@@ -73,6 +73,9 @@ export function SiteFooter() {
           <Link href="/terms" className="transition-colors hover:text-gold-400">
             クラブ規約
           </Link>
+          <Link href="/privacy" className="transition-colors hover:text-gold-400">
+            プライバシーポリシー
+          </Link>
           <Link href="/recruit" className="transition-colors hover:text-gold-400">
             コーチ・スタッフ募集
           </Link>

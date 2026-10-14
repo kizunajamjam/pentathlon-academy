@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Mail, MapPin, Phone } from "lucide-react";
 
 import { InstagramIcon } from "@/components/icons/instagram-icon";
@@ -97,6 +98,14 @@ export default function ContactPage() {
 
             <p className="mt-5 text-xs leading-relaxed text-muted">
               ご記入いただいた個人情報は、お問い合わせへの回答およびご案内のためにのみ使用します。
+              詳しくは
+              <Link
+                href="/privacy"
+                className="mx-0.5 underline decoration-gold-400 underline-offset-4 hover:text-gold-600"
+              >
+                プライバシーポリシー
+              </Link>
+              をご覧ください。
             </p>
           </aside>
         </div>
