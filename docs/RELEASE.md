@@ -44,6 +44,10 @@
       [`supabase/setup_all.sql`](../supabase/setup_all.sql) の**全文**を貼り付けて「Run」
   - 「Success. No rows returned」と出れば成功。**2回は実行しない**（大会などが重複する）
 - [ ] **Authentication → Sign In / Providers → Email** の「Allow new users to sign up」を **OFF**
+- [ ] 同じ画面の **Minimum password length** を `12` 以上、**Password Requirements** を「英字（大小）・数字・記号」にする
+      （管理画面のパスワードは12文字以上で、ほかのサービスと使い回さないものにする）
+- [ ] **Authentication → Multi-Factor** で **TOTP (App Authenticator)** が Enabled になっていることを確認する
+      （管理画面の二段階認証に使う。最初から有効のはず）
 - [ ] **Authentication → Users → Add user** で、管理画面に入る人のアカウントを作る
       （メールアドレスとパスワード。「Auto Confirm User」にチェック）
 - [ ] SQL Editor で、その人を管理者として登録する（メールアドレスと名前を書き換えて実行）
@@ -102,10 +106,37 @@
 - [ ] アカデミーについてに指導者5名・スタッフ・顧問が出ている。強化選手に2名出ている
 - [ ] お問い合わせフォームから**テスト送信**できる → 管理画面のお問い合わせに届いている
 - [ ] `/admin/login` から3で作ったアカウントでログインできる
+  - パスワードのあとに**二段階認証の登録画面**が出る。スマホに「Google Authenticator」などの認証アプリを入れ、
+    画面の QR コードを読み取って、表示された6桁の数字を入力する（初回だけ）
+  - 2回目からは、パスワードのあとに認証アプリの6桁を入力する
 - [ ] 管理画面で大会を1件「非公開」で作って、保存・削除できる
 - [ ] スマホで表示が崩れていない
 
-## 7. メールの転送（任意・今夜でなくてよい）
+## 7. 乗っ取り対策（必ず行う）
+
+サイトのコード側では、管理画面の二段階認証、通信の暗号化の強制、他サイトへの埋め込み禁止などを入れてある。
+残りは**各サービスのアカウント**の守りで、ここが破られるとサイトごと書き換えられる。
+
+- [ ] 次の6つすべてで **二段階認証（2FA）をオン** にする（どれも無料）
+  | サービス | 場所 |
+  | --- | --- |
+  | GitHub | Settings → Password and authentication → Two-factor authentication |
+  | Netlify | User settings → Security → Two-factor authentication |
+  | Supabase | Account preferences → Multi-factor authentication |
+  | Cloudflare | My Profile → Authentication → Two-Factor Authentication |
+  | お名前.com | お名前.com Navi → 二段階認証（1で設定済みなら不要） |
+  | Gmail（pentathlonacademy.jp@gmail.com） | Google アカウント → セキュリティ → 2段階認証プロセス |
+- [ ] パスワードは**サービスごとに別々**にする（使い回さない）。iPhone の「パスワード」アプリなどに保存する
+- [ ] 各サービスの**バックアップコード**（2FA のスマホをなくしたとき用）を保存しておく
+- [ ] 管理画面の認証アプリも、機種変更の前に引き継いでおく
+  - スマホをなくして管理画面に入れなくなったら: Supabase → Authentication → Users → その人 →
+    「MFA factors」を削除すると、次のログインで登録し直せる
+- [ ] 管理画面に入れる人を増やすときは、Supabase の **Add user** と staff への登録（3の SQL）を行う。
+      辞めた人は Supabase → Authentication → Users から削除する
+- [ ] Supabase の `service_role` / `sb_secret_...` キーは、どこにも貼らない・送らない
+- [ ] 知らない人から「ログインして確認して」というメールが来ても、メールのリンクからはログインしない
+
+## 8. メールの転送（任意・今夜でなくてよい）
 
 `info@pentathlon-academy.com` 宛てのメールを、今の Gmail に転送する。
 
@@ -115,7 +146,7 @@
 - [ ] 別のアドレスから `info@pentathlon-academy.com` に送って、Gmail に届くことを確認する
 - [ ] 届いたら Claude に「サイトのメールを info@ に変えて」と伝える（サイト側の表示を差し替える）
 
-## 8. 後日でよいもの
+## 9. 後日でよいもの
 
 | 内容 | 効果 | 手順 |
 | --- | --- | --- |

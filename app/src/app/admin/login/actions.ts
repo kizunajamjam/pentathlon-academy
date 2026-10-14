@@ -28,7 +28,8 @@ export async function signIn(_prev: LoginState, formData: FormData): Promise<Log
     return { message: "メールアドレスまたはパスワードが正しくありません。" };
   }
 
-  redirect("/admin");
+  // 続けて二段階認証（認証アプリのコード）へ。未登録ならそこで登録する
+  redirect("/admin/mfa");
 }
 
 export async function signOut() {

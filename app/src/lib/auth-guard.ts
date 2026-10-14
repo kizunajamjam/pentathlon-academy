@@ -7,13 +7,26 @@ import { isSupabaseConfigured } from "@/lib/supabase/config";
 
 export type StaffContext = { userId: string; name: string; email: string };
 
-// staff テーブルに登録されている user だけを通す。
-// ログイン済みでも staff に無ければ管理画面には入れない。
-async function findStaff(): Promise<StaffContext | null> {
-  if (!isSupabaseConfigured) return null;
+type StaffCheck =
+  | { state: "ok"; staff: StaffContext }
+  // パスワードは通ったが、二段階認証（認証アプリのコード）がまだ
+  | { state: "mfa" }
+  | { state: "none" };
+
+/*
+ * staff テーブルに登録されている user だけを通す。
+ * ログイン済みでも staff に無ければ管理画面には入れない。
+ *
+ * さらに二段階認証を必須にする。パスワードだけのログイン（aal1）では通さず、
+ * 認証アプリのコードまで確認できたセッション（aal2）だけを通す。
+ * パスワードが漏れても、スマホが無ければ管理画面に入れない。
+ * データベース側の is_staff() も aal2 を要求しているので、API を直接叩いても書き込めない。
+ */
+async function checkStaff(): Promise<StaffCheck> {
+  if (!isSupabaseConfigured) return { state: "none" };
 
   const user = await getCurrentUser();
-  if (!user) return null;
+  if (!user) return { state: "none" };
 
   const supabase = await createClient();
   const { data } = await supabase
@@ -21,19 +34,29 @@ async function findStaff(): Promise<StaffContext | null> {
     .select("user_id, name")
     .eq("user_id", user.id)
     .maybeSingle();
+  if (!data) return { state: "none" };
 
-  if (!data) return null;
-  return { userId: user.id, name: data.name, email: user.email ?? "" };
+  const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+  if (aal?.currentLevel !== "aal2") return { state: "mfa" };
+
+  return { state: "ok", staff: { userId: user.id, name: data.name, email: user.email ?? "" } };
 }
 
-// ページ(Server Component)用: 権限がなければログイン画面へ送る。
+// ページ(Server Component)用: 権限がなければログイン画面へ、二段階認証がまだならコード入力へ送る。
 export async function requireStaff(): Promise<StaffContext> {
-  const staff = await findStaff();
-  if (!staff) redirect("/admin/login");
-  return staff;
+  const result = await checkStaff();
+  if (result.state === "mfa") redirect("/admin/mfa");
+  if (result.state !== "ok") redirect("/admin/login");
+  return result.staff;
 }
 
 // Server Action 用: リダイレクトせず null を返すので、呼び出し側でエラー応答にする。
 export async function getStaffForAction(): Promise<StaffContext | null> {
-  return findStaff();
+  const result = await checkStaff();
+  return result.state === "ok" ? result.staff : null;
+}
+
+// 二段階認証の画面用: パスワードは通っていて staff に登録されているか（aal は問わない）
+export async function isStaffPendingMfa(): Promise<"ok" | "mfa" | "none"> {
+  return (await checkStaff()).state;
 }
