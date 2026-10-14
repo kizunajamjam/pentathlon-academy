@@ -33,7 +33,10 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
   const news = await getNews(id);
-  if (!news) return { title: "お知らせ" };
+  // 非公開・公開前のものも、本文のページと同じく「見つからない」として扱う
+  if (!news || !news.isPublished || news.publishedAt > new Date().toISOString()) {
+    return { title: "ページが見つかりません" };
+  }
 
   return {
     title: news.title,

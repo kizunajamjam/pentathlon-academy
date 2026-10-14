@@ -11,6 +11,13 @@ import { keepInputsOnSubmit } from "@/lib/form-submit";
 
 const INITIAL: ContactState = { status: "idle" };
 
+// フォームを開いた時刻（隠し入力 openedAt）から、送信までにかかった時間に置き換える
+function setElapsed(formData: FormData) {
+  const openedAt = Number(formData.get("openedAt"));
+  formData.delete("openedAt");
+  if (openedAt > 0) formData.set("elapsedMs", String(Date.now() - openedAt));
+}
+
 const inputClass =
   "w-full rounded-md border border-border bg-white px-4 py-3 text-sm text-navy-800 outline-none transition-colors focus:border-gold-500 focus:ring-2 focus:ring-gold-500/20";
 
@@ -70,6 +77,7 @@ export function ContactForm() {
         const { source, landingPath } = readAttribution();
         formData.set("source", source);
         formData.set("landingPath", landingPath);
+        setElapsed(formData);
       })}
       className="space-y-6"
     >
@@ -147,6 +155,15 @@ export function ContactForm() {
       </div>
 
       <TurnstileWidget resetKey={state} />
+
+      {/* フォームを開いた時刻。送信までの時間をサーバーに添えて、速すぎる bot を弾く */}
+      <input
+        type="hidden"
+        name="openedAt"
+        ref={(el) => {
+          if (el && !el.value) el.value = String(Date.now());
+        }}
+      />
 
       {/* ハニーポット: 人間には見えない。bot が埋めると送信を破棄する。 */}
       <div aria-hidden="true" className="absolute left-[-9999px] h-0 w-0 overflow-hidden">

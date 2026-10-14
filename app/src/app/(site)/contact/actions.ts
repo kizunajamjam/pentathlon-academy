@@ -1,6 +1,6 @@
 "use server";
 
-import { createInquiry } from "@/lib/db/inquiries";
+import { countRecentInquiries, createInquiry } from "@/lib/db/inquiries";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { INQUIRY_CATEGORIES, SITE } from "@/lib/constants/site";
 
@@ -11,6 +11,13 @@ export type ContactState = {
 };
 
 const MAX = { name: 100, email: 254, phone: 30, message: 2000 };
+
+// 人が全項目を書き終えるのに、これより速いことはない。これより速い送信は bot とみなす。
+const MIN_FILL_MS = 3000;
+
+// 連続送信の上限（直近 RATE_WINDOW_MIN 分あたり）。通知メールで受信箱が埋まるのを防ぐ。
+const RATE_WINDOW_MIN = 10;
+const RATE_LIMIT = { sameEmail: 3, total: 20 };
 
 function str(formData: FormData, key: string): string {
   const v = formData.get(key);
@@ -51,6 +58,15 @@ export async function submitInquiry(
     return { status: "error", message: "入力内容をご確認ください。", fieldErrors };
   }
 
+  // 入力にかかった時間（フォームを開いてから送信まで。ブラウザが測って添える）。
+  // 速すぎる送信もハニーポットと同じく、黙って捨てる。入力チェックのあとに置くのは、
+  // 開いてすぐ空のまま押した人に、偽の「送信完了」を見せないため。
+  // JavaScript が動かない環境では値が来ないので、そのときは判定しない。
+  const elapsedMs = Number(str(formData, "elapsedMs"));
+  if (str(formData, "elapsedMs") !== "" && Number.isFinite(elapsedMs) && elapsedMs < MIN_FILL_MS) {
+    return { status: "success" };
+  }
+
   // Supabase 未接続のうちは保存できないため、正直に電話・メールへ誘導する。
   // 電話番号は現状非公開のため、tel の有無で案内文を出し分ける。
   if (!isSupabaseConfigured) {
@@ -65,6 +81,14 @@ export async function submitInquiry(
     return {
       status: "error",
       message: "送信の確認に失敗しました。ページを読み込み直して、もう一度お試しください。",
+    };
+  }
+
+  const recent = await countRecentInquiries(email, RATE_WINDOW_MIN);
+  if (recent && (recent.sameEmail >= RATE_LIMIT.sameEmail || recent.total >= RATE_LIMIT.total)) {
+    return {
+      status: "error",
+      message: "短時間に送信が集中しています。しばらく時間をおいてから、もう一度お試しください。",
     };
   }
 

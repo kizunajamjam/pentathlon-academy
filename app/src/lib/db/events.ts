@@ -2,6 +2,7 @@ import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
 import { unwrap } from "./unwrap";
+import { isUuid } from "@/lib/utils/uuid";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { SEED_EVENTS } from "./seed";
 import type { AcademyEvent, EventCategory } from "@/types";
@@ -96,6 +97,9 @@ export async function getEvent(id: string): Promise<AcademyEvent | null> {
   if (!isSupabaseConfigured) {
     return SEED_EVENTS.find((e) => e.id === id) ?? null;
   }
+
+  // 形の違う id は DB に渡さず「存在しない」として返す（404 にするため）
+  if (!isUuid(id)) return null;
 
   const supabase = await createClient();
   const data = unwrap("events", await supabase.from("events").select("*").eq("id", id).maybeSingle());
