@@ -32,40 +32,41 @@ export default function DisciplinesPage() {
         </div>
       </section>
 
-      {/* ── 独自の育成システムと指導方針 ─────────────────────────────── */}
+      {/* ── 独自の育成システムと長期的育成指針 ─────────────────────────── */}
+      {/* 見出し → レーダーチャート → 説明、の順（オーナー指定） */}
       <section className="bg-navy-900 py-16 sm:py-20">
-        <div className="mx-auto grid max-w-6xl gap-10 px-4 lg:grid-cols-2 lg:items-center lg:gap-14">
-          <Image
-            src={assetPath("/photos/radar.jpg")}
-            alt="5種目の力を表したレーダーチャート"
-            width={1000}
-            height={874}
-            className="w-full rounded-card"
-          />
-          <div>
-            <SectionHeading
-              eyebrow="ACADEMY METHOD"
-              title="独自の育成システム"
-              tone="light"
-              description={
-                "ペンタスロンアカデミーには、独自の育成システムがあります。\n5種目それぞれの力をレーダーチャートで表し、選手の現在地をひと目でわかるようにしています。得意な種目と伸ばすべき種目を選手と共有しながら、一人ひとりに合った練習を組み立てていきます。"
-              }
+        <div className="mx-auto max-w-6xl px-4">
+          <SectionHeading eyebrow="ACADEMY METHOD" title="独自の育成システム" tone="light" />
+          <div className="mt-8 grid gap-10 lg:mt-10 lg:grid-cols-2 lg:items-center lg:gap-14">
+            <Image
+              src={assetPath("/photos/radar.jpg")}
+              alt="5種目の力を表したレーダーチャート"
+              width={1000}
+              height={874}
+              className="w-full rounded-card"
             />
-            <div className="mt-8 rounded-card border border-white/15 bg-white/5 px-5 py-5 sm:px-6">
-              <p className="eyebrow text-[10px] text-gold-400">GUIDELINE</p>
-              <p className="mt-2 font-display text-base font-bold text-white">指導方針</p>
-              <p className="mt-2 text-sm leading-relaxed text-navy-200">
-                アカデミーの指導は、NSCA（全米ストレングス＆コンディショニング協会）の「長期的な運動能力の開発に関するポジションステイトメント」を指導方針としています。
+            <div>
+              <p className="whitespace-pre-line text-sm leading-relaxed text-navy-200 sm:text-base">
+                {
+                  "ペンタスロンアカデミーには、独自の育成システムがあります。\n5種目それぞれの力をレーダーチャートで表し、選手の現在地をひと目でわかるようにしています。得意な種目と伸ばすべき種目を選手と共有しながら、一人ひとりに合った練習を組み立てていきます。"
+                }
               </p>
-              <a
-                href="https://nsca-japan.or.jp/pdf/database/position-statement/ps_longterm.pdf"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-4 inline-flex items-center gap-1.5 text-sm font-bold text-white underline decoration-gold-400 underline-offset-4 transition-colors hover:text-gold-400"
-              >
-                ポジションステイトメントを読む（PDF）
-                <ExternalLink size={14} className="shrink-0" />
-              </a>
+              <div className="mt-8 rounded-card border border-white/15 bg-white/5 px-5 py-5 sm:px-6">
+                <p className="eyebrow text-[10px] text-gold-400">GUIDELINE</p>
+                <p className="mt-2 font-display text-base font-bold text-white">長期的育成指針</p>
+                <p className="mt-2 text-sm leading-relaxed text-navy-200">
+                  アカデミーの指導は、NSCA（全米ストレングス＆コンディショニング協会）の「長期的な運動能力の開発に関するポジションステイトメント」を長期的育成指針としています。
+                </p>
+                <a
+                  href="https://nsca-japan.or.jp/pdf/database/position-statement/ps_longterm.pdf"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-4 inline-flex items-center gap-1.5 text-sm font-bold text-white underline decoration-gold-400 underline-offset-4 transition-colors hover:text-gold-400"
+                >
+                  ポジションステイトメントを読む（PDF）
+                  <ExternalLink size={14} className="shrink-0" />
+                </a>
+              </div>
             </div>
           </div>
         </div>

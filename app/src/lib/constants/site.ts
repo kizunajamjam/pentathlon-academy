@@ -279,13 +279,13 @@ export const SHOW_PLACEHOLDERS = false;
 export const NAV_ITEMS = [
   { href: "/", label: "トップ", labelEn: "HOME" },
   { href: "/about", label: "アカデミーについて", labelEn: "ABOUT" },
-  { href: "/news", label: "お知らせ", labelEn: "NEWS" },
   { href: "/disciplines", label: "トレーニング", labelEn: "TRAINING" },
   { href: "/schedule", label: "練習スケジュール", labelEn: "SCHEDULE" },
   { href: "/athletes", label: "強化選手", labelEn: "ATHLETES" },
   { href: "/events", label: "大会・イベント", labelEn: "EVENTS" },
   { href: "/watch", label: "観戦ガイド", labelEn: "WATCH" },
   { href: "/ancient", label: "古代五種", labelEn: "ANCIENT" },
+  { href: "/peace", label: "平和教育", labelEn: "PEACE" },
   { href: "/contact", label: "お問い合わせ", labelEn: "CONTACT" },
 ] as const;
 

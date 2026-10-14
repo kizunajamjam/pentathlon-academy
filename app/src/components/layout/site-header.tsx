@@ -37,7 +37,8 @@ export function SiteHeader() {
       */}
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 lg:h-20">
         <Link href="/" onClick={() => setOpen(false)}>
-          <SiteLogo />
+          {/* 平和教育のページだけ、さりげなく鳩付きのロゴにする */}
+          <SiteLogo peace={pathname.startsWith("/peace")} />
         </Link>
 
         {/* デスクトップ: 10項目あるので 2xl 以上でのみ横並びにする */}

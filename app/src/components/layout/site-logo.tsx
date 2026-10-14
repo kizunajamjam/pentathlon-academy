@@ -13,10 +13,19 @@ import { assetPath } from "@/lib/utils/asset";
  * 背景を透過させると発光のにじみが紺の地色の上で濁るため、ロゴ自体は加工せずそのまま使う。
  */
 
-export function LogoMark({ size = 40, className = "" }: { size?: number; className?: string }) {
+export function LogoMark({
+  size = 40,
+  className = "",
+  peace = false,
+}: {
+  size?: number;
+  className?: string;
+  // 平和教育のページだけ、鳩付きのロゴにする（オーナー指定）
+  peace?: boolean;
+}) {
   return (
     <Image
-      src={assetPath("/logo-mark.png")}
+      src={assetPath(peace ? "/logo-mark-peace.png" : "/logo-mark.png")}
       alt={SITE.nameEn}
       width={size}
       height={size}
@@ -64,14 +73,20 @@ export function PentagonMotif({ className }: { className?: string }) {
 }
 
 // マーク + 文字組み。ヘッダー / フッターで共用する。
-export function SiteLogo({ tone = "light" }: { tone?: "light" | "dark" }) {
+export function SiteLogo({
+  tone = "light",
+  peace = false,
+}: {
+  tone?: "light" | "dark";
+  peace?: boolean;
+}) {
   const main = tone === "light" ? "text-white" : "text-navy-800";
   const sub = tone === "light" ? "text-gold-300" : "text-gold-600";
 
   return (
     <span className="flex items-center gap-2.5">
       <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-black p-0.5">
-        <LogoMark size={40} className="h-full w-full object-contain" />
+        <LogoMark size={40} peace={peace} className="h-full w-full object-contain" />
       </span>
       <span className="flex flex-col leading-none">
         <span className={`font-display text-base font-black tracking-[0.06em] ${main}`}>

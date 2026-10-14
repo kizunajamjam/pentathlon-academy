@@ -103,7 +103,8 @@ export default async function HomePage() {
       </section>
 
       {/* ── お知らせ ───────────────────────────────────────────────── */}
-      <section className="bg-white py-16 sm:py-24">
+      {/* お知らせの一覧ページは置かない（オーナー判断）。ここが唯一の入口で、詳細ページの戻り先にもなる */}
+      <section id="news" className="scroll-mt-20 bg-white py-16 sm:py-24 lg:scroll-mt-24">
         <div className="mx-auto max-w-4xl px-4">
           <SectionHeading eyebrow="NEWS" title="お知らせ" />
           <div className="mt-8">
@@ -112,11 +113,6 @@ export default async function HomePage() {
             ) : (
               <p className="py-8 text-sm text-muted">お知らせはまだありません。</p>
             )}
-          </div>
-          <div className="mt-8">
-            <ButtonLink href="/news" variant="outline">
-              お知らせ一覧
-            </ButtonLink>
           </div>
         </div>
       </section>

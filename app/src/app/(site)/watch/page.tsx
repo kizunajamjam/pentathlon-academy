@@ -184,12 +184,6 @@ export default function WatchPage() {
         <div className="mx-auto max-w-4xl px-4">
           <SectionHeading eyebrow="LANGUAGE" title="会場で聞こえるフランス語" />
           <div className="mt-8 space-y-4 text-sm leading-[1.9] text-muted sm:text-base">
-            <p>
-              近代五種を考案したのは、近代オリンピックの父として知られるフランス人、ピエール・ド・クーベルタンです。
-            </p>
-            <p>
-              国際オリンピック委員会（IOC）の公用語は、フランス語と英語です。両者の内容が食い違うときは、フランス語が優先されます。
-            </p>
             <p>フェンシングの試合では、審判の号令にフランス語が使われます。</p>
             <p>
               「Allez（アレ）」「Halte（アルト）」など、試合中に耳にする言葉には、それぞれ意味があります。
