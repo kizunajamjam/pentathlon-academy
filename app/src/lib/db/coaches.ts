@@ -2,6 +2,7 @@ import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
 import { unwrap } from "./unwrap";
+import { isUuid } from "@/lib/utils/uuid";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { COACHES } from "@/lib/constants/site";
 import type { Coach } from "@/types";
@@ -62,6 +63,9 @@ export async function listAllCoaches(): Promise<Coach[]> {
 
 export async function getCoach(id: string): Promise<Coach | null> {
   if (!isSupabaseConfigured) return FALLBACK.find((c) => c.id === id) ?? null;
+
+  // 形の違う id は DB に渡さず「存在しない」として返す（404 にするため）
+  if (!isUuid(id)) return null;
 
   const supabase = await createClient();
   const data = unwrap("coaches", await supabase.from("coaches").select("*").eq("id", id).maybeSingle());

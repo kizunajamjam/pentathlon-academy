@@ -2,6 +2,7 @@ import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
 import { unwrap } from "./unwrap";
+import { isUuid } from "@/lib/utils/uuid";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { SEED_NEWS } from "./seed";
 import type { News, NewsCategory } from "@/types";
@@ -52,6 +53,9 @@ export async function getNews(id: string): Promise<News | null> {
   if (!isSupabaseConfigured) {
     return SEED_NEWS.find((n) => n.id === id) ?? null;
   }
+
+  // 形の違う id は DB に渡さず「存在しない」として返す（404 にするため）
+  if (!isUuid(id)) return null;
 
   const supabase = await createClient();
   const data = unwrap("news", await supabase.from("news").select("*").eq("id", id).maybeSingle());

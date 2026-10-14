@@ -65,6 +65,8 @@ export default async function AdminAnalyticsPage() {
     <>
       <div className="flex items-center justify-between gap-4">
         <h1 className="text-xl text-navy-800">分析</h1>
+        {/* CSV をダウンロードさせる Route Handler なので、ページ遷移の <Link> ではなく素の <a> にする */}
+        {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
         <a
           href="/admin/inquiries/export"
           className="flex items-center gap-1.5 rounded-full border border-border px-4 py-2 text-xs text-navy-700 transition-colors hover:border-navy-800 hover:bg-navy-50"

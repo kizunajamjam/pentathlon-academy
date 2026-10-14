@@ -46,6 +46,7 @@ jobs:
           rm -rf src/app/admin        # 管理画面（動的レンダリング）
           rm -rf src/components/admin # 管理画面専用のフォーム部品
           rm -f src/proxy.ts          # Supabase セッション更新
+          rm -rf "src/app/(site)/[...missing]" # 404 の受け皿（静的書き出しでは使えない）
           # お問い合わせフォームは Server Actions を使うため、代替表示に差し替える
           rm -f src/app/\(site\)/contact/actions.ts
           cp src/components/contact-form.static.tsx src/components/contact-form.tsx
