@@ -7,3 +7,8 @@
 
 [build.environment]
   NODE_VERSION = "22"
+
+# Next.js をサーバー機能ごと動かすためのプラグイン。
+# 画面から作ったサイトでは自動で付くはずだが、付かないことがあった（ページが全部 404 になる）ので明示する。
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
