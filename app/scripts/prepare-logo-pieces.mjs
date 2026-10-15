@@ -1,7 +1,7 @@
 /*
  * 白地のロゴ（assets/logo-flat.jpg）から、単独で使う競技アイコンを切り出す。
  *
- *   public/icons/{競技}.png   競技アイコン（各面を金の縁ごと切り抜き、黒いタイルに載せたもの。角丸は CSS）
+ *   public/icons/{競技}.png   競技アイコン（各面を金の縁ごと切り抜き、背景は透明）
  *
  * 実行: node scripts/prepare-logo-pieces.mjs   （app/ で実行）
  * 確認用の画像を見たいときは DEBUG_DIR=/tmp/pieces を付ける。
@@ -33,7 +33,7 @@ const ORDER = ["fencing", "obstacle", "swimming", "shooting", "running"];
 const OUT = 1024;
 /** 競技アイコンの出力サイズと、タイルに対する面の大きさ */
 const ICON = 256;
-const ICON_FILL = 0.86;
+const ICON_FILL = 0.96;
 /** ロゴの外周で、白地のにじみを拾わないよう内側へ寄せる量（元画像のpx） */
 const OUTER_INSET = 1.5;
 /** 隣の面との境で、隣の色を拾わないよう手前で止める量（元画像のpx） */
@@ -595,7 +595,7 @@ for (const id of ORDER) {
   overlays[id] = buf;
 }
 
-// ── 競技アイコン（各面を黒いタイルに載せる） ──
+// ── 競技アイコン（各面を透明の正方形の中央に置く） ──
 for (const id of ORDER) {
   const box = bbox(pieces[id].corners.map(toOut), 1);
   const w = Math.min(OUT, box.x1 + 1) - box.x0;
@@ -609,7 +609,7 @@ for (const id of ORDER) {
     .resize(rw, rh, { kernel: "lanczos3" })
     .png()
     .toBuffer();
-  await sharp({ create: { width: ICON, height: ICON, channels: 3, background: "#000000" } })
+  await sharp({ create: { width: ICON, height: ICON, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } } })
     .composite([{ input: piece, left: Math.round((ICON - rw) / 2), top: Math.round((ICON - rh) / 2) }])
     .png({ compressionLevel: 9 })
     .toFile(`public/icons/${id}.png`);
