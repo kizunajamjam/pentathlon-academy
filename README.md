@@ -44,13 +44,13 @@ Supabase の接続、スタッフアカウントの発行、デプロイの手�
 
 ## 競技アイコンについて
 
-`app/public/icons/*.png`（競技ごとの面）は、白地のロゴ `app/assets/logo-flat.jpg` から自動生成しています。
-ヘッダーのロゴ・ファビコン・OGP は、黒地・発光版のロゴ `app/public/logo.png` から作っています。
-ロゴを差し替えたときだけ再実行してください。
+単独の競技アイコン `app/public/icons/{競技}.png` は、白地のロゴ `app/assets/logo-flat.jpg` から自動生成しています。
+トップのロゴ（組み上がる演出の各面・中央の P と星）・ヘッダーのロゴ・ファビコン・OGP は、
+黒地・発光版のロゴ `app/public/logo.png` から作っています。ロゴを差し替えたときだけ再実行してください。
 
 ```bash
-node scripts/prepare-logo-pieces.mjs   # 競技ごとの面（app/ で実行）
-node scripts/prepare-logo-glow.mjs     # ヘッダーのロゴ・ファビコン・OGP
+node scripts/prepare-logo-pieces.mjs   # 単独の競技アイコン（app/ で実行）
+node scripts/prepare-logo-glow.mjs     # トップのロゴの各面・ヘッダーのロゴ・ファビコン・OGP
 node scripts/check-wedges.mjs          # 生成結果の目視確認
 ```
 

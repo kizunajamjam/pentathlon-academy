@@ -233,8 +233,9 @@ revoke insert on table public.inquiries from anon;
 
 ### 競技アイコンについて
 
-`public/icons/*.png` は、白地のロゴ（`assets/logo-flat.jpg`）の五角形の各面を、金の縁ごと切り出したもの。
+単独の競技アイコン `public/icons/{競技}.png` は、白地のロゴ（`assets/logo-flat.jpg`）の五角形の各面を、金の縁ごと切り出したもの。
 生成は `node scripts/prepare-logo-pieces.mjs`（ロゴを差し替えたときだけ再実行）。
+トップのロゴの組み上がりに使う `overlay-*.png`・`center-*.png` は発光版から `node scripts/prepare-logo-glow.mjs` で作る。
 
 切り出しは画像から各面の境目を検出し、直線を当てはめた多角形で行う。手動調整の座標は無い。
 `DEBUG_DIR=/tmp/pieces` を付けて実行すると、検出した多角形と組み上げ結果の確認用画像が出る。
