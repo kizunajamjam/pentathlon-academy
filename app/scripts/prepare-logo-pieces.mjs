@@ -1,17 +1,13 @@
 /*
- * 白地のロゴ（assets/logo-flat.jpg）から、競技ごとの面（ピース）の画像を切り出す。
+ * 白地のロゴ（assets/logo-flat.jpg）から、単独で使う競技アイコンを切り出す。
  *
- *   public/icons/{競技}.png            競技アイコン（各面を黒いタイルに載せたもの。角丸は CSS）
- *   public/icons/overlay-{競技}.png    各面をマークと同じ座標に置いたもの（トップの組み上がり用）
- *   public/icons/center-p.png          中央の「P」
- *   public/icons/center-star.png       中央の星
- *   src/lib/constants/logo-geometry.ts 各面の輪郭と重心、星の位置
+ *   public/icons/{競技}.png   競技アイコン（各面を金の縁ごと切り抜き、黒いタイルに載せたもの。角丸は CSS）
  *
  * 実行: node scripts/prepare-logo-pieces.mjs   （app/ で実行）
  * 確認用の画像を見たいときは DEBUG_DIR=/tmp/pieces を付ける。
  *
- * ヘッダーのロゴ・ファビコン・OGP は、これまでどおり発光版から
- * scripts/prepare-logo-glow.mjs で作る（こちらでは触らない）。
+ * トップのロゴ（組み上がる演出・ホバーで拡大する面・中央の P と星・当たり判定の座標）と、
+ * ヘッダーのロゴ・ファビコン・OGP は、発光版のロゴから scripts/prepare-logo-glow.mjs で作る。
  *
  * ── 切り抜きの考え方 ────────────────────────────────────────────────
  * 各面は凸な四角形で、面と面のあいだ・中央の黒い五角形とのあいだ・外周を、
@@ -19,25 +15,21 @@
  * 画素の境目をなぞるのではなく、境目に直線を当てはめて多角形として切る。
  *
  *   1. 各画素を色で分類する（フェンシングの濃い金・赤・緑・青・黒・白）
- *   2. 色ごとに一番大きい塊を取り、その凸包に一番よく当てはまる四角形を選ぶ
+ *   2. 色ごとの塊をまとめ、その凸包に一番よく当てはまる四角形を選ぶ
  *      （中の白い選手のシルエットは凸包に含まれる）
  *   3. 四角形の各辺の近くにある境目の画素に直線を当てはめ直し、角を交点で決める
  *   4. 各辺の外側にある「向かいの直線」（隣の面・中央の黒・ロゴの外周の境目）まで
  *      広げたものを面の範囲とする。金の縁がまるごと面に入る
  *   5. その多角形を 4x4 の超解像で塗り、アンチエイリアスの効いた透明度にする
  *
- * 隣り合う面は金の線の上で重なるが、どちらも同じ元画像の画素なので、
- * 重ねると元のロゴと同じ見た目に戻る。
- *
- * 中央の「P」と星は黒地の上にあるので、明るさをそのまま不透明度にして
- * 抜き出す（黒＝透明）。トップのロゴ欄の背景は黒なので、重ねると元の画像に戻る。
+ * オブスタクルだけは山の先端が中央の黒地へ飛び出しているので、その三角も含める。
  */
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir } from "node:fs/promises";
 import sharp from "sharp";
 
 const SRC = "assets/logo-flat.jpg";
 const ORDER = ["fencing", "obstacle", "swimming", "shooting", "running"];
-/** マーク（五角形）の正方形の出力サイズ。表示は最大 448px なので、高精細画面向けに倍で持つ。 */
+/** 切り出しの作業用に、マーク（五角形）を引き直す正方形のサイズ。アイコンはここから縮小する。 */
 const OUT = 1024;
 /** 競技アイコンの出力サイズと、タイルに対する面の大きさ */
 const ICON = 256;
@@ -477,7 +469,6 @@ const MARGIN = 6;
 const S = Math.max(ob.x1 - ob.x0, ob.y1 - ob.y0) + MARGIN * 2;
 const sqLeft = (ob.x0 + ob.x1) / 2 - S / 2;
 const sqTop = (ob.y0 + ob.y1) / 2 - S / 2;
-const k = S / OUT; // 出力1pxあたりの元画像のpx
 
 // 元画像を、マークの正方形・出力解像度に引き直す（色はここから取る）
 const L0 = Math.round(sqLeft);
@@ -602,9 +593,6 @@ for (const id of ORDER) {
     buf[i * 4 + 3] = cov[i];
   }
   overlays[id] = buf;
-  await sharp(buf, { raw: { width: OUT, height: OUT, channels: 4 } })
-    .png({ compressionLevel: 9 })
-    .toFile(`public/icons/overlay-${id}.png`);
 }
 
 // ── 競技アイコン（各面を黒いタイルに載せる） ──
@@ -627,125 +615,6 @@ for (const id of ORDER) {
     .toFile(`public/icons/${id}.png`);
 }
 
-// ── 中央の P と星（黒地の上の明るい画素） ──
-// 金の縁を拾わないよう、中央の五角形を少し内側に寄せた範囲だけを見る
-const centerInner = (() => {
-  const ls = center.edges.map((e) => ({ p: [e.a[0] - e.n[0] * 1.5, e.a[1] - e.n[1] * 1.5], d: e.d }));
-  return withNormals({ lines: ls, corners: ls.map((L, i) => intersect(ls[(i - 1 + ls.length) % ls.length], L)) });
-})();
-const centerCov = coverage(centerInner);
-
-// 明るい画素の塊（元画像）で P と星を分ける。一番大きいのが P、金色の塊が星
-const bright = new Uint8Array(W * H);
-{
-  const box = bbox(center.corners);
-  for (let y = box.y0; y <= box.y1; y++)
-    for (let x = box.x0; x <= box.x1; x++) {
-      const [r, g, b] = px(x, y);
-      if (Math.max(r, g, b) > 40) bright[y * W + x] = 1;
-    }
-}
-const insideCenter = (x, y) =>
-  center.edges.every((e) => (x - e.a[0]) * e.n[0] + (y - e.a[1]) * e.n[1] < -3);
-const brightComps = components(bright).filter(
-  (c) => c.length > 300 && insideCenter(c[0][0], c[0][1]),
-);
-const pComp = brightComps[0];
-const starComp = brightComps.find((c) => {
-  if (c === pComp) return false;
-  const [r, g, b] = px(...c[Math.floor(c.length / 2)]);
-  const [h, s] = hsv(r, g, b);
-  return h >= 30 && h <= 60 && s > 0.4;
-});
-if (!pComp || !starComp) throw new Error("中央の P と星を見つけられませんでした");
-
-/** 塊を出力解像度の範囲に写し、周りに少し広げる（アンチエイリアスの縁を含めるため） */
-function regionOut(comp, grow) {
-  const m = new Uint8Array(OUT * OUT);
-  for (const [x, y] of comp) {
-    const [X, Y] = toOut([x + 0.5, y + 0.5]);
-    const r = Math.ceil(grow / k);
-    for (let dy = -r; dy <= r; dy++)
-      for (let dx = -r; dx <= r; dx++) {
-        const xx = Math.floor(X) + dx;
-        const yy = Math.floor(Y) + dy;
-        if (xx >= 0 && yy >= 0 && xx < OUT && yy < OUT) m[yy * OUT + xx] = 1;
-      }
-  }
-  return m;
-}
-const pRegion = regionOut(pComp, 2);
-const starRegion = regionOut(starComp, 2);
-
-function lumaCutout(region) {
-  const buf = Buffer.alloc(OUT * OUT * 4);
-  for (let i = 0; i < OUT * OUT; i++) {
-    if (!region[i] || !centerCov[i]) continue;
-    const r = markImg[i * 3];
-    const g = markImg[i * 3 + 1];
-    const b = markImg[i * 3 + 2];
-    const a = Math.max(r, g, b);
-    if (a === 0) continue;
-    // 黒の上に重ねたとき元の色に戻るよう、色は不透明度で割り戻す
-    buf[i * 4] = Math.round((r * 255) / a);
-    buf[i * 4 + 1] = Math.round((g * 255) / a);
-    buf[i * 4 + 2] = Math.round((b * 255) / a);
-    buf[i * 4 + 3] = Math.round((a * centerCov[i]) / 255);
-  }
-  return buf;
-}
-await sharp(lumaCutout(pRegion), { raw: { width: OUT, height: OUT, channels: 4 } })
-  .png({ compressionLevel: 9 })
-  .toFile("public/icons/center-p.png");
-await sharp(lumaCutout(starRegion), { raw: { width: OUT, height: OUT, channels: 4 } })
-  .png({ compressionLevel: 9 })
-  .toFile("public/icons/center-star.png");
-
-// ── 輪郭と重心を書き出す（0〜100）──
-const to100 = (p) => toOut(p).map((v) => (v / OUT) * 100);
-function centroid(corners) {
-  let a = 0;
-  let cx = 0;
-  let cy = 0;
-  for (let i = 0; i < corners.length; i++) {
-    const [x0, y0] = corners[i];
-    const [x1, y1] = corners[(i + 1) % corners.length];
-    const c = x0 * y1 - x1 * y0;
-    a += c;
-    cx += (x0 + x1) * c;
-    cy += (y0 + y1) * c;
-  }
-  return [cx / (3 * a), cy / (3 * a)];
-}
-const starCenter = starComp.reduce((s, p) => [s[0] + p[0], s[1] + p[1]], [0, 0]).map((v) => v / starComp.length);
-const fmt = (v) => v.toFixed(2);
-const wedgeLines = ORDER.map((id) => {
-  const pts = pieces[id].corners.map(to100);
-  const [cx, cy] = to100(centroid(pieces[id].corners));
-  return `  { id: "${id}", points: "${pts.map(([x, y]) => `${fmt(x)},${fmt(y)}`).join(" ")}", centroid: { x: ${fmt(cx)}, y: ${fmt(cy)} } },`;
-});
-const [sx, sy] = to100(starCenter);
-await writeFile(
-  "src/lib/constants/logo-geometry.ts",
-  `// scripts/prepare-logo-pieces.mjs が生成。直接編集しないこと。
-// public/icons/overlay-*.png 上での各面の情報（viewBox="0 0 100 100" 基準）。
-//   points   … 面の輪郭（金の縁を含む四角形）。ホバーの当たり判定に使う
-//   centroid … 面の重心。拡大の基点に使う
-import type { DisciplineId } from "@/types";
-
-export const LOGO_WEDGES: {
-  id: DisciplineId;
-  points: string;
-  centroid: { x: number; y: number };
-}[] = [
-${wedgeLines.join("\n")}
-];
-
-// 中央の星の重心。組み上がる演出で、きらめきの光をここから出す。
-export const LOGO_STAR = { x: ${fmt(sx)}, y: ${fmt(sy)} };
-`,
-);
-
 // ── 確認用：検出した多角形を元画像に描く ──
 if (DEBUG_DIR) {
   await mkdir(DEBUG_DIR, { recursive: true });
@@ -761,10 +630,9 @@ if (DEBUG_DIR) {
     .composite([{ input: Buffer.from(svg) }])
     .png()
     .toFile(`${DEBUG_DIR}/polygons.png`);
-  // 組み上げ確認：黒地に全部を重ねる
-  const layers = [...ORDER.map((id) => `public/icons/overlay-${id}.png`), "public/icons/center-star.png", "public/icons/center-p.png"];
+  // 組み上げ確認：黒地に全部の面を重ねる
   await sharp({ create: { width: OUT, height: OUT, channels: 3, background: "#000000" } })
-    .composite(layers.map((input) => ({ input })))
+    .composite(ORDER.map((id) => ({ input: overlays[id], raw: { width: OUT, height: OUT, channels: 4 } })))
     .png()
     .toFile(`${DEBUG_DIR}/assembled.png`);
   console.log(`確認用の画像: ${DEBUG_DIR}`);
