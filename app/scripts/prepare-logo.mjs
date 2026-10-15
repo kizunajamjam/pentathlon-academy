@@ -1,5 +1,7 @@
 /*
- * ⚠️ 旧ロゴ（白地版）用。現在の黒地・発光版のロゴでは scripts/prepare-logo-glow.mjs を使うこと。
+ * ⚠️ 旧ロゴ用で、いまは使っていない。実行すると現在の画像を上書きしてしまうので注意。
+ * 現在は、ヘッダー・ファビコン・OGP を scripts/prepare-logo-glow.mjs で、
+ * 競技ごとの面を scripts/prepare-logo-pieces.mjs で作っている。
  *
  * public/logo.png から、サイトで使う画像を切り出す。
  *
