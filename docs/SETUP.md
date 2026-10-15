@@ -233,10 +233,11 @@ revoke insert on table public.inquiries from anon;
 
 ### 競技アイコンについて
 
-`public/icons/*.png` はロゴの五角形の各面を切り出したもの。
-生成は `node scripts/prepare-logo.mjs`（ロゴを差し替えたときだけ再実行）。
+`public/icons/*.png` は、白地のロゴ（`assets/logo-flat.jpg`）の五角形の各面を、金の縁ごと切り出したもの。
+生成は `node scripts/prepare-logo-pieces.mjs`（ロゴを差し替えたときだけ再実行）。
 
-切り出しは画像から実際の塗り範囲を検出して行う。手動調整の定数は無い。
+切り出しは画像から各面の境目を検出し、直線を当てはめた多角形で行う。手動調整の座標は無い。
+`DEBUG_DIR=/tmp/pieces` を付けて実行すると、検出した多角形と組み上げ結果の確認用画像が出る。
 
 1. 背景でない画素の連結領域を洗い出す
 2. 大きい順に5つ取る（面のあいだは白い隙間で切れているので必ず分かれ、

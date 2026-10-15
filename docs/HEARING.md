@@ -240,7 +240,7 @@ OVERVIEW（アカデミー概要）
 | 通知メール | `RESEND_API_KEY` / `CONTACT_NOTIFY_TO` / `CONTACT_NOTIFY_FROM` |
 | プライバシーポリシー | 新規ページ + `NAV_ITEMS` かフッターに導線 |
 | アカウント | `docs/SETUP.md` の 2〜3 章 |
-| ロゴ | `app/public/logo.png` を差し替え → `node scripts/prepare-logo.mjs` |
+| ロゴ | 発光版 `app/public/logo.png` → `node scripts/prepare-logo-glow.mjs`、白地版 `app/assets/logo-flat.jpg` → `node scripts/prepare-logo-pieces.mjs` |
 | 大会 | 管理画面 `/admin/events`（暫定値は `SEED_EVENTS`） |
 | お知らせ | 管理画面 `/admin/news`（暫定値は `SEED_NEWS`） |
 
