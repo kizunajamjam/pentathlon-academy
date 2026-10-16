@@ -418,6 +418,7 @@ export const INQUIRY_CATEGORIES = [
   "料金について",
   "取材・メディア",
   "コーチ・スタッフ募集について",
+  "スポンサー・協賛について",
   "その他",
 ] as const;
 

@@ -79,6 +79,9 @@ export function SiteFooter() {
           <Link href="/recruit" className="transition-colors hover:text-gold-400">
             コーチ・スタッフ募集
           </Link>
+          <Link href="/sponsor" className="transition-colors hover:text-gold-400">
+            スポンサー募集
+          </Link>
         </div>
       </div>
     </footer>
