@@ -595,11 +595,29 @@ for (const id of ORDER) {
   overlays[id] = buf;
 }
 
+function alphaBox(buf) {
+  let x0 = OUT;
+  let y0 = OUT;
+  let x1 = -1;
+  let y1 = -1;
+  for (let y = 0; y < OUT; y++)
+    for (let x = 0; x < OUT; x++)
+      if (buf[(y * OUT + x) * 4 + 3]) {
+        x0 = Math.min(x0, x);
+        y0 = Math.min(y0, y);
+        x1 = Math.max(x1, x);
+        y1 = Math.max(y1, y);
+      }
+  return { x0, y0, x1, y1 };
+}
+
 // ── 競技アイコン（各面を透明の正方形の中央に置く） ──
 for (const id of ORDER) {
-  const box = bbox(pieces[id].corners.map(toOut), 1);
-  const w = Math.min(OUT, box.x1 + 1) - box.x0;
-  const h = Math.min(OUT, box.y1 + 1) - box.y0;
+  // 切り出す範囲は、実際に塗った範囲（透明でない画素）から取る。
+  // 四角形の角だけで決めると、オブスタクルの山の先端（四角形の外）が欠ける
+  const box = alphaBox(overlays[id]);
+  const w = box.x1 + 1 - box.x0;
+  const h = box.y1 + 1 - box.y0;
   const target = Math.round(ICON * ICON_FILL);
   const scale = target / Math.max(w, h);
   const rw = Math.round(w * scale);

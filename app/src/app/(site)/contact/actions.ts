@@ -15,9 +15,11 @@ const MAX = { name: 100, email: 254, phone: 30, message: 2000 };
 // 人が全項目を書き終えるのに、これより速いことはない。これより速い送信は bot とみなす。
 const MIN_FILL_MS = 3000;
 
-// 連続送信の上限（直近 RATE_WINDOW_MIN 分あたり）。通知メールで受信箱が埋まるのを防ぐ。
+// 連続送信の上限（直近 RATE_WINDOW_MIN 分あたり）。
+// 同じメールアドレスからの連投は断る。全体の件数が多いときは、保存はするが通知メールを止める
+// （全体で断ると、誰かが連投するだけで正規の問い合わせまで受け付けなくなるため）。
 const RATE_WINDOW_MIN = 10;
-const RATE_LIMIT = { sameEmail: 3, total: 20 };
+const RATE_LIMIT = { sameEmail: 3, notifyTotal: 20 };
 
 function str(formData: FormData, key: string): string {
   const v = formData.get(key);
@@ -59,12 +61,15 @@ export async function submitInquiry(
   }
 
   // 入力にかかった時間（フォームを開いてから送信まで。ブラウザが測って添える）。
-  // 速すぎる送信もハニーポットと同じく、黙って捨てる。入力チェックのあとに置くのは、
-  // 開いてすぐ空のまま押した人に、偽の「送信完了」を見せないため。
+  // 速すぎる送信は bot とみなして保存しない。ただし自動入力と貼り付けで速く送れる人も
+  // いるので、黙って捨てずに、もう一度押してもらう（入力内容はフォームに残る）。
   // JavaScript が動かない環境では値が来ないので、そのときは判定しない。
   const elapsedMs = Number(str(formData, "elapsedMs"));
   if (str(formData, "elapsedMs") !== "" && Number.isFinite(elapsedMs) && elapsedMs < MIN_FILL_MS) {
-    return { status: "success" };
+    return {
+      status: "error",
+      message: "送信の確認ができませんでした。お手数ですが、もう一度「この内容で送信する」を押してください。",
+    };
   }
 
   // Supabase 未接続のうちは保存できないため、正直に電話・メールへ誘導する。
@@ -85,7 +90,7 @@ export async function submitInquiry(
   }
 
   const recent = await countRecentInquiries(email, RATE_WINDOW_MIN);
-  if (recent && (recent.sameEmail >= RATE_LIMIT.sameEmail || recent.total >= RATE_LIMIT.total)) {
+  if (recent && recent.sameEmail >= RATE_LIMIT.sameEmail) {
     return {
       status: "error",
       message: "短時間に送信が集中しています。しばらく時間をおいてから、もう一度お試しください。",
@@ -112,7 +117,11 @@ export async function submitInquiry(
 
   // 保存が成功していれば管理画面から確認できるので、
   // 通知メールが送れなくても送信自体は成功として扱う。
-  await notifyByEmail({ name, email, phone, category, message });
+  if (recent && recent.total >= RATE_LIMIT.notifyTotal) {
+    console.warn("[contact] 送信が集中しているため、通知メールを送りませんでした（管理画面には保存済み）");
+  } else {
+    await notifyByEmail({ name, email, phone, category, message });
+  }
 
   return { status: "success" };
 }

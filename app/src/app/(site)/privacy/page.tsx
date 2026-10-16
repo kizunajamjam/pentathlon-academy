@@ -24,7 +24,10 @@ const CONTACT_NAME = `${SITE.name} 代表`;
 const USES_TURNSTILE = Boolean(process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY);
 const USES_PLAUSIBLE =
   Boolean(process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN) && process.env.NEXT_PUBLIC_IS_PREVIEW !== "1";
-const USES_RESEND = Boolean(process.env.RESEND_API_KEY);
+// 通知メールは、キー・宛先・送信元の3つがそろったときだけ送られる（contact/actions.ts と同じ条件）
+const USES_RESEND = Boolean(
+  process.env.RESEND_API_KEY && process.env.CONTACT_NOTIFY_TO && process.env.CONTACT_NOTIFY_FROM,
+);
 
 type Block = string | string[];
 type Section = { title: string; blocks: Block[] };
