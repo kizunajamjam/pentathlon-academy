@@ -73,9 +73,6 @@ export async function createInquiry(input: InquiryInput) {
  * キーが無い・数えられなかったときは null を返し、呼び出し側は制限をかけない
  * （数えられないことを理由に、正規の問い合わせを落とさないため）。
  */
-// ilike で大文字小文字だけを無視して完全一致させる（% と _ をワイルドカードにしない）
-const escapeLike = (v: string) => v.replace(/[\\%_]/g, "\\$&");
-
 export async function countRecentInquiries(
   email: string,
   minutes: number,
@@ -83,16 +80,24 @@ export async function countRecentInquiries(
   const supabase = createServiceClient();
   if (!supabase) return null;
 
+  // 直近のメールアドレスを取ってきて、ここで数える。
+  // ilike で数えると、アドレスに含まれる * や % がワイルドカード扱いになり、別の人の分まで数えてしまう。
+  // 10分ぶんの件数はごく少ないので、全部取っても負担にならない（念のため上限を付ける）
   const since = new Date(Date.now() - minutes * 60_000).toISOString();
-  const recent = () =>
-    supabase.from("inquiries").select("id", { count: "exact", head: true }).gte("created_at", since);
-
-  const [total, sameEmail] = await Promise.all([recent(), recent().ilike("email", escapeLike(email))]);
-  if (total.error || sameEmail.error) {
-    console.error("[db/inquiries] 直近の件数を数えられませんでした", total.error ?? sameEmail.error);
+  const { data, error } = await supabase
+    .from("inquiries")
+    .select("email")
+    .gte("created_at", since)
+    .limit(500);
+  if (error) {
+    console.error("[db/inquiries] 直近の件数を数えられませんでした", error);
     return null;
   }
-  return { total: total.count ?? 0, sameEmail: sameEmail.count ?? 0 };
+  const target = email.toLowerCase();
+  return {
+    total: data.length,
+    sameEmail: data.filter((row) => row.email.toLowerCase() === target).length,
+  };
 }
 
 // 管理画面用。

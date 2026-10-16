@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 
 import { NEWS_CATEGORY_LABEL } from "@/lib/constants/site";
-import { getNews, listPublishedNews } from "@/lib/db/news";
+import { getNews, isNewsVisible, listPublishedNews } from "@/lib/db/news";
 import { formatDate } from "@/lib/utils/date";
 
 type Props = { params: Promise<{ id: string }> };
@@ -34,7 +34,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
   const news = await getNews(id);
   // 非公開・公開前のものも、本文のページと同じく「見つからない」として扱う
-  if (!news || !news.isPublished || news.publishedAt > new Date().toISOString()) {
+  if (!news || !isNewsVisible(news)) {
     return { title: "ページが見つかりません" };
   }
 
@@ -51,7 +51,7 @@ export default async function NewsDetailPage({ params }: Props) {
   const news = await getNews(id);
 
   // 非公開・公開日時前のものは詳細でも見せない
-  if (!news || !news.isPublished || news.publishedAt > new Date().toISOString()) {
+  if (!news || !isNewsVisible(news)) {
     notFound();
   }
 

@@ -1,6 +1,6 @@
 import { ButtonLink } from "@/components/ui/button-link";
 
-// 404 の本文。app/not-found.tsx と (site)/not-found.tsx で共通に使う。
+// 404 の本文。app/not-found.tsx から使う。
 export function NotFoundMessage() {
   return (
     <section className="flex flex-1 items-center bg-white py-20">

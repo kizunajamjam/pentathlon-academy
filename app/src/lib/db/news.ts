@@ -49,6 +49,11 @@ export async function listPublishedNews(limit?: number): Promise<News[]> {
   return (data ?? []).map(mapNews);
 }
 
+// 公開ページに出してよいか（公開済みで、公開日時が到来している）。listPublishedNews と同じ条件
+export function isNewsVisible(news: News): boolean {
+  return news.isPublished && news.publishedAt <= new Date().toISOString();
+}
+
 export async function getNews(id: string): Promise<News | null> {
   if (!isSupabaseConfigured) {
     return SEED_NEWS.find((n) => n.id === id) ?? null;
