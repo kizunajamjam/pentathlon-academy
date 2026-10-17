@@ -4,8 +4,6 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { getStaffForAction } from "@/lib/auth-guard";
-import { isAdminDemo } from "@/lib/supabase/config";
-import { DEMO_READ_ONLY_MESSAGE } from "@/lib/admin-demo";
 import { createCoach, deleteCoach, updateCoach } from "@/lib/db/coaches";
 
 export type CoachFormState = { message?: string };
@@ -16,7 +14,6 @@ export async function saveCoach(
 ): Promise<CoachFormState> {
   const staff = await getStaffForAction();
   if (!staff) return { message: "権限がありません。再度ログインしてください。" };
-  if (isAdminDemo) return { message: DEMO_READ_ONLY_MESSAGE };
 
   const name = String(formData.get("name") ?? "").trim();
   const title = String(formData.get("title") ?? "").trim();
@@ -48,7 +45,6 @@ export async function saveCoach(
 export async function removeCoach(formData: FormData) {
   const staff = await getStaffForAction();
   if (!staff) redirect("/admin/login");
-  if (isAdminDemo) return;
 
   const id = String(formData.get("id") ?? "");
   if (!id) return;

@@ -83,17 +83,6 @@ select id, '山田 太郎' from auth.users where email = 'staff@example.com';
 公開ページと同じ見た目で別タブに開く。下書き・予約中でも見られる（ログイン中のスタッフだけ）。
 編集したら、いったん保存してから開くこと。
 
-### 管理画面のデモ版（人に見せる・画面を確かめる）
-
-プルリクエストを作ると Netlify が作るプレビュー URL（`deploy-preview-番号--pentathlon-academy.netlify.app`）は、
-管理画面のデモ版になる（`netlify.toml` の `deploy-preview` で設定）。
-
-- 本番の Supabase には一切つながず、見本のデータで動く。本番のデータや個人情報は見えない
-- `/admin/login` から、メール `demo@example.com`・パスワード `demo` で、二段階認証なしに入れる
-  （ログイン画面にも表示される）
-- 保存・削除・対応済みの切り替えは何もしない
-- 公開ページも見本のデータで表示され、検索エンジンには載らない
-
 ## 4. お問い合わせの通知メール（任意）
 
 問い合わせは **必ず DB に保存され、管理画面 `/admin/inquiries` から確認できる**。

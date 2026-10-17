@@ -3,8 +3,7 @@ import "server-only";
 import { redirect } from "next/navigation";
 
 import { createClient, getCurrentUser } from "@/lib/supabase/server";
-import { DEMO_ACCOUNT, isAdminDemo, isSupabaseConfigured } from "@/lib/supabase/config";
-import { hasDemoSession } from "@/lib/admin-demo";
+import { isSupabaseConfigured } from "@/lib/supabase/config";
 
 export type StaffContext = { userId: string; name: string; email: string };
 
@@ -24,12 +23,6 @@ type StaffCheck =
  * データベース側の is_staff() も aal2 を要求しているので、API を直接叩いても書き込めない。
  */
 async function checkStaff(): Promise<StaffCheck> {
-  // デモ版: デモのアカウントで入っていれば通す（仮データのみ・保存はしない）
-  if (isAdminDemo) {
-    return (await hasDemoSession())
-      ? { state: "ok", staff: { userId: "demo", name: DEMO_ACCOUNT.name, email: DEMO_ACCOUNT.email } }
-      : { state: "none" };
-  }
   if (!isSupabaseConfigured) return { state: "none" };
 
   const user = await getCurrentUser();

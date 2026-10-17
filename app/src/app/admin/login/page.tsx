@@ -6,7 +6,6 @@ import { keepInputsOnSubmit } from "@/lib/form-submit";
 import { AlertCircle } from "lucide-react";
 
 import { LogoMark } from "@/components/layout/site-logo";
-import { DEMO_ACCOUNT, isAdminDemo } from "@/lib/supabase/config";
 import { signIn, type LoginState } from "./actions";
 
 const INITIAL: LoginState = {};
@@ -27,21 +26,6 @@ export default function AdminLoginPage() {
           <h1 className="mt-5 font-display text-lg text-white">管理画面</h1>
           <p className="mt-1.5 text-xs text-navy-300">ペンタスロンアカデミー</p>
         </div>
-
-        {isAdminDemo && (
-          <div className="mt-8 rounded-card border border-gold-400/40 bg-gold-50 px-5 py-4 text-sm leading-relaxed text-navy-800">
-            <p className="font-bold">デモ版の管理画面です</p>
-            <p className="mt-1 text-xs text-navy-700">
-              中身は見本のデータで、保存・削除をしても何も変わりません。次のアカウントで入れます。
-            </p>
-            <dl className="mt-3 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 font-display text-xs">
-              <dt className="text-navy-500">メール</dt>
-              <dd>{DEMO_ACCOUNT.email}</dd>
-              <dt className="text-navy-500">パスワード</dt>
-              <dd>{DEMO_ACCOUNT.password}</dd>
-            </dl>
-          </div>
-        )}
 
         <form action={formAction} onSubmit={keepInputsOnSubmit(formAction)} className="mt-8 rounded-card bg-white p-7 shadow-lg">
           {state.message && (

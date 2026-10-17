@@ -4,8 +4,6 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { getStaffForAction } from "@/lib/auth-guard";
-import { isAdminDemo } from "@/lib/supabase/config";
-import { DEMO_READ_ONLY_MESSAGE } from "@/lib/admin-demo";
 import { createNews, deleteNews, updateNews, type NewsInput } from "@/lib/db/news";
 import { uploadNewsImage } from "@/lib/db/news-image";
 import type { NewsCategory } from "@/types";
@@ -45,7 +43,6 @@ export async function saveNews(
 ): Promise<NewsFormState> {
   const staff = await getStaffForAction();
   if (!staff) return { message: "権限がありません。再度ログインしてください。" };
-  if (isAdminDemo) return { message: DEMO_READ_ONLY_MESSAGE };
 
   const parsed = parse(formData);
   if ("error" in parsed) return { message: parsed.error };
@@ -77,7 +74,6 @@ export async function saveNews(
 export async function removeNews(formData: FormData) {
   const staff = await getStaffForAction();
   if (!staff) redirect("/admin/login");
-  if (isAdminDemo) return;
 
   const id = String(formData.get("id") ?? "");
   if (!id) return;

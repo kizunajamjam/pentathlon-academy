@@ -1,4 +1,5 @@
 # Netlify の設定。本番サイトはここで動かす（Next.js の機能はそのまま使える）。
+# 確認用プレビュー（GitHub Pages）は .github/workflows/pages.yml で別に作っている。
 [build]
   base = "app"
   command = "npm run build"
@@ -11,11 +12,3 @@
 # 画面から作ったサイトでは自動で付くはずだが、付かないことがあった（ページが全部 404 になる）ので明示する。
 [[plugins]]
   package = "@netlify/plugin-nextjs"
-
-# プルリクエストごとのプレビュー URL（deploy-preview-番号--pentathlon-academy.netlify.app）は、
-# 管理画面のデモ版にする。本番の Supabase には一切つながず見本のデータで動き、
-# 管理画面には仮のアカウントで二段階認証なしに入れる（保存・削除はしない）。
-# 検索エンジンにも載せない。詳しくは app/src/lib/supabase/config.ts の isAdminDemo。
-[context.deploy-preview.environment]
-  NEXT_PUBLIC_IS_PREVIEW = "1"
-  NEXT_PUBLIC_ADMIN_DEMO = "1"

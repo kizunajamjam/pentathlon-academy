@@ -3,12 +3,8 @@ import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import { unwrap } from "./unwrap";
 import { isUuid } from "@/lib/utils/uuid";
-import { isAdminDemo, isSupabaseConfigured } from "@/lib/supabase/config";
+import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { SEED_NEWS } from "./seed";
-import { DEMO_NEWS } from "./demo-data";
-
-// Supabase を使わないときのお知らせ（デモ版だけ見本を入れる）
-const FALLBACK_NEWS = isAdminDemo ? DEMO_NEWS : SEED_NEWS;
 import type { News, NewsCategory } from "@/types";
 
 type NewsRow = {
@@ -36,8 +32,7 @@ function mapNews(row: NewsRow): News {
 // 公開ページ用: 公開済みかつ公開日時が到来しているものだけ。
 export async function listPublishedNews(limit?: number): Promise<News[]> {
   if (!isSupabaseConfigured) {
-    const visible = FALLBACK_NEWS.filter(isNewsVisible);
-    return limit ? visible.slice(0, limit) : visible;
+    return limit ? SEED_NEWS.slice(0, limit) : SEED_NEWS;
   }
 
   const supabase = await createClient();
@@ -61,7 +56,7 @@ export function isNewsVisible(news: News): boolean {
 
 export async function getNews(id: string): Promise<News | null> {
   if (!isSupabaseConfigured) {
-    return FALLBACK_NEWS.find((n) => n.id === id) ?? null;
+    return SEED_NEWS.find((n) => n.id === id) ?? null;
   }
 
   // 形の違う id は DB に渡さず「存在しない」として返す（404 にするため）
@@ -74,7 +69,7 @@ export async function getNews(id: string): Promise<News | null> {
 
 // 管理画面用: 下書きも含めて全件。
 export async function listAllNews(): Promise<News[]> {
-  if (!isSupabaseConfigured) return FALLBACK_NEWS;
+  if (!isSupabaseConfigured) return SEED_NEWS;
 
   const supabase = await createClient();
   const data = unwrap("news", await supabase

@@ -2,8 +2,6 @@ import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
-import { isSupabaseConfigured } from "@/lib/supabase/config";
-import { DEMO_INQUIRIES } from "./demo-data";
 import { unwrap } from "./unwrap";
 import type { Inquiry } from "@/types";
 
@@ -104,9 +102,6 @@ export async function countRecentInquiries(
 
 // 管理画面用。
 export async function listInquiries(): Promise<Inquiry[]> {
-  // Supabase を使わないとき（管理画面のデモ版）は見本を返す
-  if (!isSupabaseConfigured) return DEMO_INQUIRIES;
-
   const supabase = await createClient();
   const data = unwrap("inquiries", await supabase
     .from("inquiries")
