@@ -1,6 +1,7 @@
 import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
+import { createPublicClient } from "@/lib/supabase/public";
 import { unwrap } from "./unwrap";
 import { isUuid } from "@/lib/utils/uuid";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
@@ -38,7 +39,7 @@ const FALLBACK: Coach[] = COACHES.map((c, i) => ({
 export async function listPublishedCoaches(): Promise<Coach[]> {
   if (!isSupabaseConfigured) return FALLBACK;
 
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const data = unwrap(
     "coaches",
     await supabase

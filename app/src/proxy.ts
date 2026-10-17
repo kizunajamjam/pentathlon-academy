@@ -5,6 +5,8 @@ import { isSupabaseConfigured } from "@/lib/supabase/config";
 
 // Next.js 16 では middleware.ts は廃止され proxy.ts に改称された。
 // ここでは Supabase セッション Cookie の更新のみを行う(認可判定は各ページ/Actionで行う)。
+// ログインを使うのは管理画面だけなので、/admin の下でだけ動かす（下の matcher）。
+// 公開ページで毎回 Supabase に問い合わせると、そのぶん表示が遅くなるため。
 export async function proxy(request: NextRequest) {
   // Supabase 未接続のうちは何もしない。
   // 環境変数が無い状態で createServerClient を呼ぶと全リクエストが落ちるため。
@@ -37,5 +39,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)"],
+  matcher: ["/admin/:path*"],
 };

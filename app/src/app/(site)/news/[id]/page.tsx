@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { NewsArticle } from "@/components/ui/news-article";
-import { getNews, isNewsVisible, listPublishedNews } from "@/lib/db/news";
+import { getPublishedNews, isNewsVisible, listPublishedNews } from "@/lib/db/news";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -19,8 +19,8 @@ type Props = { params: Promise<{ id: string }> };
 const NO_NEWS_ID = "none";
 
 export async function generateStaticParams() {
-  // 本番（Netlify）では事前生成しない。ビルド時には cookie を読めず、
-  // Supabase の取得が失敗してビルドごと止まるため。詳細ページはアクセス時に作られる。
+  // 本番（Netlify）では事前生成しない。詳細ページは最初のアクセス時に作られ、
+  // 以後は (site)/layout.tsx の revalidate に従って使い回される。
   if (process.env.STATIC_EXPORT !== "1") return [];
 
   const news = await listPublishedNews();
@@ -29,7 +29,7 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
-  const news = await getNews(id);
+  const news = await getPublishedNews(id);
   // 非公開・公開前のものも、本文のページと同じく「見つからない」として扱う
   if (!news || !isNewsVisible(news)) {
     return { title: "ページが見つかりません" };
@@ -45,7 +45,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function NewsDetailPage({ params }: Props) {
   const { id } = await params;
-  const news = await getNews(id);
+  const news = await getPublishedNews(id);
 
   // 非公開・公開日時前のものは詳細でも見せない
   if (!news || !isNewsVisible(news)) {

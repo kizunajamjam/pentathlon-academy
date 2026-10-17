@@ -1,6 +1,7 @@
 import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
+import { createPublicClient } from "@/lib/supabase/public";
 import { unwrap } from "./unwrap";
 import { isUuid } from "@/lib/utils/uuid";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
@@ -35,7 +36,7 @@ export async function listPublishedNews(limit?: number): Promise<News[]> {
     return limit ? SEED_NEWS.slice(0, limit) : SEED_NEWS;
   }
 
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   let query = supabase
     .from("news")
     .select("*")
@@ -63,6 +64,18 @@ export async function getNews(id: string): Promise<News | null> {
   if (!isUuid(id)) return null;
 
   const supabase = await createClient();
+  const data = unwrap("news", await supabase.from("news").select("*").eq("id", id).maybeSingle());
+  return data ? mapNews(data) : null;
+}
+
+// 公開ページ用の1件取得。ログイン情報を使わない（ページを使い回せる）ので、公開済みのものしか取れない。
+export async function getPublishedNews(id: string): Promise<News | null> {
+  if (!isSupabaseConfigured) {
+    return SEED_NEWS.find((n) => n.id === id) ?? null;
+  }
+  if (!isUuid(id)) return null;
+
+  const supabase = createPublicClient();
   const data = unwrap("news", await supabase.from("news").select("*").eq("id", id).maybeSingle());
   return data ? mapNews(data) : null;
 }
