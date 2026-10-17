@@ -1,14 +1,18 @@
-# GitHub Pages への確認用プレビューを公開する。
-name: Deploy preview to GitHub Pages
+# GitHub Pages の確認用プレビューは役目を終えたので、本番サイトへの転送だけを置く。
+#
+# 以前はここでサイトを静的に書き出して公開していたが、本番（Netlify）ができたので
+# 中身を差し替えた。古い URL（https://kizunajamjam.github.io/pentathlon-academy/...）を
+# 開いた人やブックマークは、同じページの本番 URL へ移動する。
+#
+# GitHub の Settings → Pages で公開を止めれば、このワークフローごと削除してよい。
+name: Redirect GitHub Pages to production
 
 on:
+  # このファイルを変えたときと、手動のときだけ動かす（毎日の作り直しはやめた）
   push:
     branches: [main]
+    paths: [".github/workflows/pages.yml"]
   workflow_dispatch:
-  # 大会の「開催予定」はビルド時点の日付で決まるため、毎日作り直して
-  # 終わった大会を外す。JST 0:17 ごろ（UTC 15:17）。
-  schedule:
-    - cron: "17 15 * * *"
 
 permissions:
   contents: read
@@ -23,50 +27,35 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-          cache-dependency-path: app/package-lock.json
-
-      # npm ci ではなく npm install を使う。
-      # 画像生成に使う sharp はプラットフォームごとに別の依存を持ち、
-      # Windows で生成した lock ファイルには Linux 用のものが入らないため、
-      # npm ci の同期チェックに引っかかる。ここでは解決を実行時に任せる。
-      - run: npm install
-        working-directory: app
-
-      # 静的書き出しでは動かせないものを、このビルドに限って外す。
-      # リポジトリ上のファイルは変更しない（CI のチェックアウト内でのみ操作）。
-      - name: 静的化できない部分を除く
-        working-directory: app
+      # どのパスで開かれても、トップの index.html か 404.html が返る。
+      # どちらも同じ転送ページにし、/pentathlon-academy を外した同じパスへ送る。
+      - name: 転送ページを作る
         run: |
-          rm -rf src/app/admin        # 管理画面（動的レンダリング）
-          rm -rf src/components/admin # 管理画面専用のフォーム部品
-          rm -f src/proxy.ts          # Supabase セッション更新
-          rm -rf "src/app/(site)/[...missing]" # 404 の受け皿（静的書き出しでは使えない）
-          # お問い合わせフォームは Server Actions を使うため、代替表示に差し替える
-          rm -f src/app/\(site\)/contact/actions.ts
-          cp src/components/contact-form.static.tsx src/components/contact-form.tsx
-
-      - name: ビルド
-        working-directory: app
-        env:
-          STATIC_EXPORT: "1"
-          NEXT_PUBLIC_BASE_PATH: /pentathlon-academy
-          NEXT_PUBLIC_SITE_URL: https://kizunajamjam.github.io/pentathlon-academy
-          # 仮テキストのまま公開するため、検索エンジンには載せない
-          NEXT_PUBLIC_IS_PREVIEW: "1"
-        run: npm run build
-
-      # Jekyll に _next/ を無視されないようにする
-      - run: touch app/out/.nojekyll
+          mkdir -p out
+          cat > out/index.html <<'HTML'
+          <!doctype html>
+          <html lang="ja">
+          <head>
+          <meta charset="utf-8">
+          <meta name="robots" content="noindex">
+          <link rel="canonical" href="https://pentathlon-academy.com/">
+          <meta http-equiv="refresh" content="0; url=https://pentathlon-academy.com/">
+          <title>ペンタスロンアカデミー</title>
+          <script>
+            var path = location.pathname.replace(/^\/pentathlon-academy/, "") || "/";
+            location.replace("https://pentathlon-academy.com" + path + location.search + location.hash);
+          </script>
+          </head>
+          <body>
+          <p>このページは移転しました。<a href="https://pentathlon-academy.com/">https://pentathlon-academy.com/</a> をご覧ください。</p>
+          </body>
+          </html>
+          HTML
+          cp out/index.html out/404.html
 
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: app/out
+          path: out
 
   deploy:
     needs: build
