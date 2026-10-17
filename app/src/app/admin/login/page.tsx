@@ -11,7 +11,7 @@ import { signIn, type LoginState } from "./actions";
 const INITIAL: LoginState = {};
 
 const inputClass =
-  "w-full rounded-md border border-border bg-white px-4 py-3 text-sm text-navy-800 outline-none transition-colors focus:border-gold-500 focus:ring-2 focus:ring-gold-500/20";
+  "w-full rounded-md border border-border bg-white px-4 py-3 text-base text-navy-800 outline-none transition-colors focus:border-gold-500 focus:ring-2 focus:ring-gold-500/20";
 
 export default function AdminLoginPage() {
   const [state, formAction, pending] = useActionState(signIn, INITIAL);

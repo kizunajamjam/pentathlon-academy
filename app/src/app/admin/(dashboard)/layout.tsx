@@ -22,18 +22,18 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   return (
     <div className="min-h-screen bg-surface">
       <header className="border-b border-border bg-white">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3.5">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-2 px-4 py-2">
           <Link href="/admin" className="flex items-center gap-2.5">
             <LogoMark className="h-8 w-8" />
             <span className="font-display text-sm font-bold text-navy-800">管理画面</span>
           </Link>
 
-          <div className="flex items-center gap-4">
-            <span className="hidden text-xs text-muted sm:inline">{staff.name}</span>
+          <div className="flex items-center gap-1">
+            <span className="mr-2 hidden text-xs text-muted sm:inline">{staff.name}</span>
             <Link
               href="/"
               target="_blank"
-              className="flex items-center gap-1.5 text-xs text-muted transition-colors hover:text-gold-600"
+              className="flex min-h-11 items-center gap-1.5 rounded-md px-2.5 text-xs text-muted transition-colors hover:bg-navy-50 hover:text-gold-600"
             >
               <ExternalLink size={14} />
               サイトを見る
@@ -41,7 +41,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             <form action={signOut}>
               <button
                 type="submit"
-                className="flex items-center gap-1.5 text-xs text-muted transition-colors hover:text-shoot-500"
+                className="flex min-h-11 items-center gap-1.5 rounded-md px-2.5 text-xs text-muted transition-colors hover:bg-navy-50 hover:text-shoot-500"
               >
                 <LogOut size={14} />
                 ログアウト

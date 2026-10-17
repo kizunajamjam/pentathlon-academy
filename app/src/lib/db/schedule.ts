@@ -1,6 +1,7 @@
 import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
+import { createPublicClient } from "@/lib/supabase/public";
 import { unwrap } from "./unwrap";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { SEED_SCHEDULE } from "./seed";
@@ -43,7 +44,7 @@ function mapSlot(row: ScheduleRow): ScheduleSlot {
 export async function listActiveSlots(): Promise<ScheduleSlot[]> {
   if (!isSupabaseConfigured) return SEED_SCHEDULE;
 
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const data = unwrap("schedule", await supabase
     .from("schedule_slots")
     .select("*")

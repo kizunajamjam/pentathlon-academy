@@ -8,7 +8,7 @@ export default function AdminAthleteNewPage() {
     <>
       <Link
         href="/admin/athletes"
-        className="inline-flex items-center gap-1.5 text-sm text-muted transition-colors hover:text-gold-600"
+        className="-ml-2 inline-flex min-h-11 items-center gap-1.5 rounded-md px-2 text-sm text-muted transition-colors hover:text-gold-600"
       >
         <ArrowLeft size={16} />
         強化選手一覧

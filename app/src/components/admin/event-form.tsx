@@ -124,7 +124,7 @@ export function EventForm({
           type="checkbox"
           name="isPublished"
           defaultChecked={event?.isPublished ?? false}
-          className="h-4 w-4 accent-navy-800"
+          className="h-5 w-5 shrink-0 accent-navy-800"
         />
         <span className="text-sm text-navy-800">
           サイトに公開する

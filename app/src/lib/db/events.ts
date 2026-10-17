@@ -1,6 +1,7 @@
 import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
+import { createPublicClient } from "@/lib/supabase/public";
 import { unwrap } from "./unwrap";
 import { isUuid } from "@/lib/utils/uuid";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
@@ -34,7 +35,7 @@ function mapEvent(row: EventRow): AcademyEvent {
 }
 
 // 今日(JST)の 00:00。大会当日や複数日開催の途中でも「開催予定」に残すための基準。
-function startOfTodayJst(): string {
+export function startOfTodayJst(): string {
   const today = new Date().toLocaleDateString("sv-SE", { timeZone: "Asia/Tokyo" });
   return new Date(`${today}T00:00:00+09:00`).toISOString();
 }
@@ -51,7 +52,7 @@ export async function listUpcomingEvents(limit?: number): Promise<AcademyEvent[]
     return limit ? list.slice(0, limit) : list;
   }
 
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   let query = supabase
     .from("events")
     .select("*")
@@ -79,7 +80,7 @@ export async function listPastEvents(months = 6): Promise<AcademyEvent[]> {
     );
   }
 
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const data = unwrap(
     "events",
     await supabase

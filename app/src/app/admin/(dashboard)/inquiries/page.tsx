@@ -55,18 +55,18 @@ export default async function AdminInquiriesPage() {
 
             <p className="mt-4 text-base font-bold text-navy-800">{q.name} 様</p>
 
-            <ul className="mt-3 space-y-1.5 text-sm">
+            <ul className="mt-3 space-y-0.5 text-sm">
               <li className="flex items-center gap-2 text-navy-700">
                 <Mail size={14} className="shrink-0 text-gold-600" />
                 {/* 返信しやすいよう mailto にしておく */}
-                <a href={`mailto:${q.email}`} className="break-all hover:text-gold-600">
+                <a href={`mailto:${q.email}`} className="inline-block break-all py-1.5 hover:text-gold-600">
                   {q.email}
                 </a>
               </li>
               {q.phone && (
                 <li className="flex items-center gap-2 text-navy-700">
                   <Phone size={14} className="shrink-0 text-gold-600" />
-                  <a href={`tel:${q.phone}`} className="hover:text-gold-600">
+                  <a href={`tel:${q.phone}`} className="inline-block py-1.5 hover:text-gold-600">
                     {q.phone}
                   </a>
                 </li>
@@ -82,7 +82,7 @@ export default async function AdminInquiriesPage() {
               <input type="hidden" name="next" value={String(!q.isHandled)} />
               <button
                 type="submit"
-                className="flex items-center gap-1.5 rounded-full border border-border px-4 py-2 text-xs text-navy-700 transition-colors hover:border-navy-800 hover:bg-navy-50"
+                className="flex min-h-11 items-center gap-1.5 rounded-full border border-border px-5 text-sm text-navy-700 transition-colors hover:border-navy-800 hover:bg-navy-50"
               >
                 {q.isHandled ? (
                   <>

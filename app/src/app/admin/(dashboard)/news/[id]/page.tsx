@@ -4,6 +4,7 @@ import { ArrowLeft } from "lucide-react";
 
 import { NewsForm } from "@/components/admin/news-form";
 import { SubmitButton } from "@/components/admin/form-ui";
+import { PreviewLink } from "@/components/admin/preview-link";
 import { getNews } from "@/lib/db/news";
 import { toDatetimeLocal } from "@/lib/utils/date";
 import { removeNews } from "../actions";
@@ -21,13 +22,19 @@ export default async function AdminNewsEditPage({
     <>
       <Link
         href="/admin/news"
-        className="inline-flex items-center gap-1.5 text-sm text-muted transition-colors hover:text-gold-600"
+        className="-ml-2 inline-flex min-h-11 items-center gap-1.5 rounded-md px-2 text-sm text-muted transition-colors hover:text-gold-600"
       >
         <ArrowLeft size={16} />
         お知らせ一覧
       </Link>
 
-      <h1 className="mt-5 text-xl text-navy-800">お知らせを編集</h1>
+      <div className="mt-5 flex items-center justify-between gap-4">
+        <h1 className="text-xl text-navy-800">お知らせを編集</h1>
+        <PreviewLink href={`/admin/preview/news/${news.id}`} />
+      </div>
+      <p className="mt-2 text-xs text-muted">
+        プレビューには保存済みの内容が出ます。編集したら、保存してから開いてください。
+      </p>
 
       <div className="mt-8 rounded-card border border-border bg-white p-6 sm:p-8">
         <NewsForm news={news} defaultPublishedAt={toDatetimeLocal(news.publishedAt)} />

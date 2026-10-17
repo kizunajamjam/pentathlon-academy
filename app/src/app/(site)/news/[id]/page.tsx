@@ -1,11 +1,8 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
 
-import { NEWS_CATEGORY_LABEL } from "@/lib/constants/site";
-import { getNews, isNewsVisible, listPublishedNews } from "@/lib/db/news";
-import { formatDate } from "@/lib/utils/date";
+import { NewsArticle } from "@/components/ui/news-article";
+import { getPublishedNews, isNewsVisible, listPublishedNews } from "@/lib/db/news";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -22,8 +19,8 @@ type Props = { params: Promise<{ id: string }> };
 const NO_NEWS_ID = "none";
 
 export async function generateStaticParams() {
-  // 本番（Netlify）では事前生成しない。ビルド時には cookie を読めず、
-  // Supabase の取得が失敗してビルドごと止まるため。詳細ページはアクセス時に作られる。
+  // 本番（Netlify）では事前生成しない。詳細ページは最初のアクセス時に作られ、
+  // 以後は (site)/layout.tsx の revalidate に従って使い回される。
   if (process.env.STATIC_EXPORT !== "1") return [];
 
   const news = await listPublishedNews();
@@ -32,7 +29,7 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
-  const news = await getNews(id);
+  const news = await getPublishedNews(id);
   // 非公開・公開前のものも、本文のページと同じく「見つからない」として扱う
   if (!news || !isNewsVisible(news)) {
     return { title: "ページが見つかりません" };
@@ -48,56 +45,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function NewsDetailPage({ params }: Props) {
   const { id } = await params;
-  const news = await getNews(id);
+  const news = await getPublishedNews(id);
 
   // 非公開・公開日時前のものは詳細でも見せない
   if (!news || !isNewsVisible(news)) {
     notFound();
   }
 
-  return (
-    <article className="bg-white py-14 sm:py-20">
-      <div className="mx-auto max-w-3xl px-4">
-        <Link
-          href="/#news"
-          className="inline-flex items-center gap-1.5 text-sm text-muted transition-colors hover:text-gold-600"
-        >
-          <ArrowLeft size={16} />
-          お知らせへ戻る
-        </Link>
-
-        <div className="mt-8 flex flex-wrap items-center gap-4">
-          <time className="font-display text-sm text-muted" dateTime={news.publishedAt}>
-            {formatDate(news.publishedAt)}
-          </time>
-          <span className="rounded-full border border-gold-300 bg-gold-50 px-3 py-0.5 text-xs text-gold-700">
-            {NEWS_CATEGORY_LABEL[news.category]}
-          </span>
-        </div>
-
-        <h1 className="mt-4 text-2xl leading-relaxed text-navy-800 sm:text-3xl">{news.title}</h1>
-        <span className="mt-6 block h-0.5 w-12 bg-gold-500" />
-
-        {news.imageUrl && (
-          // eslint-disable-next-line @next/next/no-img-element -- Storage の公開URLをそのまま表示する
-          <img
-            src={news.imageUrl}
-            alt=""
-            className="mt-10 w-full rounded-card border border-border object-cover"
-          />
-        )}
-
-        {/* 本文は管理画面のテキストエリア入力なので、段落を改行で組み立てる */}
-        <div className="mt-10 space-y-5">
-          {news.body.split("\n").map((line, i) =>
-            line.trim() === "" ? null : (
-              <p key={i} className="text-sm leading-loose text-navy-700 sm:text-base">
-                {line}
-              </p>
-            ),
-          )}
-        </div>
-      </div>
-    </article>
-  );
+  return <NewsArticle news={news} />;
 }
