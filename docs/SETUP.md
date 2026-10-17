@@ -174,8 +174,11 @@ revoke insert on table public.inquiries from anon;
 
 ### 確認用プレビュー（GitHub Pages）
 
-本番が動いたら `.github/workflows/pages.yml` は不要になる。
-毎日の作り直し（大会の入れ替え用）も本番では要らない（ページはアクセスのたびに作られるため）。
+役目を終えたので、`.github/workflows/pages.yml` はプレビューを作らず、
+本番（https://pentathlon-academy.com）への転送ページだけを公開するようにした。
+古い URL を開くと、同じページの本番 URL へ移動する。毎日の作り直しもやめた。
+
+完全に止めるには、GitHub → Settings → Pages で公開を無効にし、`pages.yml` を削除する。
 
 ---
 

@@ -153,4 +153,4 @@
 | お問い合わせの通知メール（Resend） | 問い合わせが来たらメールで知らせる。未設定でも管理画面には届く | [SETUP.md](SETUP.md) の「お問い合わせの通知メール」 |
 | 協会サイトの新着をメールで受け取る | 週1回のチェック結果をメールで受け取る（未設定なら GitHub から通知） | [SETUP.md](SETUP.md) の「協会サイトの新着チェック」 |
 | スパム対策（Cloudflare Turnstile） | フォームへの機械的な送信を防ぐ | [SETUP.md](SETUP.md) の「お問い合わせの強化」 |
-| 確認用サイト（GitHub Pages）を止める | 本番と二重に存在しないようにする | GitHub → Settings → Pages を無効にし、`.github/workflows/pages.yml` を削除 |
+| 確認用サイト（GitHub Pages）を止める | 本番と二重に存在しないようにする | 済: 本番への転送ページに差し替えた。完全に止めるなら GitHub → Settings → Pages を無効にし、`.github/workflows/pages.yml` を削除 |
