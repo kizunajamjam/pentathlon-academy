@@ -34,7 +34,7 @@ function mapEvent(row: EventRow): AcademyEvent {
 }
 
 // 今日(JST)の 00:00。大会当日や複数日開催の途中でも「開催予定」に残すための基準。
-function startOfTodayJst(): string {
+export function startOfTodayJst(): string {
   const today = new Date().toLocaleDateString("sv-SE", { timeZone: "Asia/Tokyo" });
   return new Date(`${today}T00:00:00+09:00`).toISOString();
 }

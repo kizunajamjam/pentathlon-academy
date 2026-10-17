@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { getStaffForAction } from "@/lib/auth-guard";
+import { isAdminDemo } from "@/lib/supabase/config";
+import { DEMO_READ_ONLY_MESSAGE } from "@/lib/admin-demo";
 import { createSlot, deleteSlot, updateSlot } from "@/lib/db/schedule";
 import type { DayOfWeek, DisciplineId } from "@/types";
 
@@ -17,6 +19,7 @@ export async function saveSlot(
 ): Promise<SlotFormState> {
   const staff = await getStaffForAction();
   if (!staff) return { message: "権限がありません。再度ログインしてください。" };
+  if (isAdminDemo) return { message: DEMO_READ_ONLY_MESSAGE };
 
   const dayOfWeek = Number(formData.get("dayOfWeek"));
   // 時刻・クラス名は「個別に相談」の枠もあるため任意項目。空欄は null にする。
@@ -71,6 +74,7 @@ export async function saveSlot(
 export async function removeSlot(formData: FormData) {
   const staff = await getStaffForAction();
   if (!staff) redirect("/admin/login");
+  if (isAdminDemo) return;
 
   const id = String(formData.get("id") ?? "");
   if (!id) return;

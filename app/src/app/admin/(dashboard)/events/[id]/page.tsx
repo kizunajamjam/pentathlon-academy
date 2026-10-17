@@ -4,6 +4,7 @@ import { ArrowLeft } from "lucide-react";
 
 import { EventForm } from "@/components/admin/event-form";
 import { SubmitButton } from "@/components/admin/form-ui";
+import { PreviewLink } from "@/components/admin/preview-link";
 import { getEvent } from "@/lib/db/events";
 import { toDatetimeLocal } from "@/lib/utils/date";
 import { removeEvent } from "../actions";
@@ -27,7 +28,13 @@ export default async function AdminEventEditPage({
         大会・イベント一覧
       </Link>
 
-      <h1 className="mt-5 text-xl text-navy-800">大会・イベントを編集</h1>
+      <div className="mt-5 flex items-center justify-between gap-4">
+        <h1 className="text-xl text-navy-800">大会・イベントを編集</h1>
+        <PreviewLink href={`/admin/preview/events/${event.id}`} />
+      </div>
+      <p className="mt-2 text-xs text-muted">
+        プレビューには保存済みの内容が出ます。編集したら、保存してから開いてください。
+      </p>
 
       <div className="mt-8 rounded-card border border-border bg-white p-6 sm:p-8">
         <EventForm

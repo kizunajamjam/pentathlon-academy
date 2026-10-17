@@ -5,6 +5,7 @@ import { AdminNav } from "@/components/admin/admin-nav";
 import { LogoMark } from "@/components/layout/site-logo";
 import { requireStaff } from "@/lib/auth-guard";
 import { signOut } from "@/app/admin/login/actions";
+import { isAdminDemo } from "@/lib/supabase/config";
 
 /*
  * 管理画面は必ずリクエストごとにレンダリングする。
@@ -21,6 +22,11 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   return (
     <div className="min-h-screen bg-surface">
+      {isAdminDemo && (
+        <p className="bg-gold-500 px-4 py-2 text-center text-xs font-bold text-navy-900">
+          デモ版：中身は見本のデータです。保存・削除をしても何も変わりません。
+        </p>
+      )}
       <header className="border-b border-border bg-white">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3.5">
           <Link href="/admin" className="flex items-center gap-2.5">

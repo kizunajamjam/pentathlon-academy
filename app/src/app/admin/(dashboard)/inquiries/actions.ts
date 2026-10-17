@@ -4,11 +4,13 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { getStaffForAction } from "@/lib/auth-guard";
+import { isAdminDemo } from "@/lib/supabase/config";
 import { setInquiryHandled } from "@/lib/db/inquiries";
 
 export async function toggleHandled(formData: FormData) {
   const staff = await getStaffForAction();
   if (!staff) redirect("/admin/login");
+  if (isAdminDemo) return;
 
   const id = String(formData.get("id") ?? "");
   const next = formData.get("next") === "true";

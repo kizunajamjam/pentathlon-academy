@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { getStaffForAction } from "@/lib/auth-guard";
+import { isAdminDemo } from "@/lib/supabase/config";
+import { DEMO_READ_ONLY_MESSAGE } from "@/lib/admin-demo";
 import { createEvent, deleteEvent, updateEvent } from "@/lib/db/events";
 import type { EventCategory } from "@/types";
 
@@ -24,6 +26,7 @@ export async function saveEvent(
 ): Promise<EventFormState> {
   const staff = await getStaffForAction();
   if (!staff) return { message: "権限がありません。再度ログインしてください。" };
+  if (isAdminDemo) return { message: DEMO_READ_ONLY_MESSAGE };
 
   const title = String(formData.get("title") ?? "").trim();
   const category = String(formData.get("category") ?? "competition") as EventCategory;
@@ -62,6 +65,7 @@ export async function saveEvent(
 export async function removeEvent(formData: FormData) {
   const staff = await getStaffForAction();
   if (!staff) redirect("/admin/login");
+  if (isAdminDemo) return;
 
   const id = String(formData.get("id") ?? "");
   if (!id) return;
