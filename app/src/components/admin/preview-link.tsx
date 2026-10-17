@@ -7,7 +7,7 @@ export function PreviewLink({ href }: { href: string }) {
       href={href}
       target="_blank"
       rel="noopener"
-      className="flex shrink-0 items-center gap-1.5 rounded-full border border-border bg-white px-4 py-2 text-xs font-bold text-navy-700 transition-colors hover:border-navy-800"
+      className="flex min-h-11 shrink-0 items-center gap-1.5 rounded-full border border-border bg-white px-4 text-sm font-bold text-navy-700 transition-colors hover:border-navy-800"
     >
       <Eye size={14} aria-hidden="true" />
       プレビュー

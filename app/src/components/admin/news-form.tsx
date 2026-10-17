@@ -97,7 +97,7 @@ export function NewsForm({
               className="max-h-48 rounded-md border border-border object-contain"
             />
             <label className="mt-2 flex items-center gap-2 text-xs text-muted">
-              <input type="checkbox" name="removeImage" className="h-4 w-4 accent-navy-800" />
+              <input type="checkbox" name="removeImage" className="h-5 w-5 shrink-0 accent-navy-800" />
               この画像を外す
             </label>
           </div>
@@ -107,7 +107,7 @@ export function NewsForm({
           name="image"
           type="file"
           accept="image/jpeg,image/png,image/webp"
-          className="block w-full text-sm text-navy-700 file:mr-4 file:rounded-full file:border-0 file:bg-navy-50 file:px-4 file:py-2 file:text-sm file:text-navy-800"
+          className="block w-full text-base text-navy-700 file:mr-4 file:min-h-11 file:rounded-full file:border-0 file:bg-navy-50 file:px-5 file:text-base file:text-navy-800 sm:text-sm sm:file:text-sm"
         />
       </AdminField>
 
@@ -116,7 +116,7 @@ export function NewsForm({
           type="checkbox"
           name="isPublished"
           defaultChecked={news?.isPublished ?? false}
-          className="h-4 w-4 accent-navy-800"
+          className="h-5 w-5 shrink-0 accent-navy-800"
         />
         <span className="text-sm text-navy-800">
           サイトに公開する

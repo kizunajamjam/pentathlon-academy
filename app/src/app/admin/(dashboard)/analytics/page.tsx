@@ -69,7 +69,7 @@ export default async function AdminAnalyticsPage() {
         {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
         <a
           href="/admin/inquiries/export"
-          className="flex items-center gap-1.5 rounded-full border border-border px-4 py-2 text-xs text-navy-700 transition-colors hover:border-navy-800 hover:bg-navy-50"
+          className="flex min-h-11 shrink-0 items-center gap-1.5 rounded-full border border-border px-4 text-xs text-navy-700 transition-colors hover:border-navy-800 hover:bg-navy-50"
         >
           <Download size={14} />
           お問い合わせをCSVで保存
