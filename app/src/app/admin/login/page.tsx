@@ -17,6 +17,10 @@ const LINK_NOTICES: Record<string, { tone: "error" | "info"; text: string }> = {
     tone: "error",
     text: "リンクが無効か、有効期限が切れています。お手数ですが、パスワードの再設定をもう一度お申し込みください（メールのリンクは、申し込んだのと同じブラウザで開いてください）。",
   },
+  "invite-invalid": {
+    tone: "error",
+    text: "招待のリンクが無効か、有効期限が切れています。管理者に招待メールの再送を頼んでください。",
+  },
   email: {
     tone: "info",
     text: "確認リンクを開きました。変更が完了していれば、新しいメールアドレスでログインできます。",

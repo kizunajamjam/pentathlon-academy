@@ -65,10 +65,10 @@ export async function isStaffPendingMfa(): Promise<"ok" | "mfa" | "none"> {
 const RECOVERY_WINDOW_SEC = 15 * 60;
 
 /*
- * パスワード再設定のメールのリンクから入ったばかりか。
+ * パスワード再設定・招待のメールのリンクから入ったばかりか。
  *
  * パスワード以外の方法（メールのリンク）でログインし、二段階認証も済ませてから
- * 15分以内なら、今のパスワードを聞かずに変更できる（忘れた人のための再設定）。
+ * 15分以内なら、今のパスワードを聞かずに変更できる（忘れた人の再設定と、招待された人の最初の設定）。
  * ログイン方法はセッションの記録（amr）から読むので、画面側からはごまかせない。
  */
 export async function isRecoveryLogin(): Promise<boolean> {

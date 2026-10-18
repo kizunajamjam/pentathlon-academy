@@ -62,18 +62,35 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_xxxx
 
 スタッフ判定は `staff` テーブルの allowlist で行っている。
 「ログインできる＝編集できる」ではないので、**2ステップ必要**。
+スタッフには招待メールを送り、パスワードは本人に決めてもらう。
 
-1. Supabase ダッシュボード → Authentication → Users → **Add user**
-   （メールアドレスとパスワードを決めて発行する）
-2. SQL Editor で、その user を staff に登録する
+1. Supabase ダッシュボード → Authentication → Users → **Invite user** でメールアドレスを入れて送る
+2. **本人がリンクを開く前に**、SQL Editor でその user を staff に登録する
+   （招待した時点で auth.users に入っているので、すぐ登録できる）
 
 ```sql
 insert into public.staff (user_id, name)
 select id, '山田 太郎' from auth.users where email = 'staff@example.com';
 ```
 
+本人は、メールのリンクを開く → 認証アプリを登録する → 新しいパスワードを決める、の順に進む。
+パスワードは**リンクを開いてから15分以内**に決める。決めずに閉じてしまったら、
+ログイン画面の「パスワードを忘れた方」から設定できる。
+招待リンクの有効期限は Supabase の Email OTP Expiration（初期値1時間）。切れたら Invite user で送り直す。
+
+**招待メールの文面を一度だけ変える必要がある。** Authentication → Emails → **Invite user** の本文のリンクを、
+`{{ .ConfirmationURL }}` から次に差し替える（このままでないと管理画面がログイン情報を受け取れない）。
+
+```html
+<h2>ペンタスロンアカデミー 管理画面へのご招待</h2>
+<p>下のリンクを開いて、認証アプリの登録とパスワードの設定をしてください。</p>
+<p><a href="{{ .SiteURL }}/admin/auth/callback?token_hash={{ .TokenHash }}&type=invite">管理画面の利用を始める</a></p>
+```
+
+`{{ .SiteURL }}` は Authentication → URL Configuration の Site URL になる。
+
 **Authentication → Providers → Email の「Enable sign-ups」は必ず OFF にする。**
-（アカウント発行はダッシュボードからのみ行う運用にするため）
+（アカウント発行は招待からのみ行う運用にするため）
 
 `/admin/login` からログインすると管理画面に入れる。
 

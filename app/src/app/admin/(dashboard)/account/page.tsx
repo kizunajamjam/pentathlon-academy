@@ -20,7 +20,7 @@ export default async function AdminAccountPage() {
         </h2>
         {recovery && (
           <p className="mt-2 text-sm leading-relaxed text-muted">
-            再設定のメールから入ったので、今のパスワードは入力しなくて大丈夫です。
+            メールのリンクから入ったので、今のパスワードは入力しなくて大丈夫です。この画面を開いてから15分以内に設定してください。
           </p>
         )}
         <div className="mt-6 max-w-md">
