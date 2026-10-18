@@ -60,3 +60,25 @@ export async function getStaffForAction(): Promise<StaffContext | null> {
 export async function isStaffPendingMfa(): Promise<"ok" | "mfa" | "none"> {
   return (await checkStaff()).state;
 }
+
+// パスワード再設定のリンクから入ったあと、今のパスワードなしで変更できる時間
+const RECOVERY_WINDOW_SEC = 15 * 60;
+
+/*
+ * パスワード再設定のメールのリンクから入ったばかりか。
+ *
+ * パスワード以外の方法（メールのリンク）でログインし、二段階認証も済ませてから
+ * 15分以内なら、今のパスワードを聞かずに変更できる（忘れた人のための再設定）。
+ * ログイン方法はセッションの記録（amr）から読むので、画面側からはごまかせない。
+ */
+export async function isRecoveryLogin(): Promise<boolean> {
+  const supabase = await createClient();
+  const { data } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+  const methods = data?.currentAuthenticationMethods ?? [];
+  const firstFactor = methods.find(
+    (m): m is { method: string; timestamp: number } =>
+      typeof m === "object" && m.method !== "totp" && m.method !== "mfa/totp",
+  );
+  if (!firstFactor || firstFactor.method === "password") return false;
+  return Date.now() / 1000 - firstFactor.timestamp < RECOVERY_WINDOW_SEC;
+}

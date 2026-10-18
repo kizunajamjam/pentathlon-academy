@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { LogoMark } from "@/components/layout/site-logo";
+import { safeAdminPath } from "@/lib/auth-links";
 import { isStaffPendingMfa } from "@/lib/auth-guard";
 import { createClient } from "@/lib/supabase/server";
 import { signOut } from "@/app/admin/login/actions";
@@ -14,10 +15,15 @@ export const dynamic = "force-dynamic";
  * - 認証アプリが登録済み → 6桁のコードを入力
  * - まだ（初回） → QR コードを読み取って登録
  */
-export default async function AdminMfaPage() {
+export default async function AdminMfaPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ next?: string }>;
+}) {
+  const next = safeAdminPath((await searchParams).next);
   const state = await isStaffPendingMfa();
   if (state === "none") redirect("/admin/login");
-  if (state === "ok") redirect("/admin");
+  if (state === "ok") redirect(next);
 
   const supabase = await createClient();
   const { data: factors } = await supabase.auth.mfa.listFactors();
@@ -34,7 +40,7 @@ export default async function AdminMfaPage() {
           <p className="mt-1.5 text-xs text-navy-300">ペンタスロンアカデミー 管理画面</p>
         </div>
 
-        <MfaForm mode={enrolled ? "verify" : "setup"} />
+        <MfaForm mode={enrolled ? "verify" : "setup"} next={next} />
 
         <form action={signOut} className="mt-6 text-center">
           <button type="submit" className="text-xs text-navy-300 underline underline-offset-4 hover:text-white">

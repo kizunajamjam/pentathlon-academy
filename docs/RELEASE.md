@@ -58,6 +58,11 @@
   ```
 
 - [ ] **Authentication → URL Configuration** の Site URL を `https://pentathlon-academy.com` にする
+- [ ] 同じ画面の **Redirect URLs** に `https://pentathlon-academy.com/admin/auth/callback` を追加する
+      （パスワード再設定・メールアドレス変更の確認メールのリンクの戻り先。無いとリンクがトップページに飛んでしまう）
+- [ ] **Authentication → Emails → SMTP Settings** で、Resend など自前の送信元を設定する
+      （Supabase 標準の送信は、プロジェクトのメンバー宛てにしか届かず、1時間に数通まで。
+      これが無いと、パスワード再設定・メールアドレス変更のメールがスタッフに届かない）
 - [ ] **Project Settings → API**（または Data API）で次の2つを控える
   - Project URL（`https://xxxx.supabase.co`）
   - anon / publishable key（`sb_publishable_...` または `eyJ...` で始まるもの）

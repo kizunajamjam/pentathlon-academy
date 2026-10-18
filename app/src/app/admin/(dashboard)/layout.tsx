@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ExternalLink, LogOut } from "lucide-react";
+import { ExternalLink, LogOut, UserCog } from "lucide-react";
 
 import { AdminNav } from "@/components/admin/admin-nav";
 import { LogoMark } from "@/components/layout/site-logo";
@@ -30,6 +30,16 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
           <div className="flex items-center gap-1">
             <span className="mr-2 hidden text-xs text-muted sm:inline">{staff.name}</span>
+            {/* スマホでは横幅が足りないのでアイコンだけにする */}
+            <Link
+              href="/admin/account"
+              aria-label="アカウント設定"
+              title="アカウント設定"
+              className="flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-md px-2.5 text-xs text-muted transition-colors hover:bg-navy-50 hover:text-gold-600"
+            >
+              <UserCog size={16} className="sm:size-3.5" />
+              <span className="hidden sm:inline">アカウント</span>
+            </Link>
             <Link
               href="/"
               target="_blank"
