@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ArrowRight, KeyRound, Mail, Users } from "lucide-react";
 
-import { isRecoveryLogin, requireStaff } from "@/lib/auth-guard";
+import { isRecoveryLogin, RECOVERY_WINDOW_MIN, requireStaff } from "@/lib/auth-guard";
 import { ROLE_LABELS } from "@/lib/staff-roles";
 import { getCurrentUser } from "@/lib/supabase/server";
 import { EmailForm, PasswordForm } from "./account-forms";
@@ -36,7 +36,7 @@ export default async function AdminAccountPage() {
         </h2>
         {recovery && (
           <p className="mt-2 text-sm leading-relaxed text-muted">
-            メールのリンクから入ったので、今のパスワードは入力しなくて大丈夫です。この画面を開いてから15分以内に設定してください。
+            メールのリンクから入ったので、今のパスワードは入力しなくて大丈夫です。リンクを開いてから{RECOVERY_WINDOW_MIN}分以内に設定してください。
           </p>
         )}
         <div className="mt-6 max-w-md">

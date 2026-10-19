@@ -38,11 +38,12 @@ function useClearOnDone(state: AccountState) {
   return ref;
 }
 
-function CurrentPasswordField() {
+// パスワード・メールアドレスの両方のフォームに出るので、id はそれぞれ別にする
+function CurrentPasswordField({ id }: { id: string }) {
   return (
-    <AdminField label="今のパスワード" htmlFor="currentPassword">
+    <AdminField label="今のパスワード" htmlFor={id}>
       <input
-        id="currentPassword"
+        id={id}
         name="currentPassword"
         type="password"
         autoComplete="current-password"
@@ -60,7 +61,7 @@ export function PasswordForm({ recovery }: { recovery: boolean }) {
   return (
     <form ref={ref} action={formAction} onSubmit={keepInputsOnSubmit(formAction)} className="space-y-5">
       <Result state={state} />
-      {!recovery && <CurrentPasswordField />}
+      {recovery ? <input type="hidden" name="recovery" value="1" /> : <CurrentPasswordField id="password-current" />}
       <AdminField
         label="新しいパスワード"
         htmlFor="newPassword"
@@ -104,7 +105,7 @@ export function EmailForm() {
       <AdminField label="新しいメールアドレス" htmlFor="email">
         <input id="email" name="email" type="email" autoComplete="email" required className={adminInput} />
       </AdminField>
-      <CurrentPasswordField />
+      <CurrentPasswordField id="email-current" />
       <SubmitButton pending={pending} pendingLabel="送信中...">
         確認メールを送る
       </SubmitButton>

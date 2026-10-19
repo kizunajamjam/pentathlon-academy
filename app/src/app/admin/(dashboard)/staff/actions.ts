@@ -16,6 +16,14 @@ const NO_SERVICE_KEY = {
 // 管理者を0人にする変更は、データベースのトリガーが断る（staff_keep_one_admin）
 const LAST_ADMIN = { message: "管理者を0人にはできません。先にほかの人を管理者にしてください。" };
 
+// 対象がスタッフか。ログイン中のセッション（RLS）で読むので、管理者でなければ常に false
+async function isStaffMember(userId: string): Promise<boolean> {
+  if (!userId) return false;
+  const supabase = await createClient();
+  const { data } = await supabase.from("staff").select("user_id").eq("user_id", userId).maybeSingle();
+  return data !== null;
+}
+
 const readRole = (formData: FormData): StaffRole | null => {
   const role = formData.get("role");
   return role === "admin" || role === "editor" ? role : null;
@@ -41,9 +49,10 @@ export async function inviteStaff(_prev: StaffActionState, formData: FormData): 
 
   const { data, error } = await service.auth.admin.inviteUserByEmail(email);
   if (error || !data.user) {
-    if (error?.code === "email_exists" || error?.status === 422) {
+    if (error?.code === "email_exists" || error?.code === "user_already_exists") {
       return { message: "このメールアドレスは、すでにアカウントがあります。" };
     }
+    if (error?.code === "email_address_invalid") return { message: "このメールアドレスには送れません。" };
     if (error?.code === "over_email_send_rate_limit" || error?.status === 429) {
       return { message: "送信が続いたため、いったん止めています。しばらく時間をおいてから、もう一度お試しください。" };
     }
@@ -53,6 +62,11 @@ export async function inviteStaff(_prev: StaffActionState, formData: FormData): 
 
   const { error: insertError } = await service.from("staff").insert({ user_id: data.user.id, name, role });
   if (insertError) {
+    // 招待中の人をもう一度招待すると、Supabase は今のアカウントのまま招待メールを送り直し、
+    // staff にはもう行がある。この場合はアカウントを消さない（消すと本人の招待が無効になる）
+    if (insertError.code === "23505") {
+      return { done: `${email} はすでにスタッフに登録されています。招待メールを送り直しました。` };
+    }
     console.error("[admin/staff] staff への登録に失敗", insertError);
     // 管理画面に入れないアカウントだけが残らないよう、作ったアカウントを消しておく
     await service.auth.admin.deleteUser(data.user.id);
@@ -70,6 +84,10 @@ export async function resendInvite(_prev: StaffActionState, formData: FormData):
   if (!service) return NO_SERVICE_KEY;
 
   const userId = String(formData.get("userId") ?? "");
+  // スタッフ以外のアカウントに招待メールを送らないよう、先にスタッフか確かめる
+  if (!(await isStaffMember(userId))) {
+    return { message: "このスタッフは見つかりません。ページを読み込み直してください。" };
+  }
   const { data } = await service.auth.admin.getUserById(userId);
   const email = data.user?.email;
   if (!email) return { message: "アカウントが見つかりません。ページを読み込み直してください。" };
@@ -98,11 +116,15 @@ export async function changeRole(_prev: StaffActionState, formData: FormData): P
   if (userId === admin.userId) return { message: "自分のロールは変えられません。ほかの管理者に頼んでください。" };
 
   const supabase = await createClient();
-  const { error } = await supabase.from("staff").update({ role }).eq("user_id", userId);
+  const { data, error } = await supabase.from("staff").update({ role }).eq("user_id", userId).select("user_id");
   if (error) {
     if (error.code === "P0001") return LAST_ADMIN;
     console.error("[admin/staff] ロールの変更に失敗", error);
     return { message: "変更できませんでした。時間をおいて、もう一度お試しください。" };
+  }
+  // ほかの管理者がすでに削除していた場合など
+  if (!data || data.length === 0) {
+    return { message: "このスタッフは見つかりません。ページを読み込み直してください。" };
   }
 
   revalidatePath("/admin/staff");
@@ -123,11 +145,10 @@ export async function removeStaff(_prev: StaffActionState, formData: FormData): 
   if (!userId) return { message: "ページを読み込み直してください。" };
   if (userId === admin.userId) return { message: "自分は削除できません。ほかの管理者に頼んでください。" };
 
-  // 対象がスタッフであることを、ログイン中のセッション（RLS）で確かめてから消す。
-  // service_role は何でも消せるので、スタッフ以外のアカウントを消さないようにするため
-  const supabase = await createClient();
-  const { data: row } = await supabase.from("staff").select("user_id").eq("user_id", userId).maybeSingle();
-  if (!row) return { message: "このスタッフは見つかりません。ページを読み込み直してください。" };
+  // service_role は何でも消せるので、スタッフ以外のアカウントを消さないよう先に確かめる
+  if (!(await isStaffMember(userId))) {
+    return { message: "このスタッフは見つかりません。ページを読み込み直してください。" };
+  }
 
   const { error } = await service.auth.admin.deleteUser(userId);
   if (error) {

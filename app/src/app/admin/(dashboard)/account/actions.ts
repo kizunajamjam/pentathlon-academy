@@ -46,6 +46,14 @@ export async function changePassword(_prev: AccountState, formData: FormData): P
   if (password !== confirm) return { message: "確認用のパスワードが一致しません。" };
 
   if (!(await isRecoveryLogin())) {
+    // 画面を開いたときはリンクから入ってすぐだったが、そのあと時間が切れた。
+    // 今のパスワードの欄が無い（招待された人はそもそもパスワードが無い）ので、やり直してもらう
+    if (formData.get("recovery") === "1") {
+      return {
+        message:
+          "メールのリンクを開いてから時間が経ったため、このままでは変更できません。ログアウトして、ログイン画面の「パスワードを忘れた方」から設定し直してください。",
+      };
+    }
     if (!current) return { message: "今のパスワードを入力してください。" };
     if (!(await isCurrentPassword(staff.email, current))) {
       return { message: "今のパスワードが正しくありません。" };

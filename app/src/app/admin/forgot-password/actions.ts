@@ -24,6 +24,9 @@ export async function requestPasswordReset(_prev: ForgotState, formData: FormDat
     return { message: "送信が続いたため、いったん止めています。しばらく時間をおいてから、もう一度お試しください。" };
   }
 
+  // 送信の設定（SMTP・Redirect URLs）の誤りに気づけるよう、記録だけは残す
+  if (error) console.error("[admin/forgot-password] 再設定メールの送信に失敗", error.code, error.message);
+
   // 登録の有無にかかわらず同じ結果を返す（アカウントの存在有無を推測されないようにするため）
   return { sent: true };
 }

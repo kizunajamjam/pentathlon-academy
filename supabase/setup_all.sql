@@ -525,6 +525,7 @@ grant insert, update, delete on table public.staff to service_role;
 
 -- 管理者が1人もいなくなる変更は断る（誰もスタッフを管理できなくなるため）。
 -- ロールの変更・行の削除のほか、アカウントの削除（auth.users から連鎖して消える）でも効く。
+-- 管理者の行が変わったときだけ数える（管理者のいない間も、ほかの行の削除は止めない）。
 -- security definer にして、操作した人の RLS に関係なく全員の行で数える。
 create function public.staff_keep_one_admin()
 returns trigger
@@ -533,6 +534,9 @@ security definer
 set search_path = public
 as $$
 begin
+  -- 2人の管理者が同時にお互いを外すと、どちらの確認も相手が残っているように見えて
+  -- 0人になりうる。確認を1つずつ順番に行わせて防ぐ（ロックは取引の終わりに外れる）
+  perform pg_advisory_xact_lock(hashtext('public.staff_keep_one_admin'));
   if not exists (select 1 from public.staff where role = 'admin') then
     raise exception '管理者を0人にはできません' using errcode = 'P0001';
   end if;
@@ -542,5 +546,6 @@ $$;
 
 create trigger staff_keep_one_admin
   after update of role or delete on public.staff
-  for each statement
+  for each row
+  when (old.role = 'admin')
   execute function public.staff_keep_one_admin();
