@@ -61,22 +61,39 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_xxxx
 ## 3. 管理画面に入れるようにする
 
 スタッフ判定は `staff` テーブルの allowlist で行っている。
-「ログインできる＝編集できる」ではないので、**2ステップ必要**。
+「ログインできる＝編集できる」ではないので、アカウントの作成と staff への登録の**2ステップ必要**。
 スタッフには招待メールを送り、パスワードは本人に決めてもらう。
 
+ロールは2つ（`supabase/migrations/20261019_staff_roles.sql`）。
+
+| ロール | できること |
+| --- | --- |
+| 管理者 (`admin`) | すべての操作。加えて、スタッフの招待・ロールの変更・削除 |
+| 編集者 (`editor`) | お知らせ・スケジュール・大会・指導者・選手・お問い合わせの操作 |
+
+管理者は、自分のロールの変更と自分の削除はできない。管理者が0人になる変更はデータベースが断る。
+
+**最初の管理者**だけは Supabase で作る。
+
 1. Supabase ダッシュボード → Authentication → Users → **Invite user** でメールアドレスを入れて送る
-2. **本人がリンクを開く前に**、SQL Editor でその user を staff に登録する
+2. **本人がリンクを開く前に**、SQL Editor でその user を管理者として staff に登録する
    （招待した時点で auth.users に入っているので、すぐ登録できる）
 
 ```sql
-insert into public.staff (user_id, name)
-select id, '山田 太郎' from auth.users where email = 'staff@example.com';
+insert into public.staff (user_id, name, role)
+select id, '山田 太郎', 'admin' from auth.users where email = 'staff@example.com';
 ```
+
+**2人目から**は、管理者が管理画面の「アカウント → スタッフの管理」（`/admin/staff`）で、
+名前・メールアドレス・ロールを入れて招待する。staff への登録も同時に行われる。
+これには `SUPABASE_SERVICE_ROLE_KEY` をサーバーに登録しておく必要がある（「お問い合わせの強化」と同じキー）。
+キーが無いあいだは、上と同じ手順で、ロールを `'editor'` か `'admin'` にして登録する。
 
 本人は、メールのリンクを開く → 認証アプリを登録する → 新しいパスワードを決める、の順に進む。
 パスワードは**リンクを開いてから15分以内**に決める。決めずに閉じてしまったら、
 ログイン画面の「パスワードを忘れた方」から設定できる。
-招待リンクの有効期限は Supabase の Email OTP Expiration（初期値1時間）。切れたら Invite user で送り直す。
+招待リンクの有効期限は Supabase の Email OTP Expiration（初期値1時間）。切れたら、
+「スタッフの管理」の「招待メールを再送」か、Supabase の Invite user で送り直す。
 
 **招待メールの文面を一度だけ変える必要がある。** Authentication → Emails → **Invite user** の本文のリンクを、
 `{{ .ConfirmationURL }}` から次に差し替える（このままでないと管理画面がログイン情報を受け取れない）。

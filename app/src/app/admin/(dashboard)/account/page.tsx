@@ -1,6 +1,8 @@
-import { KeyRound, Mail } from "lucide-react";
+import Link from "next/link";
+import { ArrowRight, KeyRound, Mail, Users } from "lucide-react";
 
 import { isRecoveryLogin, requireStaff } from "@/lib/auth-guard";
+import { ROLE_LABELS } from "@/lib/staff-roles";
 import { getCurrentUser } from "@/lib/supabase/server";
 import { EmailForm, PasswordForm } from "./account-forms";
 
@@ -11,7 +13,21 @@ export default async function AdminAccountPage() {
   return (
     <>
       <h1 className="text-xl text-navy-800">アカウント設定</h1>
-      <p className="mt-3 text-sm text-muted">ログインに使うメールアドレスとパスワードを変更できます。</p>
+      <p className="mt-3 text-sm text-muted">
+        ログインに使うメールアドレスとパスワードを変更できます。あなたのロール:{" "}
+        <span className="font-bold text-navy-800">{ROLE_LABELS[staff.role]}</span>
+      </p>
+
+      {staff.role === "admin" && (
+        <Link
+          href="/admin/staff"
+          className="mt-6 flex min-h-14 items-center gap-3 rounded-card border border-border bg-white px-5 py-4 text-sm font-bold text-navy-800 transition-colors hover:bg-navy-50/60"
+        >
+          <Users size={18} className="text-gold-600" aria-hidden="true" />
+          <span className="flex-1">スタッフの管理（招待・ロールの変更・削除）</span>
+          <ArrowRight size={16} className="text-muted" aria-hidden="true" />
+        </Link>
+      )}
 
       <section className="mt-8 rounded-card border border-border bg-white p-6 sm:p-8">
         <h2 className="flex items-center gap-2 text-base font-bold text-navy-800">

@@ -4,8 +4,9 @@ import { redirect } from "next/navigation";
 
 import { createClient, getCurrentUser } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
+import type { StaffRole } from "@/lib/staff-roles";
 
-export type StaffContext = { userId: string; name: string; email: string };
+export type StaffContext = { userId: string; name: string; email: string; role: StaffRole };
 
 type StaffCheck =
   | { state: "ok"; staff: StaffContext }
@@ -31,7 +32,7 @@ async function checkStaff(): Promise<StaffCheck> {
   const supabase = await createClient();
   const { data } = await supabase
     .from("staff")
-    .select("user_id, name")
+    .select("user_id, name, role")
     .eq("user_id", user.id)
     .maybeSingle();
   if (!data) return { state: "none" };
@@ -39,7 +40,15 @@ async function checkStaff(): Promise<StaffCheck> {
   const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
   if (aal?.currentLevel !== "aal2") return { state: "mfa" };
 
-  return { state: "ok", staff: { userId: user.id, name: data.name, email: user.email ?? "" } };
+  return {
+    state: "ok",
+    staff: {
+      userId: user.id,
+      name: data.name,
+      email: user.email ?? "",
+      role: data.role === "admin" ? "admin" : "editor",
+    },
+  };
 }
 
 // ページ(Server Component)用: 権限がなければログイン画面へ、二段階認証がまだならコード入力へ送る。
@@ -54,6 +63,19 @@ export async function requireStaff(): Promise<StaffContext> {
 export async function getStaffForAction(): Promise<StaffContext | null> {
   const result = await checkStaff();
   return result.state === "ok" ? result.staff : null;
+}
+
+// 管理者だけのページ用: 編集者はダッシュボードへ戻す
+export async function requireAdmin(): Promise<StaffContext> {
+  const staff = await requireStaff();
+  if (staff.role !== "admin") redirect("/admin");
+  return staff;
+}
+
+// 管理者だけの Server Action 用
+export async function getAdminForAction(): Promise<StaffContext | null> {
+  const staff = await getStaffForAction();
+  return staff?.role === "admin" ? staff : null;
 }
 
 // 二段階認証の画面用: パスワードは通っていて staff に登録されているか（aal は問わない）
