@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 
+import { safeAdminPath } from "@/lib/auth-links";
 import { isStaffPendingMfa } from "@/lib/auth-guard";
 import { createClient } from "@/lib/supabase/server";
 
@@ -10,6 +11,8 @@ export type EnrollResult = { factorId: string; qrCode: string; secret: string } 
 
 const CODE = /^\d{6}$/;
 const readCode = (formData: FormData) => String(formData.get("code") ?? "").replace(/\s/g, "");
+// 確認できたあとの行き先（メールのリンクから来たときはアカウント設定）
+const readNext = (formData: FormData) => safeAdminPath(String(formData.get("next") ?? ""));
 
 // 認証アプリに出ている6桁のコードを確認する（登録済みの人の毎回のログイン）
 export async function verifyMfa(_prev: MfaState, formData: FormData): Promise<MfaState> {
@@ -26,7 +29,7 @@ export async function verifyMfa(_prev: MfaState, formData: FormData): Promise<Mf
   const { error } = await supabase.auth.mfa.challengeAndVerify({ factorId: factor.id, code });
   if (error) return { message: "コードが正しくないか、有効期限が切れています。新しいコードで試してください。" };
 
-  redirect("/admin");
+  redirect(readNext(formData));
 }
 
 /*
@@ -74,5 +77,5 @@ export async function confirmEnroll(_prev: MfaState, formData: FormData): Promis
   const { error } = await supabase.auth.mfa.challengeAndVerify({ factorId, code });
   if (error) return { message: "コードが正しくないか、有効期限が切れています。新しいコードで試してください。" };
 
-  redirect("/admin");
+  redirect(readNext(formData));
 }

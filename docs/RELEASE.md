@@ -48,20 +48,17 @@
       （管理画面のパスワードは12文字以上で、ほかのサービスと使い回さないものにする）
 - [ ] **Authentication → Multi-Factor** で **TOTP (App Authenticator)** が Enabled になっていることを確認する
       （管理画面の二段階認証に使う。最初から有効のはず）
-- [ ] **Authentication → Users → Add user** で、管理画面に入る人のアカウントを作る
-      （メールアドレスとパスワード。「Auto Confirm User」にチェック）
-- [ ] SQL Editor で、その人を管理者として登録する（メールアドレスと名前を書き換えて実行）
-
-  ```sql
-  insert into public.staff (user_id, name)
-  select id, '小路 瑛' from auth.users where email = 'ここにメールアドレス';
-  ```
-
 - [ ] **Authentication → URL Configuration** の Site URL を `https://pentathlon-academy.com` にする
+- [ ] 同じ画面の **Redirect URLs** に `https://pentathlon-academy.com/admin/auth/callback` を追加する
+      （パスワード再設定・メールアドレス変更の確認メールのリンクの戻り先。無いとリンクがトップページに飛んでしまう）
+- [ ] **Authentication → Emails → SMTP Settings** で、Resend など自前の送信元を設定する
+      （Supabase 標準の送信は、プロジェクトのメンバー宛てにしか届かず、1時間に数通まで。
+      これが無いと、パスワード再設定・メールアドレス変更・招待のメールがスタッフに届かない）
+- [ ] **Authentication → Emails → Invite user** の本文のリンクを、`docs/SETUP.md` の「3. 管理画面に入れるようにする」にある形に差し替える
 - [ ] **Project Settings → API**（または Data API）で次の2つを控える
   - Project URL（`https://xxxx.supabase.co`）
   - anon / publishable key（`sb_publishable_...` または `eyJ...` で始まるもの）
-  - ※ `service_role` / `sb_secret_...` は**控えなくてよい**（使う場合も絶対に公開しない）
+  - ※ `service_role` / `sb_secret_...` は今は**控えなくてよい**（後日、管理画面からスタッフを招待するときに使う。絶対に公開しない）
 
 ## 4. サイトを公開する（Netlify）
 
@@ -105,10 +102,22 @@
 - [ ] 練習スケジュールに9枠、大会・イベントに開催予定と過去の大会が出ている
 - [ ] アカデミーについてに指導者5名・スタッフ・顧問が出ている。強化選手に2名出ている
 - [ ] お問い合わせフォームから**テスト送信**できる → 管理画面のお問い合わせに届いている
-- [ ] `/admin/login` から3で作ったアカウントでログインできる
-  - パスワードのあとに**二段階認証の登録画面**が出る。スマホに「Google Authenticator」などの認証アプリを入れ、
-    画面の QR コードを読み取って、表示された6桁の数字を入力する（初回だけ）
-  - 2回目からは、パスワードのあとに認証アプリの6桁を入力する
+- [ ] 管理画面に入る人を招待する（招待リンクの期限は1時間なので、サイトが開くようになってから送る）
+  - Supabase の **Authentication → Users → Invite user** でメールアドレスを入れて送る
+  - **本人がリンクを開く前に**、SQL Editor でその人を**管理者**として登録する（メールアドレスと名前を書き換えて実行）
+
+    ```sql
+    insert into public.staff (user_id, name, role)
+    select id, '小路 瑛', 'admin' from auth.users where email = 'ここにメールアドレス';
+    ```
+
+  - ここで登録するのは最初の管理者だけ。2人目からは、管理画面の「アカウント → スタッフの管理」から招待できる
+    （下の「後日でよいもの」の `SUPABASE_SERVICE_ROLE_KEY` が必要。それまでは同じ手順で、ロールを `'editor'` にして登録する）
+
+- [ ] 招待メールのリンクを開くと、**二段階認証の登録画面**が出る。スマホに「Google Authenticator」などの認証アプリを入れ、
+      画面の QR コードを読み取って、表示された6桁の数字を入力する（初回だけ）
+  - 続けて出る画面で、**リンクを開いてから30分以内に**パスワードを決める（12文字以上）
+  - `/admin/login` から、そのメールアドレスとパスワードでログインできる。2回目からは、パスワードのあとに認証アプリの6桁を入力する
 - [ ] 管理画面で大会を1件「非公開」で作って、保存・削除できる
 - [ ] スマホで表示が崩れていない
 
@@ -152,5 +161,6 @@
 | --- | --- | --- |
 | お問い合わせの通知メール（Resend） | 問い合わせが来たらメールで知らせる。未設定でも管理画面には届く | [SETUP.md](SETUP.md) の「お問い合わせの通知メール」 |
 | 協会サイトの新着をメールで受け取る | 週1回のチェック結果をメールで受け取る（未設定なら GitHub から通知） | [SETUP.md](SETUP.md) の「協会サイトの新着チェック」 |
+| 管理画面からスタッフを招待する | 「アカウント → スタッフの管理」から招待・削除できる（SQL が要らなくなる）。ロールの変更は設定なしでもできる | Netlify の Environment variables に `SUPABASE_SERVICE_ROLE_KEY`（Supabase → Settings → API Keys の secret key）を登録して再デプロイ。**絶対に `NEXT_PUBLIC_` を付けない** |
 | スパム対策（Cloudflare Turnstile） | フォームへの機械的な送信を防ぐ | [SETUP.md](SETUP.md) の「お問い合わせの強化」 |
 | 確認用サイト（GitHub Pages）を止める | 本番と二重に存在しないようにする | 済: 本番への転送ページに差し替えた。完全に止めるなら GitHub → Settings → Pages を無効にし、`.github/workflows/pages.yml` を削除 |

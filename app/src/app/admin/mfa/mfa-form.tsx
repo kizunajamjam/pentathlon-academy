@@ -44,11 +44,11 @@ function CodeInput() {
   );
 }
 
-export function MfaForm({ mode }: { mode: "verify" | "setup" }) {
-  return mode === "verify" ? <VerifyForm /> : <SetupForm />;
+export function MfaForm({ mode, next }: { mode: "verify" | "setup"; next: string }) {
+  return mode === "verify" ? <VerifyForm next={next} /> : <SetupForm next={next} />;
 }
 
-function VerifyForm() {
+function VerifyForm({ next }: { next: string }) {
   const [state, formAction, pending] = useActionState(verifyMfa, INITIAL);
   return (
     <form
@@ -57,6 +57,7 @@ function VerifyForm() {
       className="mt-8 rounded-card bg-white p-7 shadow-lg"
     >
       <ErrorMessage message={state.message} />
+      <input type="hidden" name="next" value={next} />
       <p className="mb-5 text-sm leading-relaxed text-muted">
         スマホの認証アプリ（Google Authenticator など）に表示されている数字を入力してください。
       </p>
@@ -68,7 +69,7 @@ function VerifyForm() {
   );
 }
 
-function SetupForm() {
+function SetupForm({ next }: { next: string }) {
   const [enroll, setEnroll] = useState<{ factorId: string; qrCode: string; secret: string } | null>(null);
   const [startError, setStartError] = useState<string>();
   const [starting, startTransition] = useTransition();
@@ -109,6 +110,7 @@ function SetupForm() {
     >
       <ErrorMessage message={state.message} />
       <input type="hidden" name="factorId" value={enroll.factorId} />
+      <input type="hidden" name="next" value={next} />
       <p className="text-sm leading-relaxed text-navy-800">
         1. 認証アプリで、この QR コードを読み取ってください。
       </p>
