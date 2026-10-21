@@ -1,6 +1,6 @@
 # ペンタスロンアカデミー 公式サイト
 
-近代五種競技アカデミーの公式サイト。公開ページ7つと、スタッフが自分で更新できる管理画面で構成しています。
+近代五種競技アカデミーの公式サイト（https://pentathlon-academy.com で公開中）。公開ページと、スタッフが自分で更新できる管理画面で構成しています。
 
 ## 構成
 
@@ -9,14 +9,14 @@
 | フレームワーク | Next.js 16 (App Router) / React 19 / TypeScript |
 | スタイル | Tailwind CSS v4（設定ファイルなし。トークンは `app/src/app/globals.css`） |
 | DB / 認証 | Supabase |
-| デプロイ | Vercel |
+| デプロイ | Netlify（サイト本体）／ Cloudflare（DNS） |
 
 ```
 pentathlon-academy/
 ├── app/                  Next.js プロジェクト
 │   ├── scripts/          ロゴから競技アイコンを生成するスクリプト
 │   └── src/
-│       ├── app/(site)/   公開ページ7つ
+│       ├── app/(site)/   公開ページ
 │       ├── app/admin/    管理画面
 │       ├── components/
 │       ├── lib/
@@ -59,4 +59,7 @@ node scripts/check-wedges.mjs          # 生成結果の目視確認
 現在は文言・写真・連絡先の一部が仮のものです。差し替えが必要な箇所は
 [docs/SETUP.md](docs/SETUP.md) の一覧にまとめています。
 
-公開までにオーナーへ確認が必要な項目は [docs/HEARING.md](docs/HEARING.md) にまとめています。
+オーナーへの確認でまだ回答のない項目は [docs/HEARING-next.txt](docs/HEARING-next.txt)（LINE で送れる形）に、
+これまでの経緯は [docs/HEARING.md](docs/HEARING.md) にまとめています。
+
+公開後に残っている作業（データベースの更新の確認・各サービスの設定など）は [docs/TODO.md](docs/TODO.md) にあります。

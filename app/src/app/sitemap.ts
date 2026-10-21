@@ -3,7 +3,7 @@ import type { MetadataRoute } from "next";
 import { NAV_ITEMS } from "@/lib/constants/site";
 import { listPublishedNews } from "@/lib/db/news";
 
-// TODO: 本番ドメインが決まったら NEXT_PUBLIC_SITE_URL を設定する。
+// 本番は NEXT_PUBLIC_SITE_URL=https://pentathlon-academy.com（Netlify の環境変数）。
 const BASE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://example.com";
 
 // 静的書き出し（GitHub Pages）ではビルド時に固定する必要がある

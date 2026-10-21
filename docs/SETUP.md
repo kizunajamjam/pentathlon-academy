@@ -16,7 +16,7 @@ pentathlon-academy/
 ├── app/                    Next.js プロジェクト
 │   └── src/
 │       ├── app/
-│       │   ├── (site)/     公開ページ7つ
+│       │   ├── (site)/     公開ページ
 │       │   └── admin/      管理画面
 │       ├── components/
 │       ├── lib/{supabase,db,constants,utils}/
@@ -43,9 +43,8 @@ npm run dev --prefix pentathlon-academy/app
 ## 2. Supabase をつなぐ
 
 1. Supabase で新規プロジェクトを作成する
-2. SQL Editor で `supabase/migrations/` のファイルを **日付の古い順に全部** 実行する
-   （`20260815_initial_schema.sql` → `20261004_content_tables.sql` → `20261005_inquiry_analytics.sql`）。
-   2つ目は指導者・強化選手・お知らせ画像の追加で、現在サイトに載っている指導者と強化選手が初期データとして入る
+2. SQL Editor に `supabase/setup_all.sql` の全文を貼り付けて **1回だけ** 実行する
+   （`supabase/migrations/` の全ファイルを日付順につないだもの。指導者・強化選手・大会・練習スケジュールの初期データも入る）
 3. `app/.env.local` を作る（`app/.env.example` をコピー）
 
 ```
@@ -57,6 +56,14 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_xxxx
 
 これで お知らせ・スケジュール・イベント が DB 参照に切り替わる。
 最初は空なので、管理画面から登録するまで各ページは「まだありません」と表示される。
+
+### 本番の DB に新しいマイグレーションを足すとき
+
+`setup_all.sql` は新しく作るときだけ使う。すでに動いている DB で実行し直すと、初期データが重複する。
+
+1. `supabase/migrations/` に `YYYYMMDD_内容.sql` を追加し、`setup_all.sql` を作り直す（ファイルの先頭のコメント参照）
+2. 本番の SQL Editor で、**追加したファイルだけ**を日付の古い順に1回ずつ実行する
+3. どこまで反映済みか分からなくなったら、[TODO.md](TODO.md) の「反映済みか確かめる SQL」で確かめる
 
 ## 3. 管理画面に入れるようにする
 
