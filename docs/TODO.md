@@ -34,7 +34,7 @@ select
 
 ### スタッフを確かめる
 
-オーナーへの確認（E-18・C-4）とあわせて、誰が管理画面に入れるかを見る。
+誰が管理画面に入れるかを見る。オーナーに管理画面を説明するときに、入る人（C-4）と認証アプリの登録（E-18）もあわせて確かめる。
 
 ```sql
 select s.name, s.role, u.email from public.staff s join auth.users u on u.id = s.user_id;
