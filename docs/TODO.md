@@ -83,7 +83,7 @@ revoke insert on table public.inquiries from anon;
 - [ ] 協会サイトの新着の Issue（#12 など）を見て、載せる大会があれば管理画面から登録し、Issue を閉じる
 - [ ] 任意: GitHub → Settings → Pages を無効にし、`.github/workflows/pages.yml` を削除する
 - [ ] 任意: 協会サイトの新着をメールで受け取る（GitHub の Actions secrets に `RESEND_API_KEY` / `NOTIFY_TO` / `NOTIFY_FROM`）
-- [ ] オーナーが E-17 で「作る」と答えたら: Cloudflare の Email Routing で `info@pentathlon-academy.com` を Gmail に転送し、
+- [ ] オーナーが問16（メールアドレス）で「作る」と答えたら: Cloudflare の Email Routing で `info@pentathlon-academy.com` を Gmail に転送し、
       サイトに載せるメールアドレスを差し替える（[RELEASE.md](RELEASE.md) の 8）
 
 ## 6. オーナーの回答が来たら
