@@ -73,7 +73,7 @@ export function NewsForm({
         />
       </AdminField>
 
-      <AdminField label="本文" htmlFor="body" hint="改行がそのまま段落になります。">
+      <AdminField label="本文" htmlFor="body" hint="空行で段落が分かれます。1回の改行は、段落の中の改行になります。">
         <textarea
           id="body"
           name="body"
