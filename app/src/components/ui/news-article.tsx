@@ -39,15 +39,21 @@ export function NewsArticle({ news }: { news: News }) {
           />
         )}
 
-        {/* 本文は管理画面のテキストエリア入力なので、段落を改行で組み立てる */}
+        {/*
+          本文は管理画面のテキストエリア入力。空行で段落を分け、1回の改行は段落の中の改行にする
+          （順位と記録のように、続けて読ませたい行を間を空けずに並べられるようにするため）
+        */}
         <div className="mt-10 space-y-5">
-          {news.body.split("\n").map((line, i) =>
-            line.trim() === "" ? null : (
-              <p key={i} className="text-sm leading-loose text-navy-700 sm:text-base">
-                {line}
+          {news.body
+            .replace(/\r\n/g, "\n")
+            .split(/\n\s*\n/)
+            .map((para) => para.trim())
+            .filter((para) => para !== "")
+            .map((para, i) => (
+              <p key={i} className="whitespace-pre-line text-sm leading-loose text-navy-700 sm:text-base">
+                {para}
               </p>
-            ),
-          )}
+            ))}
         </div>
       </div>
     </article>
