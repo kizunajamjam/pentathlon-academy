@@ -4,7 +4,6 @@ import { ExternalLink } from "lucide-react";
 
 import { PageHero } from "@/components/ui/page-hero";
 import { SectionHeading } from "@/components/ui/section-heading";
-import { assetPath } from "@/lib/utils/asset";
 
 export const metadata: Metadata = {
   title: "平和教育",
@@ -203,7 +202,7 @@ export default function PeacePage() {
       <section className="bg-black py-14 sm:py-20">
         <div className="mx-auto max-w-3xl px-4 text-center">
           <Image
-            src={assetPath("/photos/peace-logo.jpg")}
+            src="/photos/peace-logo.jpg"
             alt="オリーブの枝をくわえた鳩と、ペンタスロンアカデミーのロゴ"
             width={1000}
             height={938}

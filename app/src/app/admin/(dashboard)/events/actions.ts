@@ -5,18 +5,12 @@ import { redirect } from "next/navigation";
 
 import { getStaffForAction } from "@/lib/auth-guard";
 import { createEvent, deleteEvent, updateEvent } from "@/lib/db/events";
+import { fromDatetimeLocal } from "@/lib/utils/date";
 import type { EventCategory } from "@/types";
 
 export type EventFormState = { message?: string };
 
 const CATEGORIES: EventCategory[] = ["competition", "trial", "camp", "openday"];
-
-// datetime-local はローカル時刻の文字列で来るので JST 固定で ISO に変換する。
-function toIso(local: string): string | null {
-  if (!local) return null;
-  const iso = new Date(`${local}:00+09:00`).toISOString();
-  return Number.isNaN(Date.parse(iso)) ? null : iso;
-}
 
 export async function saveEvent(
   _prev: EventFormState,
@@ -27,8 +21,10 @@ export async function saveEvent(
 
   const title = String(formData.get("title") ?? "").trim();
   const category = String(formData.get("category") ?? "competition") as EventCategory;
-  const startsAt = toIso(String(formData.get("startsAt") ?? ""));
-  const endsAt = toIso(String(formData.get("endsAt") ?? ""));
+  const startsAtLocal = String(formData.get("startsAt") ?? "").trim();
+  const endsAtLocal = String(formData.get("endsAt") ?? "").trim();
+  const startsAt = fromDatetimeLocal(startsAtLocal);
+  const endsAt = endsAtLocal ? fromDatetimeLocal(endsAtLocal) : null;
   const location = String(formData.get("location") ?? "").trim() || null;
   const description = String(formData.get("description") ?? "").trim() || null;
   const url = String(formData.get("url") ?? "").trim() || null;
@@ -36,7 +32,9 @@ export async function saveEvent(
 
   if (!title) return { message: "タイトルを入力してください。" };
   if (!CATEGORIES.includes(category)) return { message: "種別を選択してください。" };
-  if (!startsAt) return { message: "開催日時を入力してください。" };
+  if (!startsAtLocal) return { message: "開催日時を入力してください。" };
+  if (!startsAt) return { message: "開催日時の形式が不正です。" };
+  if (endsAtLocal && !endsAt) return { message: "終了日時の形式が不正です。" };
   if (endsAt && endsAt < startsAt) {
     return { message: "終了日時は開始日時より後にしてください。" };
   }

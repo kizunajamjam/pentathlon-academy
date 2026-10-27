@@ -40,13 +40,32 @@ export function startOfTodayJst(): string {
   return new Date(`${today}T00:00:00+09:00`).toISOString();
 }
 
+// 終わった大会か（最終日が昨日以前）。開催当日や複数日開催の途中は、まだ終わっていない扱い。
+// 公開ページ・プレビュー・管理画面の一覧で同じ判定を使う。
+export function isEventPast(event: AcademyEvent, today = startOfTodayJst()): boolean {
+  return (event.endsAt ?? event.startsAt) < today;
+}
+
+// 今日(JST)から months か月前の日の 00:00。
+// 3月31日の1か月前は2月28日(29日)のように、月末は前の月の末日にそろえる。
+function monthsAgoJst(months: number): string {
+  const today = new Date().toLocaleDateString("sv-SE", { timeZone: "Asia/Tokyo" });
+  const [y, m, d] = today.split("-").map(Number);
+  // 対象の月の1日を作ってから、その月の末日を超えないように日を合わせる
+  const first = new Date(Date.UTC(y, m - 1 - months, 1));
+  const year = first.getUTCFullYear();
+  const month = first.getUTCMonth();
+  const lastDay = new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
+  const date = new Date(Date.UTC(year, month, Math.min(d, lastDay)));
+  return new Date(`${date.toISOString().slice(0, 10)}T00:00:00+09:00`).toISOString();
+}
+
 // これから開催されるもの(最終日が今日以降)を古い順に。
-// 静的書き出しではビルド時点で判定されるため、pages.yml で毎日ビルドし直している。
 export async function listUpcomingEvents(limit?: number): Promise<AcademyEvent[]> {
   const today = startOfTodayJst();
 
   if (!isSupabaseConfigured) {
-    const list = SEED_EVENTS.filter((e) => (e.endsAt ?? e.startsAt) >= today).sort((a, b) =>
+    const list = SEED_EVENTS.filter((e) => !isEventPast(e, today)).sort((a, b) =>
       a.startsAt.localeCompare(b.startsAt),
     );
     return limit ? list.slice(0, limit) : list;
@@ -70,12 +89,10 @@ export async function listUpcomingEvents(limit?: number): Promise<AcademyEvent[]
 // 協会の記事は年をまたいでも残っているが、古いものほどリンク切れの心配が増えるので期間を区切る。
 export async function listPastEvents(months = 6): Promise<AcademyEvent[]> {
   const today = startOfTodayJst();
-  const since = new Date(today);
-  since.setMonth(since.getMonth() - months);
-  const from = since.toISOString();
+  const from = monthsAgoJst(months);
 
   if (!isSupabaseConfigured) {
-    return SEED_EVENTS.filter((e) => (e.endsAt ?? e.startsAt) < today && e.startsAt >= from).sort(
+    return SEED_EVENTS.filter((e) => isEventPast(e, today) && e.startsAt >= from).sort(
       (a, b) => b.startsAt.localeCompare(a.startsAt),
     );
   }

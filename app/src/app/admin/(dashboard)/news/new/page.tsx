@@ -2,9 +2,12 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
 import { NewsForm } from "@/components/admin/news-form";
+import { requireStaff } from "@/lib/auth-guard";
 import { toDatetimeLocal } from "@/lib/utils/date";
 
-export default function AdminNewsNewPage() {
+export default async function AdminNewsNewPage() {
+  // 画面遷移ではレイアウトの確認が動かないため、ページでも確かめる
+  await requireStaff();
   return (
     <>
       <Link

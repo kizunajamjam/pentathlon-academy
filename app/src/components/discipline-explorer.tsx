@@ -16,7 +16,6 @@ import {
   assemblyFrame,
   type AssemblyFrame,
 } from "@/lib/logo-assembly";
-import { assetPath } from "@/lib/utils/asset";
 import type { DisciplineId } from "@/types";
 
 /*
@@ -406,7 +405,7 @@ export function DisciplineExplorer() {
                 ref={(el) => {
                   pieceRefs.current[wedge.id] = el;
                 }}
-                src={assetPath(`/icons/overlay-${wedge.id}.png`)}
+                src={`/icons/overlay-${wedge.id}.png`}
                 alt=""
                 width={512}
                 height={512}
@@ -419,7 +418,7 @@ export function DisciplineExplorer() {
             ))}
             <Image
               ref={starRef}
-              src={assetPath("/icons/center-star.png")}
+              src="/icons/center-star.png"
               alt=""
               width={512}
               height={512}
@@ -429,7 +428,7 @@ export function DisciplineExplorer() {
             />
             <Image
               ref={markRef}
-              src={assetPath("/icons/center-p.png")}
+              src="/icons/center-p.png"
               alt={SITE.nameEn}
               width={512}
               height={512}
@@ -505,7 +504,7 @@ export function DisciplineExplorer() {
                 >
                   {/* SVG の href には basePath が自動で付かないので自分で補う */}
                   <image
-                    href={assetPath(`/icons/overlay-${activeWedge.id}.png`)}
+                    href={`/icons/overlay-${activeWedge.id}.png`}
                     x="0"
                     y="0"
                     width="100"

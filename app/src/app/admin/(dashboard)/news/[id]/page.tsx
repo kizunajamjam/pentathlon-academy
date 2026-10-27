@@ -3,8 +3,9 @@ import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 
 import { NewsForm } from "@/components/admin/news-form";
-import { SubmitButton } from "@/components/admin/form-ui";
+import { DeleteForm } from "@/components/admin/form-ui";
 import { PreviewLink } from "@/components/admin/preview-link";
+import { requireStaff } from "@/lib/auth-guard";
 import { getNews } from "@/lib/db/news";
 import { toDatetimeLocal } from "@/lib/utils/date";
 import { removeNews } from "../actions";
@@ -14,6 +15,8 @@ export default async function AdminNewsEditPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  // 画面遷移ではレイアウトの確認が動かないため、ページでも確かめる
+  await requireStaff();
   const { id } = await params;
   const news = await getNews(id);
   if (!news) notFound();
@@ -45,12 +48,11 @@ export default async function AdminNewsEditPage({
         <p className="mt-1.5 text-xs text-muted">
           削除すると元に戻せません。サイトからも表示されなくなります。
         </p>
-        <form action={removeNews} className="mt-4">
-          <input type="hidden" name="id" value={news.id} />
-          <SubmitButton variant="danger" pendingLabel="削除中...">
-            削除する
-          </SubmitButton>
-        </form>
+        <DeleteForm
+          action={removeNews}
+          id={news.id}
+          confirmMessage="このお知らせを削除します。元に戻せません。よろしいですか？"
+        />
       </div>
     </>
   );

@@ -1,5 +1,4 @@
-# プルリクエストと main への push で、型・lint・ビルドを確認する。
-# pages.yml は管理画面を取り除いてビルドするため、管理画面の検証はここで行う。
+# プルリクエストと main への push で、型・lint・テスト・ビルドを確認する。
 name: CI
 
 on:
@@ -19,7 +18,7 @@ jobs:
           cache: npm
           cache-dependency-path: app/package-lock.json
 
-      # sharp のプラットフォーム別依存のため npm ci ではなく npm install（pages.yml と同じ理由）
+      # sharp のプラットフォーム別依存のため npm ci ではなく npm install
       - run: npm install
         working-directory: app
 

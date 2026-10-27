@@ -3,8 +3,9 @@ import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 
 import { EventForm } from "@/components/admin/event-form";
-import { SubmitButton } from "@/components/admin/form-ui";
+import { DeleteForm } from "@/components/admin/form-ui";
 import { PreviewLink } from "@/components/admin/preview-link";
+import { requireStaff } from "@/lib/auth-guard";
 import { getEvent } from "@/lib/db/events";
 import { toDatetimeLocal } from "@/lib/utils/date";
 import { removeEvent } from "../actions";
@@ -14,6 +15,8 @@ export default async function AdminEventEditPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  // 画面遷移ではレイアウトの確認が動かないため、ページでも確かめる
+  await requireStaff();
   const { id } = await params;
   const event = await getEvent(id);
   if (!event) notFound();
@@ -47,12 +50,11 @@ export default async function AdminEventEditPage({
       <div className="mt-8 rounded-card border border-shoot-500/25 bg-white p-6">
         <p className="text-sm font-bold text-navy-800">この予定を削除</p>
         <p className="mt-1.5 text-xs text-muted">削除すると元に戻せません。</p>
-        <form action={removeEvent} className="mt-4">
-          <input type="hidden" name="id" value={event.id} />
-          <SubmitButton variant="danger" pendingLabel="削除中...">
-            削除する
-          </SubmitButton>
-        </form>
+        <DeleteForm
+          action={removeEvent}
+          id={event.id}
+          confirmMessage="この予定を削除します。元に戻せません。よろしいですか？"
+        />
       </div>
     </>
   );

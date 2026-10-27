@@ -100,6 +100,12 @@ function cell(v: string | null): string {
   return `"${s.replace(/"/g, '""')}"`;
 }
 
+// CSV の日時（"2026-10-05 10:00"）。管理画面の表示と同じく日本時間で出す
+function jstDateTime(iso: string | null): string | null {
+  if (!iso) return null;
+  return new Date(Date.parse(iso) + JST).toISOString().slice(0, 16).replace("T", " ");
+}
+
 export function inquiriesToCsv(inquiries: Inquiry[]): string {
   const header = [
     "受信日時",
@@ -114,7 +120,7 @@ export function inquiriesToCsv(inquiries: Inquiry[]): string {
     "対応日時",
   ];
   const rows = inquiries.map((i) => [
-    i.createdAt,
+    jstDateTime(i.createdAt),
     i.category,
     i.name,
     i.email,
@@ -123,7 +129,7 @@ export function inquiriesToCsv(inquiries: Inquiry[]): string {
     i.source,
     i.landingPath,
     i.isHandled ? "対応済み" : "未対応",
-    i.handledAt,
+    jstDateTime(i.handledAt),
   ]);
   // BOM を付けないと Excel で日本語が文字化けする
   return "﻿" + [header, ...rows].map((r) => r.map(cell).join(",")).join("\r\n") + "\r\n";

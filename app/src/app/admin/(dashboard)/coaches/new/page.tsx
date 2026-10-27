@@ -2,8 +2,11 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
 import { CoachForm } from "@/components/admin/coach-form";
+import { requireStaff } from "@/lib/auth-guard";
 
-export default function AdminCoachNewPage() {
+export default async function AdminCoachNewPage() {
+  // 画面遷移ではレイアウトの確認が動かないため、ページでも確かめる
+  await requireStaff();
   return (
     <>
       <Link

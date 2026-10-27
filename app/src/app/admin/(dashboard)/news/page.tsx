@@ -1,11 +1,14 @@
 import Link from "next/link";
 import { Plus } from "lucide-react";
 
+import { requireStaff } from "@/lib/auth-guard";
 import { NEWS_CATEGORY_LABEL } from "@/lib/constants/site";
 import { listAllNews } from "@/lib/db/news";
 import { formatDateDot, formatTime } from "@/lib/utils/date";
 
 export default async function AdminNewsPage() {
+  // 画面遷移ではレイアウトの確認が動かないため、ページでも確かめる
+  await requireStaff();
   const news = await listAllNews();
   const now = new Date().toISOString();
 

@@ -3,14 +3,14 @@ import type { MetadataRoute } from "next";
 import { NAV_ITEMS } from "@/lib/constants/site";
 import { listPublishedNews } from "@/lib/db/news";
 
-// TODO: 本番ドメインが決まったら NEXT_PUBLIC_SITE_URL を設定する。
+// 本番ドメインは NEXT_PUBLIC_SITE_URL で指定する（Netlify の環境変数に設定済み）
 const BASE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://example.com";
 
-// 静的書き出し（GitHub Pages）ではビルド時に固定する必要がある
-export const dynamic = "force-static";
+// 1時間ごとに作り直す。デプロイのときに1回作るだけだと、あとから公開したお知らせが載らない
+export const revalidate = 3600;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  // DB に一時的につながらなくても、ビルド（デプロイ）ごと止めないよう、お知らせ抜きで返す
+  // DB に一時的につながらなくても、ビルド（デプロイ）や作り直しを止めないよう、お知らせ抜きで返す
   const news = await listPublishedNews().catch(() => []);
 
   return [

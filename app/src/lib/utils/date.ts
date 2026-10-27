@@ -87,3 +87,15 @@ export function toDatetimeLocal(iso: string): string {
   // sv-SE は "2026-08-20 10:00" 形式で返るので T 区切りに直す
   return parts.replace(" ", "T");
 }
+
+/*
+ * datetime-local の入力（"2026-08-20T10:00"、秒つきもある）を、JST として ISO に直す。
+ * Date にそのまま渡すとサーバーのタイムゾーンで解釈されるため、+09:00 を付けて固定する。
+ * 形の違う値（手入力・改ざんされた送信など）は例外にせず null を返す。
+ */
+export function fromDatetimeLocal(local: string): string | null {
+  const m = /^(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2})(:\d{2})?$/.exec(local.trim());
+  if (!m) return null;
+  const time = Date.parse(`${m[1]}T${m[2]}${m[3] ?? ":00"}+09:00`);
+  return Number.isNaN(time) ? null : new Date(time).toISOString();
+}

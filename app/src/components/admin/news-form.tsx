@@ -1,12 +1,14 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState, type ChangeEvent } from "react";
 import { AlertCircle } from "lucide-react";
 
 import { saveNews, type NewsFormState } from "@/app/admin/(dashboard)/news/actions";
 import { AdminField, SubmitButton, adminInput } from "./form-ui";
 import { keepInputsOnSubmit } from "@/lib/form-submit";
 import { NEWS_CATEGORY_LABEL } from "@/lib/constants/site";
+import { IMAGE_TYPES } from "@/lib/news-image-limits";
+import { shrinkImageIfNeeded } from "@/lib/shrink-image";
 import type { News, NewsCategory } from "@/types";
 
 const INITIAL: NewsFormState = {};
@@ -21,6 +23,35 @@ export function NewsForm({
   defaultPublishedAt: string;
 }) {
   const [state, formAction, pending] = useActionState(saveNews, INITIAL);
+  const [imageNote, setImageNote] = useState<{ text: string; isError: boolean } | null>(null);
+  const [shrinking, setShrinking] = useState(false);
+
+  // 選んだ時点で大きさを確かめ、上限を超えていれば縮小した画像に差し替える
+  const onImageChange = async (e: ChangeEvent<HTMLInputElement>) => {
+    const input = e.currentTarget;
+    const file = input.files?.[0];
+    setImageNote(null);
+    if (!file) return;
+
+    setShrinking(true);
+    const fitted = await shrinkImageIfNeeded(file);
+    setShrinking(false);
+
+    if (!fitted) {
+      input.value = "";
+      setImageNote({
+        text: "画像が大きすぎるため選べませんでした。4MB 以下の画像を選んでください。",
+        isError: true,
+      });
+      return;
+    }
+    if (fitted !== file) {
+      const files = new DataTransfer();
+      files.items.add(fitted);
+      input.files = files.files;
+      setImageNote({ text: "画像が 4MB を超えていたので、小さくして使います。", isError: false });
+    }
+  };
 
   return (
     <form action={formAction} onSubmit={keepInputsOnSubmit(formAction)} className="space-y-6">
@@ -86,7 +117,7 @@ export function NewsForm({
       <AdminField
         label="画像"
         htmlFor="image"
-        hint="JPEG・PNG・WebP、4MB まで。お知らせの冒頭に表示されます。"
+        hint="JPEG・PNG・WebP。4MB を超える写真は自動で小さくします。お知らせの冒頭に表示されます。"
       >
         {news?.imageUrl && (
           <div className="mb-3">
@@ -106,9 +137,16 @@ export function NewsForm({
           id="image"
           name="image"
           type="file"
-          accept="image/jpeg,image/png,image/webp"
+          accept={IMAGE_TYPES.join(",")}
+          onChange={onImageChange}
           className="block w-full text-base text-navy-700 file:mr-4 file:min-h-11 file:rounded-full file:border-0 file:bg-navy-50 file:px-5 file:text-base file:text-navy-800 sm:text-sm sm:file:text-sm"
         />
+        {shrinking && <p className="mt-2 text-xs text-muted">画像を確認しています...</p>}
+        {imageNote && (
+          <p className={`mt-2 text-xs ${imageNote.isError ? "text-shoot-700" : "text-muted"}`}>
+            {imageNote.text}
+          </p>
+        )}
       </AdminField>
 
       <label className="flex items-center gap-3 rounded-md border border-border bg-white px-4 py-3.5">
@@ -127,7 +165,7 @@ export function NewsForm({
       </label>
 
       <div className="flex gap-3 pt-2">
-        <SubmitButton pending={pending}>保存する</SubmitButton>
+        <SubmitButton pending={pending || shrinking}>保存する</SubmitButton>
       </div>
     </form>
   );
