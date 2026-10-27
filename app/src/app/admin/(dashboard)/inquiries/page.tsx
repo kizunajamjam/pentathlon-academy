@@ -1,10 +1,13 @@
 import { Check, Mail, Phone, RotateCcw } from "lucide-react";
 
+import { requireStaff } from "@/lib/auth-guard";
 import { listInquiries } from "@/lib/db/inquiries";
 import { formatDateDot, formatTime } from "@/lib/utils/date";
 import { toggleHandled } from "./actions";
 
 export default async function AdminInquiriesPage() {
+  // 画面遷移ではレイアウトの確認が動かないため、ページでも確かめる
+  await requireStaff();
   const inquiries = await listInquiries();
   const unhandled = inquiries.filter((i) => !i.isHandled).length;
 

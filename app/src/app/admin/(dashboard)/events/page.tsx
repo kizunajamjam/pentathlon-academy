@@ -1,13 +1,16 @@
 import Link from "next/link";
 import { Plus } from "lucide-react";
 
+import { requireStaff } from "@/lib/auth-guard";
 import { EVENT_CATEGORY_LABEL } from "@/lib/constants/site";
-import { listAllEvents } from "@/lib/db/events";
+import { isEventPast, listAllEvents, startOfTodayJst } from "@/lib/db/events";
 import { formatDateDot, formatTime } from "@/lib/utils/date";
 
 export default async function AdminEventsPage() {
+  // 画面遷移ではレイアウトの確認が動かないため、ページでも確かめる
+  await requireStaff();
   const events = await listAllEvents();
-  const now = new Date().toISOString();
+  const today = startOfTodayJst();
 
   return (
     <>
@@ -42,7 +45,7 @@ export default async function AdminEventsPage() {
                     {EVENT_CATEGORY_LABEL[e.category]}
                   </span>
                   <span className="flex-1 text-sm text-navy-800">{e.title}</span>
-                  {e.startsAt < now && (
+                  {isEventPast(e, today) && (
                     <span className="shrink-0 text-xs text-muted">終了</span>
                   )}
                   <span

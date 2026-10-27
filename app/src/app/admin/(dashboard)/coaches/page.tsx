@@ -1,9 +1,12 @@
 import Link from "next/link";
 import { Plus } from "lucide-react";
 
+import { requireStaff } from "@/lib/auth-guard";
 import { listAllCoaches } from "@/lib/db/coaches";
 
 export default async function AdminCoachsPage() {
+  // 画面遷移ではレイアウトの確認が動かないため、ページでも確かめる
+  await requireStaff();
   const items = await listAllCoaches();
 
   return (

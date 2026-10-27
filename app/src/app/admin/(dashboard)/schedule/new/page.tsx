@@ -2,8 +2,11 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
 import { SlotForm } from "@/components/admin/slot-form";
+import { requireStaff } from "@/lib/auth-guard";
 
-export default function AdminSlotNewPage() {
+export default async function AdminSlotNewPage() {
+  // 画面遷移ではレイアウトの確認が動かないため、ページでも確かめる
+  await requireStaff();
   return (
     <>
       <Link

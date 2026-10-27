@@ -3,7 +3,8 @@ import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 
 import { CoachForm } from "@/components/admin/coach-form";
-import { SubmitButton } from "@/components/admin/form-ui";
+import { DeleteForm } from "@/components/admin/form-ui";
+import { requireStaff } from "@/lib/auth-guard";
 import { getCoach } from "@/lib/db/coaches";
 import { removeCoach } from "../actions";
 
@@ -12,6 +13,8 @@ export default async function AdminCoachEditPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  // 画面遷移ではレイアウトの確認が動かないため、ページでも確かめる
+  await requireStaff();
   const { id } = await params;
   const item = await getCoach(id);
   if (!item) notFound();
@@ -37,12 +40,11 @@ export default async function AdminCoachEditPage({
         <p className="mt-1.5 text-xs text-muted">
           削除すると元に戻せません。一時的に隠したいときは「サイトに公開する」を外してください。
         </p>
-        <form action={removeCoach} className="mt-4">
-          <input type="hidden" name="id" value={item.id} />
-          <SubmitButton variant="danger" pendingLabel="削除中...">
-            削除する
-          </SubmitButton>
-        </form>
+        <DeleteForm
+          action={removeCoach}
+          id={item.id}
+          confirmMessage="この登録を削除します。元に戻せません。よろしいですか？"
+        />
       </div>
     </>
   );

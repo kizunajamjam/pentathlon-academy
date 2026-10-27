@@ -4,8 +4,9 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { getStaffForAction } from "@/lib/auth-guard";
-import { createNews, deleteNews, updateNews, type NewsInput } from "@/lib/db/news";
-import { uploadNewsImage } from "@/lib/db/news-image";
+import { createNews, deleteNews, getNews, updateNews, type NewsInput } from "@/lib/db/news";
+import { deleteNewsImage, uploadNewsImage } from "@/lib/db/news-image";
+import { fromDatetimeLocal } from "@/lib/utils/date";
 import type { NewsCategory } from "@/types";
 
 export type NewsFormState = { message?: string };
@@ -23,11 +24,8 @@ function parse(formData: FormData) {
   if (!CATEGORIES.includes(category)) return { error: "種別を選択してください。" as const };
   if (!publishedAtLocal) return { error: "公開日時を入力してください。" as const };
 
-  // datetime-local は "2026-08-20T10:00"(ローカル時刻)で来る。
-  // Date に渡すとサーバーのタイムゾーンで解釈されるため、
-  // JST 固定で ISO に変換する。
-  const iso = new Date(`${publishedAtLocal}:00+09:00`).toISOString();
-  if (Number.isNaN(Date.parse(iso))) return { error: "公開日時の形式が不正です。" as const };
+  const iso = fromDatetimeLocal(publishedAtLocal);
+  if (!iso) return { error: "公開日時の形式が不正です。" as const };
 
   return { input: { title, category, body, publishedAt: iso, isPublished } };
 }
@@ -60,11 +58,21 @@ export async function saveNews(
     input.imageUrl = null;
   }
 
+  // 画像を差し替える・外すときは、保存できたあとで前の画像を置き場から消す
+  const previousImageUrl =
+    id && input.imageUrl !== undefined ? (await getNews(id))?.imageUrl : undefined;
+
   const { error } = id ? await updateNews(id, input) : await createNews(input);
 
   if (error) {
     console.error("[admin/news] 保存に失敗", error);
+    // 保存できなかったので、いまアップロードした画像はどこからも使われない
+    if (input.imageUrl) await deleteNewsImage(input.imageUrl);
     return { message: "保存に失敗しました。時間をおいて再度お試しください。" };
+  }
+
+  if (previousImageUrl && previousImageUrl !== input.imageUrl) {
+    await deleteNewsImage(previousImageUrl);
   }
 
   revalidatePublic();
@@ -78,8 +86,10 @@ export async function removeNews(formData: FormData) {
   const id = String(formData.get("id") ?? "");
   if (!id) return;
 
+  const imageUrl = (await getNews(id))?.imageUrl;
   const { error } = await deleteNews(id);
   if (error) console.error("[admin/news] 削除に失敗", error);
+  else await deleteNewsImage(imageUrl);
 
   revalidatePublic();
   redirect("/admin/news");

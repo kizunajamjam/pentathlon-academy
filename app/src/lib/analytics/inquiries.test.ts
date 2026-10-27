@@ -64,3 +64,12 @@ test("CSV はクォートを二重化し、数式として解釈される先頭�
   assert.ok(csv.includes(`"'=HYPERLINK(""x"")"`));
   assert.ok(csv.includes(`"a""b\nc"`));
 });
+
+test("CSV の日時は日本時間で出す", () => {
+  // 2026-10-04 20:30 UTC = 2026-10-05 05:30 JST（日付が変わる時間帯）
+  const csv = inquiriesToCsv([
+    make({ createdAt: "2026-10-04T20:30:00Z", isHandled: true, handledAt: "2026-10-05T01:00:00Z" }),
+  ]);
+  assert.ok(csv.includes(`"2026-10-05 05:30"`));
+  assert.ok(csv.includes(`"2026-10-05 10:00"`));
+});

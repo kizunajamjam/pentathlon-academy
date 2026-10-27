@@ -34,6 +34,7 @@ export async function signIn(_prev: LoginState, formData: FormData): Promise<Log
 
 export async function signOut() {
   const supabase = await createClient();
-  await supabase.auth.signOut();
+  // この端末だけログアウトする（既定の global だと、スマホなどほかの端末のログインも切れる）
+  await supabase.auth.signOut({ scope: "local" });
   redirect("/admin/login");
 }

@@ -16,7 +16,8 @@ import { signOut } from "@/app/admin/login/actions";
 export const dynamic = "force-dynamic";
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  // ここで一度だけ認可を通す。配下の各ページは staff 前提で書いてよい。
+  // 最初に開いたときの認可。レイアウトは画面遷移のたびには動き直さないので、
+  // 各ページでも requireStaff を呼ぶ（同じリクエストの中では結果を使い回すので重くならない）。
   const staff = await requireStaff();
 
   return (

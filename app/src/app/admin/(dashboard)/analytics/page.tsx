@@ -1,5 +1,6 @@
 import { Download } from "lucide-react";
 
+import { requireStaff } from "@/lib/auth-guard";
 import { listInquiries } from "@/lib/db/inquiries";
 import { summarizeInquiries, type Count } from "@/lib/analytics/inquiries";
 
@@ -58,6 +59,8 @@ function formatHours(h: number | null): string {
 }
 
 export default async function AdminAnalyticsPage() {
+  // 画面遷移ではレイアウトの確認が動かないため、ページでも確かめる
+  await requireStaff();
   const inquiries = await listInquiries();
   const s = summarizeInquiries(inquiries);
 

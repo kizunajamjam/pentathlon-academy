@@ -2,31 +2,28 @@ import Link from "next/link";
 import { ArrowRight, CalendarDays, Inbox, Megaphone, Trophy } from "lucide-react";
 
 import { requireStaff } from "@/lib/auth-guard";
-import { listAllNews } from "@/lib/db/news";
-import { listAllEvents, listUpcomingEvents } from "@/lib/db/events";
+import { getDashboardCounts } from "@/lib/db/dashboard";
+import { listUpcomingEvents } from "@/lib/db/events";
 import { listActiveSlots } from "@/lib/db/schedule";
-import { listInquiries } from "@/lib/db/inquiries";
 
 export default async function AdminDashboardPage() {
   const staff = await requireStaff();
 
-  const [news, events, upcoming, slots, inquiries] = await Promise.all([
-    listAllNews(),
-    listAllEvents(),
+  const [counts, upcoming, slots] = await Promise.all([
+    getDashboardCounts(),
     listUpcomingEvents(),
     listActiveSlots(),
-    listInquiries(),
   ]);
 
-  const unhandled = inquiries.filter((i) => !i.isHandled).length;
+  const unhandled = counts.unhandledInquiries;
 
   const cards = [
     {
       href: "/admin/news",
       icon: Megaphone,
       label: "お知らせ",
-      value: `${news.length} 件`,
-      sub: `公開中 ${news.filter((n) => n.isPublished).length} 件`,
+      value: `${counts.news} 件`,
+      sub: `公開中 ${counts.publishedNews} 件`,
     },
     {
       href: "/admin/schedule",
@@ -39,14 +36,14 @@ export default async function AdminDashboardPage() {
       href: "/admin/events",
       icon: Trophy,
       label: "大会・イベント",
-      value: `${events.length} 件`,
+      value: `${counts.events} 件`,
       sub: `開催予定 ${upcoming.length} 件`,
     },
     {
       href: "/admin/inquiries",
       icon: Inbox,
       label: "お問い合わせ",
-      value: `${inquiries.length} 件`,
+      value: `${counts.inquiries} 件`,
       sub: unhandled > 0 ? `未対応 ${unhandled} 件` : "未対応なし",
       alert: unhandled > 0,
     },

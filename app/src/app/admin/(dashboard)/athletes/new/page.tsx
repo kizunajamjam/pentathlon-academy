@@ -2,8 +2,11 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
 import { AthleteForm } from "@/components/admin/athlete-form";
+import { requireStaff } from "@/lib/auth-guard";
 
-export default function AdminAthleteNewPage() {
+export default async function AdminAthleteNewPage() {
+  // 画面遷移ではレイアウトの確認が動かないため、ページでも確かめる
+  await requireStaff();
   return (
     <>
       <Link

@@ -1,5 +1,6 @@
 import "server-only";
 
+import { cache } from "react";
 import { redirect } from "next/navigation";
 
 import { createClient, getCurrentUser } from "@/lib/supabase/server";
@@ -23,7 +24,8 @@ type StaffCheck =
  * パスワードが漏れても、スマホが無ければ管理画面に入れない。
  * データベース側の is_staff() も aal2 を要求しているので、API を直接叩いても書き込めない。
  */
-async function checkStaff(): Promise<StaffCheck> {
+// 1回のリクエストの中では結果を使い回す（レイアウトとページの両方で確かめても、問い合わせは1回で済む）
+const checkStaff = cache(async (): Promise<StaffCheck> => {
   if (!isSupabaseConfigured) return { state: "none" };
 
   const user = await getCurrentUser();
@@ -49,7 +51,7 @@ async function checkStaff(): Promise<StaffCheck> {
       role: data.role === "admin" ? "admin" : "editor",
     },
   };
-}
+});
 
 // ページ(Server Component)用: 権限がなければログイン画面へ、二段階認証がまだならコード入力へ送る。
 export async function requireStaff(): Promise<StaffContext> {

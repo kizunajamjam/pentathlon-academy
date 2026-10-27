@@ -3,7 +3,8 @@ import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 
 import { SlotForm } from "@/components/admin/slot-form";
-import { SubmitButton } from "@/components/admin/form-ui";
+import { DeleteForm } from "@/components/admin/form-ui";
+import { requireStaff } from "@/lib/auth-guard";
 import { listAllSlots } from "@/lib/db/schedule";
 import { removeSlot } from "../actions";
 
@@ -12,6 +13,8 @@ export default async function AdminSlotEditPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  // 画面遷移ではレイアウトの確認が動かないため、ページでも確かめる
+  await requireStaff();
   const { id } = await params;
   // 枠は多くても数十件なので、1件取得を別に用意せず一覧から引く。
   const slot = (await listAllSlots()).find((s) => s.id === id);
@@ -38,12 +41,11 @@ export default async function AdminSlotEditPage({
         <p className="mt-1.5 text-xs text-muted">
           一時的に休止するだけなら、削除せず「サイトに表示する」のチェックを外してください。
         </p>
-        <form action={removeSlot} className="mt-4">
-          <input type="hidden" name="id" value={slot.id} />
-          <SubmitButton variant="danger" pendingLabel="削除中...">
-            削除する
-          </SubmitButton>
-        </form>
+        <DeleteForm
+          action={removeSlot}
+          id={slot.id}
+          confirmMessage="この枠を削除します。元に戻せません。よろしいですか？"
+        />
       </div>
     </>
   );

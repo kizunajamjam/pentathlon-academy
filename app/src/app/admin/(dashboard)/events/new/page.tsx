@@ -2,9 +2,12 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
 import { EventForm } from "@/components/admin/event-form";
+import { requireStaff } from "@/lib/auth-guard";
 import { toDatetimeLocal } from "@/lib/utils/date";
 
-export default function AdminEventNewPage() {
+export default async function AdminEventNewPage() {
+  // 画面遷移ではレイアウトの確認が動かないため、ページでも確かめる
+  await requireStaff();
   return (
     <>
       <Link

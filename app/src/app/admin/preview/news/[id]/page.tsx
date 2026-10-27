@@ -3,12 +3,15 @@ import { notFound } from "next/navigation";
 
 import { PreviewStatus } from "@/components/admin/preview-status";
 import { NewsArticle } from "@/components/ui/news-article";
+import { requireStaff } from "@/lib/auth-guard";
 import { getNews } from "@/lib/db/news";
 
 export const metadata: Metadata = { title: "お知らせのプレビュー" };
 
 // お知らせのプレビュー。公開ページ（/news/[id]）と同じ NewsArticle で描く。
 export default async function NewsPreviewPage({ params }: { params: Promise<{ id: string }> }) {
+  // 画面遷移ではレイアウトの確認が動かないため、ページでも確かめる
+  await requireStaff();
   const { id } = await params;
   const news = await getNews(id);
   if (!news) notFound();

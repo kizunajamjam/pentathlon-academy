@@ -2,22 +2,7 @@ import path from "node:path";
 import type { NextConfig } from "next";
 
 /*
- * STATIC_EXPORT=1 のときだけ、GitHub Pages 用の静的書き出しに切り替える。
- *
- * GitHub Pages は静的ファイルしか配信できないため、この設定では
- * お問い合わせフォーム(Server Actions)と管理画面(動的レンダリング)は動かない。
- * デザインと文言の確認用と割り切っている。
- *
- * 通常のビルド（Vercel 等）はこの分岐を通らないので、全機能がそのまま動く。
- */
-const isStaticExport = process.env.STATIC_EXPORT === "1";
-
-// プロジェクトページは https://<user>.github.io/<repo>/ で配信されるため、
-// パスの先頭にリポジトリ名が必要になる。
-const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
-
-/*
- * セキュリティ用のレスポンスヘッダー（本番の Netlify 用。静的書き出しでは使えないので付けない）。
+ * セキュリティ用のレスポンスヘッダー（本番の Netlify 用）。
  *
  * CSP: 読み込んでよい外部の取得先を、実際に使っているものだけに絞る。
  *   - Google Fonts（CSS とフォント）
@@ -71,34 +56,19 @@ const nextConfig: NextConfig = {
     serverActions: { bodySizeLimit: "5mb" },
   },
 
-  ...(isStaticExport
-    ? {}
-    : {
-        async headers() {
-          return [
-            { source: "/:path*", headers: securityHeaders },
-            // 管理画面は検索結果に出さず、ブラウザや中継サーバーにも保存させない
-            {
-              source: "/admin/:path*",
-              headers: [
-                { key: "X-Robots-Tag", value: "noindex, nofollow" },
-                { key: "Cache-Control", value: "no-store" },
-              ],
-            },
-          ];
-        },
-      }),
-
-  ...(isStaticExport
-    ? {
-        output: "export" as const,
-        basePath,
-        // 静的書き出しでは next/image の最適化サーバーが無い
-        images: { unoptimized: true },
-        // 静的ホスティングでは /path/ の形でないと 404 になりやすい
-        trailingSlash: true,
-      }
-    : {}),
+  async headers() {
+    return [
+      { source: "/:path*", headers: securityHeaders },
+      // 管理画面は検索結果に出さず、ブラウザや中継サーバーにも保存させない
+      {
+        source: "/admin/:path*",
+        headers: [
+          { key: "X-Robots-Tag", value: "noindex, nofollow" },
+          { key: "Cache-Control", value: "no-store" },
+        ],
+      },
+    ];
+  },
 };
 
 export default nextConfig;

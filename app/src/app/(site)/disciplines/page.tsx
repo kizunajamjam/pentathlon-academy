@@ -9,7 +9,6 @@ import { PageHero } from "@/components/ui/page-hero";
 import { PhotoSlot } from "@/components/ui/photo-slot";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { DISCIPLINES } from "@/lib/constants/site";
-import { assetPath } from "@/lib/utils/asset";
 
 export const metadata: Metadata = {
   title: "近代五種 トレーニング内容",
@@ -39,7 +38,7 @@ export default function DisciplinesPage() {
           <SectionHeading eyebrow="ACADEMY METHOD" title="独自の育成システム" tone="light" />
           <div className="mt-8 grid gap-10 lg:mt-10 lg:grid-cols-2 lg:items-center lg:gap-14">
             <Image
-              src={assetPath("/photos/radar.jpg")}
+              src="/photos/radar.jpg"
               alt="5種目の力を表したレーダーチャート"
               width={1000}
               height={874}
@@ -126,7 +125,7 @@ export default function DisciplinesPage() {
 
               {d.photo ? (
                 <Image
-                  src={assetPath(d.photo)}
+                  src={d.photo}
                   alt={`${d.name}の練習風景`}
                   width={1200}
                   height={d.id === "obstacle" ? 855 : d.id === "running" ? 1320 : 829}

@@ -1,9 +1,12 @@
 import Link from "next/link";
 import { Plus } from "lucide-react";
 
+import { requireStaff } from "@/lib/auth-guard";
 import { listAllAthletes } from "@/lib/db/athletes";
 
 export default async function AdminAthletesPage() {
+  // 画面遷移ではレイアウトの確認が動かないため、ページでも確かめる
+  await requireStaff();
   const items = await listAllAthletes();
 
   return (

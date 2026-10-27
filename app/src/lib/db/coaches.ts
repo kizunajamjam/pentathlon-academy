@@ -93,7 +93,13 @@ export async function createCoach(input: CoachInput) {
 
 export async function updateCoach(id: string, patch: CoachInput) {
   const supabase = await createClient();
-  const { error } = await supabase.from("coaches").update(toRow(patch)).eq("id", id);
+  // 一致する行が無い（別の人が先に削除した）ときも、エラーとして返す
+  const { error } = await supabase
+    .from("coaches")
+    .update(toRow(patch))
+    .eq("id", id)
+    .select("id")
+    .single();
   return { error };
 }
 

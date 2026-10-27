@@ -1,10 +1,13 @@
 import Link from "next/link";
 import { Plus } from "lucide-react";
 
+import { requireStaff } from "@/lib/auth-guard";
 import { DAY_LABEL, DISCIPLINES } from "@/lib/constants/site";
 import { listAllSlots } from "@/lib/db/schedule";
 
 export default async function AdminSchedulePage() {
+  // 画面遷移ではレイアウトの確認が動かないため、ページでも確かめる
+  await requireStaff();
   const slots = await listAllSlots();
 
   return (

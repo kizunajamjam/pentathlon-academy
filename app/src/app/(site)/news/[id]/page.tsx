@@ -2,30 +2,9 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { NewsArticle } from "@/components/ui/news-article";
-import { getPublishedNews, isNewsVisible, listPublishedNews } from "@/lib/db/news";
+import { getPublishedNews, isNewsVisible } from "@/lib/db/news";
 
 type Props = { params: Promise<{ id: string }> };
-
-/*
- * 静的書き出し（GitHub Pages）では、生成する詳細ページの一覧が必要になる。
- * 通常のビルドでは事前生成せず、すべてリクエスト時に生成する。
- *
- * お知らせが1件も無いときでも、空の配列は返せない。Next.js は
- * generateStaticParams が最低1件返すことを求めており、空だと
- * 静的書き出しがビルドごと失敗する（empty-generate-static-params）。
- * どこからもリンクしない id をひとつ返して逃がす。開いても 404 に
- * なるだけで、一覧にも sitemap にも出ない。
- */
-const NO_NEWS_ID = "none";
-
-export async function generateStaticParams() {
-  // 本番（Netlify）では事前生成しない。詳細ページは最初のアクセス時に作られ、
-  // 以後は (site)/layout.tsx の revalidate に従って使い回される。
-  if (process.env.STATIC_EXPORT !== "1") return [];
-
-  const news = await listPublishedNews();
-  return news.length > 0 ? news.map((n) => ({ id: n.id })) : [{ id: NO_NEWS_ID }];
-}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;

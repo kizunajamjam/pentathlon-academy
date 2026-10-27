@@ -1,7 +1,6 @@
 import Image from "next/image";
 
 import { SITE } from "@/lib/constants/site";
-import { assetPath } from "@/lib/utils/asset";
 
 /*
  * ロゴまわり。
@@ -25,7 +24,7 @@ export function LogoMark({
 }) {
   return (
     <Image
-      src={assetPath(peace ? "/logo-mark-peace.png" : "/logo-mark.png")}
+      src={peace ? "/logo-mark-peace.png" : "/logo-mark.png"}
       alt={SITE.nameEn}
       width={size}
       height={size}

@@ -21,7 +21,6 @@ import {
   type Person,
 } from "@/lib/constants/site";
 import { listPublishedCoaches } from "@/lib/db/coaches";
-import { assetPath } from "@/lib/utils/asset";
 
 export const metadata: Metadata = {
   title: "アカデミーについて",
@@ -273,7 +272,7 @@ export default async function AboutPage() {
               >
                 {partner.photo && (
                   <Image
-                    src={assetPath(partner.photo)}
+                    src={partner.photo}
                     alt={`${partner.name}の施設`}
                     width={1546}
                     height={1060}

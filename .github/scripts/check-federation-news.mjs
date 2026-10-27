@@ -13,9 +13,15 @@ const LIST_URL = "https://pentathlon.jp/news/";
 const DAYS = Number(process.env.DAYS || 7);
 const DRY_RUN = process.env.DRY_RUN === "1";
 
-// 大会・記録会に関係しそうな記事だけに絞る（役員挨拶や助成金のお知らせは除く）
-const GENRES = ["近代五種競技", "近代3種競技", "レーザーラン"];
-const TITLE_HINT = /大会|戦|選考会|記録会|CUP|カップ|選手権|体験/i;
+// 大会・記録会に関係しそうな記事だけに絞る。
+// 競技のジャンルが付いていても、役員挨拶や助成金のお知らせなどは知らせない。
+// 「戦」だけだと「挑戦」「作戦」も拾うので、大会の呼び方として使われる形に限る。
+const TITLE_HINT = /大会|ランキング戦|シリーズ戦|対抗戦|選考会|記録会|CUP|カップ|選手権|体験会/i;
+const TITLE_EXCLUDE = /挨拶|あいさつ|助成|役員|理事|総会|決算|予算/;
+
+function isEventNews(title) {
+  return TITLE_HINT.test(title) && !TITLE_EXCLUDE.test(title);
+}
 
 const strip = (s) =>
   s
@@ -33,8 +39,7 @@ function parse(html) {
     const body = m[2];
     const date = body.match(/class="entrydate[^"]*">\s*(\d{4}-\d{2}-\d{2})/)?.[1];
     const title = strip(body.match(/class="txt">([\s\S]*?)<\/div>/)?.[1] ?? "");
-    const genres = [...body.matchAll(/caticon genre[^"]*">([^<]+)</g)].map((g) => g[1].trim());
-    if (date && title) items.push({ url: m[1], date, title, genres });
+    if (date && title) items.push({ url: m[1], date, title });
   }
   return items;
 }
@@ -108,9 +113,7 @@ if (items.length === 0) {
 }
 
 const since = sinceDate();
-const hits = items.filter(
-  (i) => i.date >= since && (i.genres.some((g) => GENRES.includes(g)) || TITLE_HINT.test(i.title)),
-);
+const hits = items.filter((i) => i.date >= since && isEventNews(i.title));
 
 console.log(`読み取り ${items.length} 件 / ${since} 以降の大会関連 ${hits.length} 件`);
 if (hits.length === 0) process.exit(0);

@@ -63,3 +63,32 @@ export function SubmitButton({
     </button>
   );
 }
+
+/*
+ * 削除ボタン。元に戻せないので、押し間違いに備えて一度確かめてから送る。
+ * スマホでは横いっぱいのボタンになり、指が触れただけで消えてしまうため。
+ */
+export function DeleteForm({
+  action,
+  id,
+  confirmMessage,
+}: {
+  action: (formData: FormData) => void | Promise<void>;
+  id: string;
+  confirmMessage: string;
+}) {
+  return (
+    <form
+      action={action}
+      onSubmit={(e) => {
+        if (!window.confirm(confirmMessage)) e.preventDefault();
+      }}
+      className="mt-4"
+    >
+      <input type="hidden" name="id" value={id} />
+      <SubmitButton variant="danger" pendingLabel="削除中...">
+        削除する
+      </SubmitButton>
+    </form>
+  );
+}
