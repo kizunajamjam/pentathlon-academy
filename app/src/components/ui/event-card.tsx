@@ -7,8 +7,10 @@ import type { AcademyEvent } from "@/types";
 // 大会・イベント1件分のカード。過去分は色を落として表示する。
 export function EventCard({ event, past = false }: { event: AcademyEvent; past?: boolean }) {
   return (
+    // min-w-0: グリッドの中で、長い会場名（途中で折れないカタカナ語）に合わせて
+    // 画面より広がらないようにする（幅 320px の端末で横にはみ出していた）
     <article
-      className={`rounded-card border border-border bg-white p-6 ${past ? "opacity-70" : ""}`}
+      className={`min-w-0 rounded-card border border-border bg-white p-6 ${past ? "opacity-70" : ""}`}
     >
       <div className="flex items-center gap-3">
         <span
