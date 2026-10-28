@@ -33,14 +33,23 @@ const USES_RESEND = Boolean(
 type Block = string | string[];
 type Section = { title: string; blocks: Block[] };
 
+/*
+ * 括弧の後ろは、データが置かれる国（外的環境の把握として公表する）。
+ * Supabase はプロジェクトを東京リージョンに作っている（オーナー確認済み）。
+ * ほかは各社の本拠・主なサーバーの所在地。
+ */
 const SERVICES: string[] = [
-  "Supabase（お問い合わせ内容の保管）",
-  "Netlify（このサイトの配信）",
-  ...(USES_RESEND ? ["Resend（お問い合わせを受け付けた旨の、担当者への通知メールの送信）"] : []),
-  ...(USES_TURNSTILE ? ["Cloudflare Turnstile（フォームへの機械的な迷惑送信の防止）"] : []),
-  ...(USES_PLAUSIBLE ? ["Plausible Analytics（アクセス数の集計）"] : []),
-  "Google（Gmail によるメールの受信・返信）",
-  "Meta（Instagram のダイレクトメッセージでのやり取り）",
+  "Supabase（お問い合わせ内容の保管）… 日本（東京）",
+  "Netlify（このサイトの配信）… アメリカ合衆国",
+  ...(USES_RESEND
+    ? ["Resend（お問い合わせを受け付けた旨の、担当者への通知メールの送信）… アメリカ合衆国"]
+    : []),
+  ...(USES_TURNSTILE
+    ? ["Cloudflare Turnstile（フォームへの機械的な迷惑送信の防止）… アメリカ合衆国"]
+    : []),
+  ...(USES_PLAUSIBLE ? ["Plausible Analytics（アクセス数の集計）… ドイツ"] : []),
+  "Google（Gmail によるメールの受信・返信）… アメリカ合衆国など",
+  "Meta（Instagram のダイレクトメッセージでのやり取り）… アメリカ合衆国など",
 ];
 
 const SECTIONS: Section[] = [
@@ -90,7 +99,7 @@ const SECTIONS: Section[] = [
     blocks: [
       "本クラブは、このサイトの運営及びお問い合わせへの対応のため、次の外部サービスを利用しています。これらのサービスに保存・送信される範囲で、個人情報の取り扱いを委託しています。",
       SERVICES,
-      "これらのサービスのサーバーは、アメリカ合衆国など日本国外にある場合があります。各サービスの個人情報の取り扱いは、それぞれのプライバシーポリシーをご確認ください。",
+      "各サービスの後ろに、データが保管される主な国を記載しています。日本国外の国の個人情報の保護に関する制度は、個人情報保護委員会のウェブサイトで確認できます。各サービスの個人情報の取り扱いは、それぞれのプライバシーポリシーをご確認ください。",
     ],
   },
   {
@@ -119,7 +128,7 @@ const SECTIONS: Section[] = [
   {
     title: "開示等のご請求",
     blocks: [
-      "ご本人から、ご自身の個人情報の利用目的の通知、開示、訂正、追加、削除、利用の停止、消去または第三者への提供の停止のご請求があった場合は、ご本人であることを確認したうえで、法令に従い遅滞なく対応します。下記の窓口までご連絡ください。",
+      "ご本人から、ご自身の個人情報の利用目的の通知、開示、訂正、追加、削除、利用の停止、消去または第三者への提供の停止のご請求があった場合は、ご本人であることを確認したうえで、法令に従い遅滞なく対応します。下記の窓口までご連絡ください。個人情報の取り扱いに関する苦情も、同じ窓口で受け付けます。",
     ],
   },
   {
@@ -173,7 +182,7 @@ export default function PrivacyPage() {
             <article>
               <h2 className="text-lg text-navy-800">
                 <span className="mr-2 font-display text-gold-700">{SECTIONS.length + 1}.</span>
-                お問い合わせ窓口
+                お問い合わせ・苦情の窓口
               </h2>
               <div className="mt-4 rounded-card border border-border bg-surface px-5 py-4 text-sm leading-relaxed text-navy-700 sm:px-6">
                 <p className="font-bold text-navy-800">{CONTACT_NAME}</p>
