@@ -128,8 +128,8 @@ export const ADVISORS: Person[] = [
 /*
  * 連携先。url が null のあいだはリンクにせず名前だけ出す。
  *
- * ITAMI MED-FIT は公式サイト（伊丹市・メディカルフィットネスジム）を確認して入れた。
- * 無畏フェンシングクラブはホームページが見つからず未受領。届いたら url を入れるとリンクになる。
+ * どちらも公式サイトであることを確認して入れた（ITAMI MED-FIT は伊丹市のメディカルフィットネスジム、
+ * 無畏フェンシングクラブは大阪・箕面のクラブ。アドレスはオーナーから受領）。
  */
 export const PARTNERS: { name: string; summary: string; url: string | null; photo?: string }[] = [
   {
@@ -141,7 +141,7 @@ export const PARTNERS: { name: string; summary: string; url: string | null; phot
   {
     name: "無畏フェンシングクラブ",
     summary: "フェンシングの練習環境と指導の面で連携しています。",
-    url: null,
+    url: "https://www.mui-fencing.com/",
   },
 ];
 
