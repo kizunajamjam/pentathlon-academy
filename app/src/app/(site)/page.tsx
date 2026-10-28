@@ -1,3 +1,5 @@
+import { Coins, MapPin, Sprout } from "lucide-react";
+
 import { DisciplineExplorer } from "@/components/discipline-explorer";
 import { PentagonMotif } from "@/components/layout/site-logo";
 import { ButtonLink } from "@/components/ui/button-link";
@@ -8,6 +10,30 @@ import { SectionHeading } from "@/components/ui/section-heading";
 import { SHOW_PLACEHOLDERS, SITE } from "@/lib/constants/site";
 import { listUpcomingEvents } from "@/lib/db/events";
 import { listPublishedNews } from "@/lib/db/news";
+
+/*
+ * はじめての方が最初に知りたいこと。ヒーローのすぐ下に並べる（オーナー確認済み）。
+ * 年齢・未経験: 年齢は問わず、どの種目も未経験でよい。
+ * 費用: 月会費・指導料なし、実費のみ（クラブ規約 第5条〜第7条）。
+ * 地域: 練習場所は大阪府・兵庫県（練習スケジュール参照）。
+ */
+const FIRST_POINTS = [
+  {
+    icon: Sprout,
+    title: "未経験から始められます",
+    body: "近代五種もどの種目も初めての方を歓迎します。年齢は問いません。大人の方もどうぞ。",
+  },
+  {
+    icon: Coins,
+    title: "月会費・指導料はいただきません",
+    body: "ご負担いただくのは、施設利用料や大会参加費などの実費だけです。",
+  },
+  {
+    icon: MapPin,
+    title: "大阪・兵庫で活動しています",
+    body: "曜日ごとに種目と場所が変わります。参加する日はご相談のうえ決めます。",
+  },
+];
 
 export default async function HomePage() {
   const [news, events] = await Promise.all([listPublishedNews(4), listUpcomingEvents(2)]);
@@ -60,6 +86,26 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* ── はじめての方へ ─────────────────────────────────────────── */}
+      <section className="border-t border-white/10 bg-navy-900">
+        <ul className="mx-auto grid max-w-6xl gap-6 px-4 py-10 sm:py-12 md:grid-cols-3">
+          {FIRST_POINTS.map((point) => {
+            const Icon = point.icon;
+            return (
+              <li key={point.title} className="flex gap-4">
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-gold-400/50">
+                  <Icon size={20} className="text-gold-400" />
+                </span>
+                <div>
+                  <h2 className="font-display text-base font-bold text-white">{point.title}</h2>
+                  <p className="mt-1.5 text-sm leading-relaxed text-navy-200">{point.body}</p>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      </section>
+
       {/* ── 五種競技 ───────────────────────────────────────────────── */}
       {/* ロゴは黒地の発光デザインなので、ロゴの背景と同じ黒にして切り出しの境目を見せない */}
       <section className="bg-black py-16 sm:py-24">
@@ -103,7 +149,7 @@ export default async function HomePage() {
       </section>
 
       {/* ── お知らせ ───────────────────────────────────────────────── */}
-      {/* お知らせの一覧ページは置かない（オーナー判断）。ここが唯一の入口で、詳細ページの戻り先にもなる */}
+      {/* 最新4件だけを出す。それより前のものは /news の一覧から辿れる */}
       <section id="news" className="scroll-mt-20 bg-white py-16 sm:py-24 lg:scroll-mt-24">
         <div className="mx-auto max-w-4xl px-4">
           <SectionHeading eyebrow="NEWS" title="お知らせ" />
@@ -114,6 +160,13 @@ export default async function HomePage() {
               <p className="py-8 text-sm text-muted">お知らせはまだありません。</p>
             )}
           </div>
+          {news.length > 0 && (
+            <div className="mt-8">
+              <ButtonLink href="/news" variant="outline">
+                お知らせ一覧
+              </ButtonLink>
+            </div>
+          )}
         </div>
       </section>
 
@@ -143,7 +196,7 @@ export default async function HomePage() {
           <SectionHeading
             eyebrow="CONTACT"
             title="まずは練習を見に来て下さい。"
-            description={"体験・見学は随時受け付けています。\n水泳や陸上など、これまで続けてきた競技があれば、それがそのまま武器になります。\n近代五種が初めての方もご相談ください。"}
+            description={"体験・見学は随時受け付けています。\n水泳や陸上など、これまで続けてきた競技があれば、それがそのまま武器になります。\n近代五種が初めての方も歓迎します。"}
             tone="light"
             align="center"
             descriptionAlign="left"

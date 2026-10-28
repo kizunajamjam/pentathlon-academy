@@ -612,3 +612,12 @@ create policy news_images_select on storage.objects
 -- 日付のみ（開始時刻は非公表）なので 00:00 JST。リンクは第2〜4回と同じ協会の記事（リザルトが載っている）。
 insert into public.events (title, category, starts_at, ends_at, location, description, url, is_published) values
   ('ブルジャンプCUP2026 第5回 長崎県大村市ラウンド', 'competition', '2026-10-17T15:00:00.000Z', null, '長崎県大村市', '日本近代五種協会が主催した近代３種のシリーズ戦です。', 'https://pentathlon.jp/news/%e8%bf%91%e4%bb%a33%e7%a8%ae%e3%82%b7%e3%83%aa%e3%83%bc%e3%82%ba%e3%80%8c%e3%83%96%e3%83%ab%e3%82%b8%e3%83%a3%e3%83%b3%e3%83%97cup2026%e3%80%8d%e9%96%8b%e5%82%ac%e6%b1%ba%e5%ae%9a/', true);
+
+
+-- ── 20261028_update_miyashita_bio.sql ─────────────────────────────────
+-- 宮下裕策さんの経歴の書き方を直す（オーナー確認済み。site.ts の COACHES と同じ内容）。
+-- 「脳神経外科専攻（令和9年度付）」→「令和9年度より脳神経外科専攻予定」
+-- 置き換えなので、何度実行しても結果は同じ。
+update public.coaches
+  set bio = array_replace(bio, '脳神経外科専攻（令和9年度付）', '令和9年度より脳神経外科専攻予定'), updated_at = now()
+  where '脳神経外科専攻（令和9年度付）' = any (bio);

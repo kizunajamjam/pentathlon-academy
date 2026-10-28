@@ -20,7 +20,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "monthly" as const,
       priority: item.href === "/" ? 1 : 0.8,
     })),
-    // 規約・プライバシーポリシー・募集・スポンサーはヘッダーのナビには載せていない（footer からのみ）ので個別に足す
+    // お知らせ一覧・規約・プライバシーポリシー・募集・スポンサーはヘッダーのナビに載せていないので個別に足す
+    {
+      url: `${BASE}/news`,
+      lastModified: new Date(),
+      changeFrequency: "weekly" as const,
+      priority: 0.6,
+    },
     {
       url: `${BASE}/terms`,
       lastModified: new Date(),

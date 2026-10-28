@@ -73,7 +73,7 @@ export const COACHES: { name: string; title: string; bio: string[] }[] = [
     bio: [
       "京都大学医学部医学科卒業",
       "京都大学医学部附属病院勤務",
-      "脳神経外科専攻（令和9年度付）",
+      "令和9年度より脳神経外科専攻予定",
       "800m 1分57秒08",
       "西日本医科学生総合体育大会 800m優勝",
       "近江八幡駅伝競走大会優勝（区間賞）",
@@ -126,17 +126,16 @@ export const ADVISORS: Person[] = [
 ];
 
 /*
- * 連携先。
+ * 連携先。url が null のあいだはリンクにせず名前だけ出す。
  *
- * ⚠️ url が null のあいだはリンクにせず名前だけ出す。
- * オーナーからは「ホームページアドレスとともに」と依頼を受けているが、
- * アドレス自体は未受領。届いたら url を入れるとリンクになる。
+ * ITAMI MED-FIT は公式サイト（伊丹市・メディカルフィットネスジム）を確認して入れた。
+ * 無畏フェンシングクラブはホームページが見つからず未受領。届いたら url を入れるとリンクになる。
  */
 export const PARTNERS: { name: string; summary: string; url: string | null; photo?: string }[] = [
   {
     name: "ITAMI MED-FIT",
     summary: "コンディショニング・身体づくりの面で連携しています。",
-    url: null,
+    url: "https://itami-medfit.com/",
     photo: "/photos/itami-medfit.jpg",
   },
   {
