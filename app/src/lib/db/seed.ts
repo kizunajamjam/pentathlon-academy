@@ -121,6 +121,17 @@ export const SEED_EVENTS: AcademyEvent[] = [
     url: "https://pentathlon.jp/news/%e8%bf%91%e4%bb%a33%e7%a8%ae%e3%82%b7%e3%83%aa%e3%83%bc%e3%82%ba%e3%80%8c%e3%83%96%e3%83%ab%e3%82%b8%e3%83%a3%e3%83%b3%e3%83%97cup2026%e3%80%8d%e9%96%8b%e5%82%ac%e6%b1%ba%e5%ae%9a/",
     isPublished: true,
   },
+  {
+    id: "seed-p6",
+    title: "ブルジャンプCUP2026 第5回 長崎県大村市ラウンド",
+    category: "competition",
+    startsAt: jst("2026-10-18"),
+    endsAt: null,
+    location: "長崎県大村市",
+    description: "日本近代五種協会が主催した近代３種のシリーズ戦です。",
+    url: "https://pentathlon.jp/news/%e8%bf%91%e4%bb%a33%e7%a8%ae%e3%82%b7%e3%83%aa%e3%83%bc%e3%82%ba%e3%80%8c%e3%83%96%e3%83%ab%e3%82%b8%e3%83%a3%e3%83%b3%e3%83%97cup2026%e3%80%8d%e9%96%8b%e5%82%ac%e6%b1%ba%e5%ae%9a/",
+    isPublished: true,
+  },
   // ── 開催予定 ──
   {
     id: "seed-e2",
