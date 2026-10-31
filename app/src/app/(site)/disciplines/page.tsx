@@ -8,7 +8,7 @@ import { ButtonLink } from "@/components/ui/button-link";
 import { PageHero } from "@/components/ui/page-hero";
 import { PhotoSlot } from "@/components/ui/photo-slot";
 import { SectionHeading } from "@/components/ui/section-heading";
-import { DISCIPLINES } from "@/lib/constants/site";
+import { DISCIPLINES, SHOW_PLACEHOLDERS } from "@/lib/constants/site";
 
 export const metadata: Metadata = {
   title: "近代五種 トレーニング内容",
@@ -74,6 +74,7 @@ export default function DisciplinesPage() {
       {/* 種目ごとの詳細。左右交互に配置して単調にならないようにする。 */}
       {DISCIPLINES.map((d, i) => {
         const reversed = i % 2 === 1;
+        const hasMedia = Boolean(d.photo) || SHOW_PLACEHOLDERS;
 
         return (
           <section
@@ -81,8 +82,13 @@ export default function DisciplinesPage() {
             id={d.id}
             className={`scroll-mt-20 py-14 sm:py-20 ${i % 2 === 1 ? "bg-surface" : "bg-white"}`}
           >
-            <div className="mx-auto grid max-w-6xl gap-10 px-4 lg:grid-cols-2 lg:items-center lg:gap-14">
-              <div className={reversed ? "lg:order-2" : ""}>
+            <div
+              className={`mx-auto grid max-w-6xl gap-10 px-4 lg:items-center lg:gap-14 ${
+                hasMedia ? "lg:grid-cols-2" : ""
+              }`}
+            >
+              {/* 写真が無い種目は、文章だけを写真のある種目と同じ左端からの1列で見せる */}
+              <div className={hasMedia ? (reversed ? "lg:order-2" : "") : "max-w-3xl"}>
                 <div className="flex items-center gap-4">
                   <DisciplineIcon id={d.id} className="h-20 w-20 shrink-0 object-contain" />
                   <div>
@@ -134,10 +140,13 @@ export default function DisciplinesPage() {
                   } ${reversed ? "lg:order-1" : ""}`}
                 />
               ) : (
-                <PhotoSlot
-                  label={`${d.name}の練習写真が入ります`}
-                  className={reversed ? "lg:order-1" : ""}
-                />
+                // 写真が届いていない種目は、枠も出さない（オーナー判断。SHOW_PLACEHOLDERS 参照）
+                SHOW_PLACEHOLDERS && (
+                  <PhotoSlot
+                    label={`${d.name}の練習写真が入ります`}
+                    className={reversed ? "lg:order-1" : ""}
+                  />
+                )
               )}
             </div>
           </section>
