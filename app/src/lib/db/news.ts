@@ -33,7 +33,9 @@ function mapNews(row: NewsRow): News {
 // 公開ページ用: 公開済みかつ公開日時が到来しているものだけ。
 export async function listPublishedNews(limit?: number): Promise<News[]> {
   if (!isSupabaseConfigured) {
-    return limit ? SEED_NEWS.slice(0, limit) : SEED_NEWS;
+    // 本番と同じく、下書きと公開日時前のものは出さない
+    const visible = SEED_NEWS.filter(isNewsVisible);
+    return limit ? visible.slice(0, limit) : visible;
   }
 
   const supabase = createPublicClient();

@@ -20,6 +20,26 @@ import type { AcademyEvent, News, ScheduleSlot } from "@/types";
  */
 export const SEED_NEWS: News[] = [
   {
+    // 本番には 20261102_news_championships.sql で下書きとして入れたものと同じ
+    id: "seed-n2",
+    title: "近代五種・近代３種の日本選手権に出場します",
+    category: "notice",
+    body: [
+      "11月28日（土）・29日（日）に、千葉県長生郡のリソルの森メディカルトレーニングセンターで、日本近代五種協会が主催する2つの日本選手権が開催されます。",
+      "",
+      "・第66回近代五種全日本選手権大会（11月28日〜29日）",
+      "・第13回近代３種日本選手権大会 兼 第20回JOCジュニアオリンピックカップ（11月28日）",
+      "",
+      "ペンタスロンアカデミーからは、蒲生貴之選手が近代３種日本選手権に出場します。",
+      "日頃の練習の成果を発揮できるよう、全力で挑みます。応援よろしくお願いします！",
+      "",
+      "大会の詳細は、このサイトの「大会・イベント」のページから日本近代五種協会のお知らせをご覧ください。",
+    ].join("\n"),
+    publishedAt: "2026-11-02T03:00:00.000Z",
+    isPublished: false,
+    imageUrl: null,
+  },
+  {
     id: "seed-n1",
     title: "近代３種大会でペンタスロンアカデミーが上位独占！",
     category: "report",
@@ -165,7 +185,7 @@ export const SEED_EVENTS: AcademyEvent[] = [
     endsAt: null,
     location: "リソルの森メディカルトレーニングセンター（千葉県長生郡）",
     description:
-      "日本近代五種協会が主催する近代３種の日本選手権です。エントリーの締切は2026年10月31日（土）23:59です。大会要項は協会サイトの記事をご確認ください。",
+      "日本近代五種協会が主催する近代３種の日本選手権です。大会要項は協会サイトの記事をご確認ください。",
     url: "https://pentathlon.jp/news/%E7%AC%AC%EF%BC%96%EF%BC%96%E5%9B%9E%E8%BF%91%E4%BB%A3%E4%BA%94%E7%A8%AE%E5%85%A8%E6%97%A5%E6%9C%AC%E9%81%B8%E6%89%8B%E6%A8%A9%E5%A4%A7%E4%BC%9A/",
     isPublished: true,
   },
